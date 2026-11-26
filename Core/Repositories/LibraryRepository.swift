@@ -1,6 +1,10 @@
 import Foundation
 import GRDB
 
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
+}
+
 enum LibraryRepositoryError: Error, Equatable {
     case emptyName
     case emptyWord
@@ -150,6 +154,108 @@ final class LibraryRepository {
             set.categoryID = categoryID
             set.updatedAt = .now
             try set.update(db)
+        }
+    }
+
+
+    func updateLanguage(_ languageID: String, name: String, code: String?) throws {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
+        try database.dbQueue.write { db in
+            guard var language = try Language.fetchOne(db, key: languageID) else {
+                throw LibraryRepositoryError.languageNotFound
+            }
+            language.name = normalizedName
+            language.code = code?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            try language.update(db)
+        }
+    }
+
+    func updateCategory(_ categoryID: String, name: String) throws {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
+        try database.dbQueue.write { db in
+            guard var category = try Category.fetchOne(db, key: categoryID) else {
+                throw LibraryRepositoryError.categoryNotFound
+            }
+            category.name = normalizedName
+            try category.update(db)
+        }
+    }
+
+    func updateSet(_ setID: String, name: String, details: String? = nil) throws {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
+        try database.dbQueue.write { db in
+            guard var set = try VocabularySet.fetchOne(db, key: setID) else {
+                throw LibraryRepositoryError.setNotFound
+            }
+            set.name = normalizedName
+            set.details = details?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            set.updatedAt = .now
+            try set.update(db)
+        }
+    }
+
+    func updateWord(
+        _ wordID: String,
+        text: String,
+        translation: String,
+        transcription: String? = nil,
+        notes: String? = nil,
+        example: String? = nil
+    ) throws {
+        let normalizedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedTranslation = translation.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedText.isEmpty else { throw LibraryRepositoryError.emptyWord }
+        guard !normalizedTranslation.isEmpty else { throw LibraryRepositoryError.emptyTranslation }
+        try database.dbQueue.write { db in
+            guard var word = try Word.fetchOne(db, key: wordID) else {
+                throw LibraryRepositoryError.wordNotFound
+            }
+            word.text = normalizedText
+            word.translation = normalizedTranslation
+            word.transcription = transcription?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            word.notes = notes?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            word.example = example?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+            word.updatedAt = .now
+            try word.update(db)
+        }
+    }
+
+    func deleteLanguage(_ languageID: String) throws {
+        try database.dbQueue.write { db in
+            guard let language = try Language.fetchOne(db, key: languageID) else {
+                throw LibraryRepositoryError.languageNotFound
+            }
+            try language.delete(db)
+        }
+    }
+
+    func deleteCategory(_ categoryID: String) throws {
+        try database.dbQueue.write { db in
+            guard let category = try Category.fetchOne(db, key: categoryID) else {
+                throw LibraryRepositoryError.categoryNotFound
+            }
+            try category.delete(db)
+        }
+    }
+
+    func deleteSet(_ setID: String) throws {
+        try database.dbQueue.write { db in
+            guard let set = try VocabularySet.fetchOne(db, key: setID) else {
+                throw LibraryRepositoryError.setNotFound
+            }
+            try set.delete(db)
+        }
+    }
+
+    func deleteWord(_ wordID: String) throws {
+        try database.dbQueue.write { db in
+            guard let word = try Word.fetchOne(db, key: wordID) else {
+                throw LibraryRepositoryError.wordNotFound
+            }
+            try word.delete(db)
         }
     }
 

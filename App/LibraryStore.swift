@@ -105,6 +105,55 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
+
+    func updateLanguage(_ id: String, name: String, code: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.updateLanguage(id, name: name, code: code)
+        refreshLanguages()
+    }
+
+    func updateCategory(_ id: String, name: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.updateCategory(id, name: name)
+        objectWillChange.send()
+    }
+
+    func updateSet(_ id: String, name: String, details: String? = nil) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.updateSet(id, name: name, details: details)
+        objectWillChange.send()
+    }
+
+    func updateWord(_ id: String, text: String, translation: String, transcription: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.updateWord(id, text: text, translation: translation, transcription: transcription)
+        objectWillChange.send()
+    }
+
+    func deleteLanguage(_ id: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.deleteLanguage(id)
+        refreshLanguages()
+    }
+
+    func deleteCategory(_ id: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.deleteCategory(id)
+        objectWillChange.send()
+    }
+
+    func deleteSet(_ id: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.deleteSet(id)
+        objectWillChange.send()
+    }
+
+    func deleteWord(_ id: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.deleteWord(id)
+        objectWillChange.send()
+    }
+
     enum StoreError: LocalizedError {
         case databaseUnavailable
         var errorDescription: String? { "Не удалось открыть локальную базу данных." }
