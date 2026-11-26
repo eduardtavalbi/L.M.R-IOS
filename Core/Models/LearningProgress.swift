@@ -2,6 +2,8 @@ import Foundation
 import GRDB
 
 struct LearningProgress: Codable, FetchableRecord, MutablePersistableRecord, Identifiable, Equatable {
+    static let databaseTableName = "learningProgress"
+
     var wordID: String
     var repetitions: Int
     var correctAnswers: Int

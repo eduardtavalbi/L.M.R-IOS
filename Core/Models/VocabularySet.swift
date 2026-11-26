@@ -2,6 +2,8 @@ import Foundation
 import GRDB
 
 struct VocabularySet: Codable, FetchableRecord, MutablePersistableRecord, Identifiable, Equatable {
+    static let databaseTableName = "vocabularySets"
+
     var id: String
     var languageID: String
     var categoryID: String?

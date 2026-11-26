@@ -2,6 +2,8 @@ import Foundation
 import GRDB
 
 struct Category: Codable, FetchableRecord, MutablePersistableRecord, Identifiable, Equatable {
+    static let databaseTableName = "categories"
+
     var id: String
     var languageID: String
     var parentID: String?

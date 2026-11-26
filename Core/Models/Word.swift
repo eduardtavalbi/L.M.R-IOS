@@ -2,6 +2,8 @@ import Foundation
 import GRDB
 
 struct Word: Codable, FetchableRecord, MutablePersistableRecord, Identifiable, Equatable {
+    static let databaseTableName = "words"
+
     var id: String
     var languageID: String
     var text: String
