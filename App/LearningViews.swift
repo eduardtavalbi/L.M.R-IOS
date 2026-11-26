@@ -164,6 +164,6 @@ private struct LearningSessionView: View {
                 currentIndex += 1
                 isRevealed = false
             }
-        } catch { error = error.localizedDescription }
+        } catch let caughtError { error = caughtError.localizedDescription }
     }
 }
