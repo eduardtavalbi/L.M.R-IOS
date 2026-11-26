@@ -346,7 +346,8 @@ final class LibraryRepository {
         let ids = Array(Set(setIDs)).sorted()
         guard !ids.isEmpty else { return [] }
         let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ", ")
-        let arguments: [DatabaseValueConvertible?] = ids.map { $0 } + [dueAt]
+        var arguments = StatementArguments(ids)
+        arguments += [dueAt]
         return try database.dbQueue.read { db in
             try Word.fetchAll(db, sql: """
                 SELECT DISTINCT words.* FROM words

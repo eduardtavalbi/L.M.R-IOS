@@ -270,7 +270,7 @@ private struct MultiSetLearningSessionView: View {
             try store.recordLearningAnswer(wordID: word.id, knewAnswer: knew)
             if knew { known += 1 } else { needsWork += 1 }
             advance()
-        } catch { error = error.localizedDescription }
+        } catch let caughtError { error = caughtError.localizedDescription }
     }
 
     private func advance() {
