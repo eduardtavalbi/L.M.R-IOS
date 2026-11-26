@@ -46,6 +46,15 @@ struct LearningView: View {
                                                 Text(set.name).foregroundStyle(.secondary)
                                             }
                                         }
+                                        NavigationLink {
+                                            SpeedGameView(store: store, set: set)
+                                        } label: {
+                                            HStack {
+                                                Label("Speed", systemImage: "bolt")
+                                                Spacer()
+                                                Text(set.name).foregroundStyle(.secondary)
+                                            }
+                                        }
                                     }
                                 }
                             }
