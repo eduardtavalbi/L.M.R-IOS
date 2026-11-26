@@ -85,7 +85,7 @@ enum WordImportParser {
         var sourceRows = rows.filter { $0.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } }
         guard !sourceRows.isEmpty else { throw ParseError.noRows }
 
-        if let first = sourceRows.first, isHeader(first) {
+        if let first = sourceRows.first, isHeader(first, columnIndices: Array(columnIndices.prefix(2))) {
             sourceRows.removeFirst()
         }
 
@@ -163,10 +163,12 @@ enum WordImportParser {
         return fields
     }
 
-    private static func isHeader(_ fields: [String]) -> Bool {
-        guard fields.count >= 2 else { return false }
-        let first = fields[0].lowercased()
-        let second = fields[1].lowercased()
+    private static func isHeader(_ fields: [String], columnIndices: [Int] = [0, 1]) -> Bool {
+        guard columnIndices.count >= 2,
+              fields.indices.contains(columnIndices[0]),
+              fields.indices.contains(columnIndices[1]) else { return false }
+        let first = fields[columnIndices[0]].lowercased()
+        let second = fields[columnIndices[1]].lowercased()
         let firstHeaders = ["word", "original", "term", "слово", "иностранное слово"]
         let secondHeaders = ["translation", "meaning", "перевод", "значение"]
         return firstHeaders.contains(first) && secondHeaders.contains(second)
