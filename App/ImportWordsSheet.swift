@@ -74,7 +74,7 @@ struct ImportWordsSheet: View {
             }
             .fileImporter(
                 isPresented: $showingFileImporter,
-                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, .pdf, UTType(filenameExtension: "xlsx") ?? .data],
+                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, .pdf, .image, UTType(filenameExtension: "xlsx") ?? .data],
                 allowsMultipleSelection: false
             ) { result in
                 loadSelectedFile(result)
@@ -86,7 +86,7 @@ struct ImportWordsSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Вставь пары слов из таблицы или выбери файл.")
                 .font(.headline)
-            Text("Поддерживаются CSV, TSV, TXT, XLSX и PDF. Для PDF извлекается текстовый слой; отсканированные страницы потребуют OCR. Колонки: слово, перевод, транскрипция, пример.")
+            Text("Поддерживаются CSV, TSV, TXT, XLSX, PDF и изображения. Фото и сканы распознаются на устройстве; текст перед сохранением можно проверить и исправить. Колонки: слово, перевод, транскрипция, пример.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -121,7 +121,7 @@ struct ImportWordsSheet: View {
                 .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
             }
 
-            Button("Выбрать файл (CSV / TXT / XLSX / PDF)", systemImage: "doc") {
+            Button("Выбрать файл или изображение", systemImage: "doc") {
                 showingFileImporter = true
             }
             .buttonStyle(.bordered)
@@ -233,7 +233,16 @@ struct ImportWordsSheet: View {
             let data = try Data(contentsOf: url)
             if url.pathExtension.lowercased() == "pdf" {
                 xlsxWorksheets = []
-                source = try PDFImportParser.extractText(from: data)
+                do {
+                    source = try PDFImportParser.extractText(from: data)
+                } catch PDFImportParser.ParseError.noExtractableText {
+                    source = try ImageOCRParser.extractText(fromPDFData: data)
+                }
+                return
+            }
+            if UTType(filenameExtension: url.pathExtension)?.conforms(to: .image) == true {
+                xlsxWorksheets = []
+                source = try ImageOCRParser.extractText(fromImageData: data)
                 return
             }
             if url.pathExtension.lowercased() == "xlsx" {
