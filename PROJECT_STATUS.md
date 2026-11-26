@@ -23,7 +23,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Initial iOS Simulator build: GitHub Actions run #1 succeeded.
 - Full build and XCTest verification: run #15 succeeded on commit de338c2d1afc61f2097a7b131e7e05b1d91ecfe6.
 - Previous unpushed local changes were not present on GitHub and were not overwritten.
-- Latest verified learning baseline: run #27 succeeded on commit a7222f8c4a420853e67f6272c2f76eb774571d23; iOS Simulator build and XCTest job both passed.
+- Latest verified learning baseline: run #28 succeeded on commit faca40a73e5beed23a57f09ba6841123ac2f7e98; iOS Simulator build and XCTest job both passed.
 
 ## Current implementation
 
@@ -36,8 +36,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
 - Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
 - Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
-- Flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary.
-- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
+- Flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary. Multiple-choice and typing modes use the same SRS answer recording.
+- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date. Repository queries combine multiple sets without duplicate shared words and retrieve words with recorded mistakes for targeted practice.
 - Global library search covers original words, translations, set names, and category names; word results include all containing sets.
 
 ### Verification
@@ -45,8 +45,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - GitHub Actions is authoritative because the owner does not have Xcode locally.
 - Run #23 succeeded: iOS Simulator build and 14 XCTest cases passed.
 - Run #24 exposed an incorrect due-queue test fixture; commit 0104c8d corrected its review timestamp.
-- Run #27 succeeded after the correction and after retaining the SQL due-date filter.
+- Run #27 succeeded after the correction and after retaining the SQL due-date filter. Run #28 succeeded with multiple-choice and typing modes plus four StudyModeEngine tests.
 
 ## Next
 
-Add multiple-choice and typing learning modes, then weak-word practice and Mix Sets. All learning modes must share the same word-level SRS progress.
+Expose weak-word practice and Mix Sets in the learning interface, then continue with game modes. All learning modes share word-level SRS progress.

@@ -341,6 +341,41 @@ final class LibraryRepository {
                 """, arguments: [setID, dueAt])
         }
     }
+    /// Combines due cards from multiple sets without duplicating shared words.
+    func fetchLearningQueue(inSets setIDs: [String], dueAt: Date = .now) throws -> [Word] {
+        let ids = Array(Set(setIDs)).sorted()
+        guard !ids.isEmpty else { return [] }
+        let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ", ")
+        return try database.dbQueue.read { db in
+            try Word.fetchAll(db, sql: """
+                SELECT DISTINCT words.* FROM words
+                INNER JOIN set_words ON set_words.wordID = words.id
+                LEFT JOIN learningProgress ON learningProgress.wordID = words.id
+                WHERE set_words.setID IN (\(placeholders))
+                  AND (learningProgress.dueAt IS NULL OR learningProgress.dueAt <= ?)
+                ORDER BY CASE WHEN learningProgress.dueAt IS NULL THEN 0 ELSE 1 END,
+                         learningProgress.dueAt ASC, words.text COLLATE NOCASE
+                """, arguments: StatementArguments(ids + [dueAt]))
+        }
+    }
+
+    /// Targeted practice includes words with recorded mistakes regardless of their regular due date.
+    func fetchWeakWords(inSets setIDs: [String]) throws -> [Word] {
+        let ids = Array(Set(setIDs)).sorted()
+        guard !ids.isEmpty else { return [] }
+        let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ", ")
+        return try database.dbQueue.read { db in
+            try Word.fetchAll(db, sql: """
+                SELECT words.* FROM words
+                INNER JOIN set_words ON set_words.wordID = words.id
+                INNER JOIN learningProgress ON learningProgress.wordID = words.id
+                WHERE set_words.setID IN (\(placeholders))
+                GROUP BY words.id
+                HAVING SUM(learningProgress.incorrectAnswers) > 0
+                ORDER BY SUM(learningProgress.incorrectAnswers) DESC, words.text COLLATE NOCASE
+                """, arguments: StatementArguments(ids))
+        }
+    }
     func recordLearningAnswer(wordID: String, knewAnswer: Bool, reviewedAt: Date = .now) throws {
         try database.dbQueue.write { db in
             guard try Word.fetchOne(db, key: wordID) != nil else { throw LibraryRepositoryError.wordNotFound }

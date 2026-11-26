@@ -41,10 +41,10 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Word-level progress shared across sets.
 - [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
 - [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (GitHub Actions run #27 succeeded).
-- [ ] Multiple-choice learning mode.
-- [ ] Typing learning mode.
-- [ ] Weak-word practice.
-- [ ] Mix Sets.
+- [x] Multiple-choice learning mode (GitHub Actions run #28).
+- [x] Typing learning mode (GitHub Actions run #28).
+- [x] Weak-word and multi-set repository queries, deduplicated by word ID (UI integration next).
+- [x] Mix Sets repository queue combining selected sets without duplicate shared words (UI integration next).
 
 ## Phase 4 — Games
 
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Complete multiple-choice and typing modes with XCTest coverage, then implement weak-word practice and Mix Sets.
+Finish the learning UI for weak-word practice and Mix Sets, then implement game modes.

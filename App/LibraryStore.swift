@@ -74,6 +74,20 @@ final class LibraryStore: ObservableObject {
         learningWords(setID: setID, dueAt: dueAt).count
     }
 
+    func learningWords(setIDs: [String], dueAt: Date = .now) -> [Word] {
+        do { return try repository?.fetchLearningQueue(inSets: setIDs, dueAt: dueAt) ?? [] }
+        catch { lastError = error.localizedDescription; return [] }
+    }
+
+    func weakWords(setIDs: [String]) -> [Word] {
+        do { return try repository?.fetchWeakWords(inSets: setIDs) ?? [] }
+        catch { lastError = error.localizedDescription; return [] }
+    }
+
+    func words(setIDs: [String]) -> [Word] {
+        var seen = Set<String>()
+        return Set(setIDs).sorted().flatMap { words(setID: $0) }.filter { seen.insert($0.id).inserted }
+    }
     func recordLearningAnswer(wordID: String, knewAnswer: Bool) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.recordLearningAnswer(wordID: wordID, knewAnswer: knewAnswer)
