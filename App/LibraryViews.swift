@@ -642,7 +642,7 @@ private struct EditCategorySheet: View {
                             do {
                                 try store.updateCategory(category.id, name: name)
                                 dismiss()
-                            } catch { error = error.localizedDescription }
+                            } catch let caughtError { error = caughtError.localizedDescription }
                         }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
@@ -683,7 +683,7 @@ private struct EditSetSheet: View {
                         do {
                             try store.updateSet(set.id, name: name, details: details)
                             dismiss()
-                        } catch { error = error.localizedDescription }
+                        } catch let caughtError { error = caughtError.localizedDescription }
                     }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
@@ -731,7 +731,7 @@ private struct EditWordSheet: View {
                                 transcription: transcription.isEmpty ? nil : transcription
                             )
                             dismiss()
-                        } catch { error = error.localizedDescription }
+                        } catch let caughtError { error = caughtError.localizedDescription }
                     }.disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
