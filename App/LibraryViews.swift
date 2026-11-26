@@ -225,7 +225,7 @@ struct LanguageLibraryView: View {
         .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: nil) }
         .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: nil) }
         .sheet(isPresented: $showingEditLanguage) { EditLanguageSheet(store: store, language: language) }
-        .confirmationDialog("Удалить язык «\\(language.name)»?", isPresented: $confirmingDeleteLanguage, titleVisibility: .visible) {
+        .confirmationDialog("Удалить язык «\(language.name)»?", isPresented: $confirmingDeleteLanguage, titleVisibility: .visible) {
             Button("Удалить язык и всё его содержимое", role: .destructive) {
                 do { try store.deleteLanguage(language.id) } catch { store.lastError = error.localizedDescription }
             }
@@ -288,7 +288,7 @@ struct CategoryLibraryView: View {
         .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: category.id) }
         .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: category.id) }
         .sheet(isPresented: $showingEditCategory) { EditCategorySheet(store: store, category: category) }
-        .confirmationDialog("Удалить категорию «\\(category.name)»?", isPresented: $confirmingDeleteCategory, titleVisibility: .visible) {
+        .confirmationDialog("Удалить категорию «\(category.name)»?", isPresented: $confirmingDeleteCategory, titleVisibility: .visible) {
             Button("Удалить категорию", role: .destructive) {
                 do { try store.deleteCategory(category.id) } catch { store.lastError = error.localizedDescription }
             }
@@ -365,14 +365,14 @@ struct VocabularySetView: View {
         .sheet(isPresented: $showingMoveSet) { MoveSetSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingEditSet) { EditSetSheet(store: store, set: set) }
         .sheet(item: $editingWord) { word in EditWordSheet(store: store, word: word) }
-        .confirmationDialog("Удалить набор «\\(set.name)»?", isPresented: $confirmingDeleteSet, titleVisibility: .visible) {
+        .confirmationDialog("Удалить набор «\(set.name)»?", isPresented: $confirmingDeleteSet, titleVisibility: .visible) {
             Button("Удалить набор", role: .destructive) {
                 do { try store.deleteSet(set.id) } catch { store.lastError = error.localizedDescription }
             }
         } message: {
             Text("Сам набор и его связи будут удалены. Слова останутся в других наборах, если они там используются.")
         }
-        .confirmationDialog("Удалить слово «\\(deletingWord?.text ?? "")»?", isPresented: Binding(
+        .confirmationDialog("Удалить слово «\(deletingWord?.text ?? "")»?", isPresented: Binding(
             get: { deletingWord != nil },
             set: { if !$0 { deletingWord = nil } }
         ), titleVisibility: .visible) {
