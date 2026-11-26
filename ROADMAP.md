@@ -91,4 +91,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Correct the due-queue test fixture and verify it in CI. Then add multiple-choice and typing modes, followed by weak-word practice and Mix Sets.
+Verify the corrected due-queue fixture in CI. Then add multiple-choice and typing modes, followed by weak-word practice and Mix Sets.
