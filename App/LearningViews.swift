@@ -25,7 +25,9 @@ struct LearningView: View {
                                                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     Text(set.name).font(.headline)
-                                                    Text("\(store.words(setID: set.id).count) карточек")
+                                                    let total = store.words(setID: set.id).count
+                                                    let due = store.dueWordCount(setID: set.id)
+                                                    Text("\(due) к повторению · \(total) всего")
                                                         .font(.caption).foregroundStyle(.secondary)
                                                 }
                                                 Spacer()

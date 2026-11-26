@@ -65,9 +65,13 @@ final class LibraryStore: ObservableObject {
         catch { lastError = error.localizedDescription; return [] }
     }
 
-    func learningWords(setID: String) -> [Word] {
-        do { return try repository?.fetchLearningQueue(inSet: setID) ?? [] }
+    func learningWords(setID: String, dueAt: Date = .now) -> [Word] {
+        do { return try repository?.fetchLearningQueue(inSet: setID, dueAt: dueAt) ?? [] }
         catch { lastError = error.localizedDescription; return [] }
+    }
+
+    func dueWordCount(setID: String, dueAt: Date = .now) -> Int {
+        learningWords(setID: setID, dueAt: dueAt).count
     }
 
     func recordLearningAnswer(wordID: String, knewAnswer: Bool) throws {

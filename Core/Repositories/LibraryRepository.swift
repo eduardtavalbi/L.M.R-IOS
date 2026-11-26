@@ -326,16 +326,19 @@ final class LibraryRepository {
         }
     }
 
-    func fetchLearningQueue(inSet setID: String) throws -> [Word] {
+    /// Returns new words and reviews whose scheduled due date has arrived.
+    /// Future-due cards stay out of the active queue until they are ready.
+    func fetchLearningQueue(inSet setID: String, dueAt: Date = .now) throws -> [Word] {
         try database.dbQueue.read { db in
             try Word.fetchAll(db, sql: """
                 SELECT words.* FROM words
                 INNER JOIN set_words ON set_words.wordID = words.id
                 LEFT JOIN learningProgress ON learningProgress.wordID = words.id
                 WHERE set_words.setID = ?
+                  AND (learningProgress.dueAt IS NULL OR learningProgress.dueAt <= ?)
                 ORDER BY CASE WHEN learningProgress.dueAt IS NULL THEN 0 ELSE 1 END,
                          learningProgress.dueAt ASC, words.text COLLATE NOCASE
-                """, arguments: [setID])
+                """, arguments: [setID, dueAt])
         }
     }
 

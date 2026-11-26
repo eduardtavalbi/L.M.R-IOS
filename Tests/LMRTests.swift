@@ -165,6 +165,26 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(forgotten.dueAt, start.addingTimeInterval(600))
     }
 
+    func testLearningQueueIncludesNewAndDueWordsButExcludesFutureReviews() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let set = try repository.createSet(languageID: language.id, name: "Queue")
+        let newWord = try repository.createWord(languageID: language.id, text: "new", translation: "новый", inSet: set.id)
+        let dueWord = try repository.createWord(languageID: language.id, text: "due", translation: "пора", inSet: set.id)
+        let futureWord = try repository.createWord(languageID: language.id, text: "future", translation: "позже", inSet: set.id)
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+
+        try repository.recordLearningAnswer(wordID: dueWord.id, knewAnswer: false, reviewedAt: start)
+        try repository.recordLearningAnswer(wordID: futureWord.id, knewAnswer: true, reviewedAt: start)
+
+        let beforeDue = try repository.fetchLearningQueue(inSet: set.id, dueAt: start.addingTimeInterval(300))
+        XCTAssertEqual(Set(beforeDue.map(\.id)), Set([newWord.id, dueWord.id]))
+
+        let afterDue = try repository.fetchLearningQueue(inSet: set.id, dueAt: start.addingTimeInterval(700))
+        XCTAssertEqual(Set(afterDue.map(\.id)), Set([newWord.id, dueWord.id]))
+        XCTAssertFalse(afterDue.contains { $0.id == futureWord.id })
+    }
+
     func testReviewProgressPersistsAndIsSharedAcrossSets() throws {
         let repository = LibraryRepository(database: try DatabaseManager.inMemory())
         let language = try repository.createLanguage(name: "English")

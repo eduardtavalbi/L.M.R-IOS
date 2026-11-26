@@ -36,6 +36,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
 - Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
 - Basic flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary.
+- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
 - Language consistency validation for repository operations.
 
 ### Library UI
@@ -52,9 +53,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ## Verification
 
 - GitHub Actions is the authoritative build/test environment because the owner does not have Xcode locally.
-- Run #20 completed successfully: iOS Simulator app build and all 10 XCTest cases passed.
+- Run #23 completed successfully: iOS Simulator app build and all 14 XCTest cases passed (commit 7f1a2f9).
 - New changes must be considered unverified until their own GitHub Actions run completes successfully.
 
 ## Next
 
-Expand learning beyond flashcards: multiple-choice and typing sessions, due-review queue, weak-word practice, and Mix Sets.
+Expand learning beyond flashcards: multiple-choice and typing sessions, weak-word practice, and Mix Sets.

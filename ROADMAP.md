@@ -41,7 +41,7 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Word-level progress shared across sets.
 - [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
 - [ ] Multiple-choice, typing, and audio sessions.
-- [ ] Due-review queue and prioritization.
+- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred.
 - [ ] Weak-word and selected-set training.
 - [ ] Mix Sets.
 
@@ -91,4 +91,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Complete the first usable learning flow: card presentation, flashcard sessions, word-level progress, and a basic spaced-repetition schedule.
+Add multiple-choice and typing modes, then weak-word practice and Mix Sets.
