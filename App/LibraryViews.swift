@@ -31,7 +31,6 @@ struct LibraryView: View {
                                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(language.name).font(.headline)
-                                            let setCount = store.categories(languageID: language.id).count
                                             Text(language.code?.uppercased() ?? "Язык")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
@@ -271,7 +270,7 @@ private struct CreateLanguageSheet: View {
                         do {
                             try store.createLanguage(name: name, code: code.isEmpty ? nil : code)
                             dismiss()
-                        } catch { error = error.localizedDescription }
+                        } catch let caughtError { error = caughtError.localizedDescription }
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
@@ -302,7 +301,7 @@ private struct CreateCategorySheet: View {
                             do {
                                 try store.createCategory(languageID: language.id, name: name, parentID: parentID)
                                 dismiss()
-                            } catch { error = error.localizedDescription }
+                            } catch let caughtError { error = caughtError.localizedDescription }
                         }
                         .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
@@ -333,7 +332,7 @@ private struct CreateSetSheet: View {
                             do {
                                 try store.createSet(languageID: language.id, name: name, categoryID: categoryID)
                                 dismiss()
-                            } catch { error = error.localizedDescription }
+                            } catch let caughtError { error = caughtError.localizedDescription }
                         }
                         .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
@@ -378,7 +377,7 @@ private struct CreateWordSheet: View {
                                 transcription: transcription.isEmpty ? nil : transcription
                             )
                             dismiss()
-                        } catch { error = error.localizedDescription }
+                        } catch let caughtError { error = caughtError.localizedDescription }
                     }
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
