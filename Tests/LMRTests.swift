@@ -19,7 +19,12 @@ final class LMRTests: XCTestCase {
             parentID: parent.id
         )
 
-        XCTAssertEqual(try repository.fetchCategories(languageID: language.id), [parent, child])
+        let fetched = try repository.fetchCategories(languageID: language.id)
+        XCTAssertEqual(fetched.map(\.id), [parent.id, child.id])
+        XCTAssertEqual(fetched.map(\.name), ["Food", "Fruit"])
+        XCTAssertNil(fetched[0].parentID)
+        XCTAssertEqual(fetched[1].parentID, parent.id)
+        XCTAssertTrue(fetched.allSatisfy { $0.languageID == language.id })
     }
 
     func testUncategorizedSetAndMovingBetweenCategories() throws {
@@ -30,16 +35,19 @@ final class LMRTests: XCTestCase {
         let second = try repository.createCategory(languageID: language.id, name: "Work")
         let set = try repository.createSet(languageID: language.id, name: "Phrases")
 
-        XCTAssertEqual(try repository.fetchSets(languageID: language.id), [set])
+        let uncategorized = try repository.fetchSets(languageID: language.id)
+        XCTAssertEqual(uncategorized.map(\.id), [set.id])
+        XCTAssertNil(uncategorized.first?.categoryID)
 
         try repository.moveSet(set.id, toCategory: first.id)
-        XCTAssertEqual(
-            try repository.fetchSets(languageID: language.id, categoryID: first.id).first?.id,
-            set.id
-        )
+        let inFirst = try repository.fetchSets(languageID: language.id, categoryID: first.id)
+        XCTAssertEqual(inFirst.first?.id, set.id)
+        XCTAssertEqual(inFirst.first?.categoryID, first.id)
 
         try repository.moveSet(set.id, toCategory: second.id)
-        XCTAssertEqual(try repository.fetchSets(languageID: language.id, categoryID: second.id).first?.id, set.id)
+        let inSecond = try repository.fetchSets(languageID: language.id, categoryID: second.id)
+        XCTAssertEqual(inSecond.first?.id, set.id)
+        XCTAssertEqual(inSecond.first?.categoryID, second.id)
     }
 
     func testWordCanBelongToMultipleSetsAndSharesProgress() throws {
