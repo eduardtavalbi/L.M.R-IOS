@@ -22,7 +22,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Initial commit: 78767ec4f2ef7757e933820116bd15b77ba64eff.
 - Initial iOS Simulator build: GitHub Actions run #1 succeeded.
 - Full build and XCTest verification: run #15 succeeded on commit de338c2d1afc61f2097a7b131e7e05b1d91ecfe6.
-- The previous chat's unpushed local changes were not present on GitHub and were not overwritten.
+- Previous unpushed local changes were not present on GitHub and were not overwritten.
+- Latest verified learning baseline: run #27 succeeded on commit a7222f8c4a420853e67f6272c2f76eb774571d23; iOS Simulator build and XCTest job both passed.
 
 ## Current implementation
 
@@ -35,27 +36,17 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
 - Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
 - Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
-- Basic flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary.
+- Flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary.
 - The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
-- Language consistency validation for repository operations.
+- Global library search covers original words, translations, set names, and category names; word results include all containing sets.
 
-### Library UI
+### Verification
 
-- Five-tab SwiftUI navigation shell with a working Learning tab.
-- Local library screen with language list and empty state.
-- Nested category navigation and uncategorized sets.
-- Create, edit, and delete language, category, set, and word flows with confirmation for destructive actions.
-- Duplicate-word detection with skip, keep-both, and merge choices.
-- Move sets between categories or to the uncategorized area.
-- Global search across original words, translations, set names, and category names.
-- Word search results show every set containing that word and link into each set.
-
-## Verification
-
-- GitHub Actions is the authoritative build/test environment because the owner does not have Xcode locally.
-- Run #23 completed successfully: iOS Simulator app build and all 14 XCTest cases passed (commit 7f1a2f9).
-- Run #24 (commit `f890fa0`) built the app successfully but exposed one failing queue test: its fixture expected a 10-minute relearning card to be due after only 5 minutes. Commit `0104c8d` corrects the fixture to review the card 700 seconds earlier; the follow-up CI run is pending.
+- GitHub Actions is authoritative because the owner does not have Xcode locally.
+- Run #23 succeeded: iOS Simulator build and 14 XCTest cases passed.
+- Run #24 exposed an incorrect due-queue test fixture; commit 0104c8d corrected its review timestamp.
+- Run #27 succeeded after the correction and after retaining the SQL due-date filter.
 
 ## Next
 
-Expand learning beyond flashcards: multiple-choice and typing sessions, weak-word practice, and Mix Sets.
+Add multiple-choice and typing learning modes, then weak-word practice and Mix Sets. All learning modes must share the same word-level SRS progress.

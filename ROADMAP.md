@@ -40,9 +40,10 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Basic flashcard session with reveal, "Знаю", and "Повторить" actions.
 - [x] Word-level progress shared across sets.
 - [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
-- [ ] Multiple-choice, typing, and audio sessions.
-- [ ] Due-review queue: new words and due reviews are included; future-due reviews are deferred (awaiting CI verification after a date-comparison fix).
-- [ ] Weak-word and selected-set training.
+- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (GitHub Actions run #27 succeeded).
+- [ ] Multiple-choice learning mode.
+- [ ] Typing learning mode.
+- [ ] Weak-word practice.
 - [ ] Mix Sets.
 
 ## Phase 4 — Games
@@ -91,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Verify the corrected due-queue fixture in CI. Then add multiple-choice and typing modes, followed by weak-word practice and Mix Sets.
+Complete multiple-choice and typing modes with XCTest coverage, then implement weak-word practice and Mix Sets.
