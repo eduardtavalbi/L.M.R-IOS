@@ -33,9 +33,10 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(try repository.fetchSets(languageID: language.id), [set])
 
         try repository.moveSet(set.id, toCategory: first.id)
-        XCTAssertEqual(try repository.fetchSets(languageID: language.id, categoryID: first.id), [try XCTUnwrap(
-            repository.fetchSets(languageID: language.id, categoryID: first.id).first
-        )])
+        XCTAssertEqual(
+            try repository.fetchSets(languageID: language.id, categoryID: first.id).first?.id,
+            set.id
+        )
 
         try repository.moveSet(set.id, toCategory: second.id)
         XCTAssertEqual(try repository.fetchSets(languageID: language.id, categoryID: second.id).first?.id, set.id)

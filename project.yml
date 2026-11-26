@@ -44,3 +44,13 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
+
+schemes:
+  LMR:
+    build:
+      targets:
+        LMR: all
+        LMRTests: [test]
+    test:
+      targets:
+        - LMRTests
