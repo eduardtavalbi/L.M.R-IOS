@@ -58,8 +58,8 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 - [x] Paste text pairs with editable preview, validation, and duplicate handling (run #43).
 - [x] CSV/TSV/TXT file import into the selected set (run #44).
-- [ ] XLSX spreadsheet import with worksheet and column mapping.
-- [ ] PDF text extraction and reviewable import.
+- [x] XLSX spreadsheet import with worksheet and column mapping (run #48).
+- [ ] PDF text-layer extraction and reviewable import (implementation added; awaiting CI).
 - [ ] Image OCR pipeline with review screen.
 - [ ] AI provider abstraction and Keychain-backed API key storage.
 - [ ] AI vocabulary generation, enrichment, and document-to-cards flow.
@@ -93,4 +93,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Implement XLSX spreadsheet import with safe parsing, worksheet selection, column mapping, editable preview, duplicate handling, and transactional save.
+Verify PDF text extraction in CI, then implement image OCR with a reviewable import flow.

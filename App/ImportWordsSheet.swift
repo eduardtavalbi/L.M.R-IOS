@@ -74,7 +74,7 @@ struct ImportWordsSheet: View {
             }
             .fileImporter(
                 isPresented: $showingFileImporter,
-                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, UTType(filenameExtension: "xlsx") ?? .data],
+                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, .pdf, UTType(filenameExtension: "xlsx") ?? .data],
                 allowsMultipleSelection: false
             ) { result in
                 loadSelectedFile(result)
@@ -86,7 +86,7 @@ struct ImportWordsSheet: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Вставь пары слов из таблицы или выбери файл.")
                 .font(.headline)
-            Text("Текстовые файлы: TAB, запятая или точка с запятой. Колонки: слово, перевод, транскрипция, пример. Последние две необязательны.")
+            Text("Поддерживаются CSV, TSV, TXT, XLSX и PDF. Для PDF извлекается текстовый слой; отсканированные страницы потребуют OCR. Колонки: слово, перевод, транскрипция, пример.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
 
@@ -121,7 +121,7 @@ struct ImportWordsSheet: View {
                 .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
             }
 
-            Button("Выбрать CSV / TXT / XLSX файл", systemImage: "doc") {
+            Button("Выбрать файл (CSV / TXT / XLSX / PDF)", systemImage: "doc") {
                 showingFileImporter = true
             }
             .buttonStyle(.bordered)
@@ -231,7 +231,7 @@ struct ImportWordsSheet: View {
                 if hasAccess { url.stopAccessingSecurityScopedResource() }
             }
             let data = try Data(contentsOf: url)
-            if url.pathExtension.lowercased() == "xlsx" {
+            if url.pathExtension.lowercased() == "pdf" {\n                xlsxWorksheets = []\n                source = try PDFImportParser.extractText(from: data)\n                return\n            }\n            if url.pathExtension.lowercased() == "xlsx" {
                 xlsxWorksheets = try XLSXImportParser.parse(data: data)
                 selectedWorksheetID = xlsxWorksheets.first?.id ?? ""
                 source = ""

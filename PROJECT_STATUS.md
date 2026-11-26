@@ -1,6 +1,6 @@
 # L.M.R. — Project Status
 
-Last updated: 2026-11-26
+Last updated: 2026-11-27
 
 ## Product
 
@@ -27,7 +27,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Speed game: run #36 succeeded.
 - Missing word in sentence: run #38 succeeded on commit f8866b60b8b92dd2754ce888ce04ec4fb697acc4.
 - Text-pair import parser and editable preview: run #43 succeeded.
-- CSV/TXT file picker and import flow: run #44 succeeded; both iOS Simulator build and XCTest passed.
+- CSV/TXT file picker and import flow: run #44 succeeded; both iOS Simulator build and XCTest passed.\n- XLSX worksheet selection, column mapping, and editable import preview: run #48 succeeded; iOS Simulator build and XCTest passed.
 
 ## Current implementation
 
@@ -61,7 +61,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Transactional batch import into a selected vocabulary set.
 - CSV, TSV, and plain-text file selection with UTF-8, UTF-16, and Windows-1251 decoding fallback.
 - Import repository tests cover metadata, duplicate policies, transaction rollback, and missing target sets.
-- XLSX, PDF, and image OCR are not implemented yet.
+- XLSX spreadsheet import with worksheet selection, configurable column mapping, editable preview, duplicate resolution, and transactional save.\n- PDF text-layer extraction into the existing editable import workflow; scanned/image-only PDFs are explicitly reported as requiring OCR (pending CI verification).
 
 ## Verification
 
@@ -69,4 +69,4 @@ GitHub Actions on macos-latest is authoritative because the owner develops on Wi
 
 ## Next
 
-Add XLSX spreadsheet import with worksheet selection/mapping, then PDF text extraction and image OCR through a reviewable import pipeline.
+Next: verify PDF text extraction in CI, then add image OCR through the same reviewable import pipeline.
