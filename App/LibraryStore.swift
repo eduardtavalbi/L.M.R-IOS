@@ -4,7 +4,7 @@ import SwiftUI
 @MainActor
 final class LibraryStore: ObservableObject {
     @Published private(set) var languages: [Language] = []
-    @Published private(set) var lastError: String?
+    @Published var lastError: String?
 
     private let database: DatabaseManager?
     private let repository: LibraryRepository?

@@ -30,7 +30,7 @@ struct ContentView: View {
                 .tabItem { Label("AI", systemImage: "sparkles") }
                 .tag(AppTab.ai)
 
-            PlaceholderView(title: "Профиль", systemImage: "person.crop.circle")
+            PlaceholderView(title: "Профиль", symbol: "person.crop.circle")
                 .tabItem { Label("Профиль", systemImage: "person.crop.circle") }
                 .tag(AppTab.profile)
         }
