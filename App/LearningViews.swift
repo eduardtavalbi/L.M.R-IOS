@@ -13,6 +13,20 @@ struct LearningView: View {
                         ForEach(store.languages) { language in
                             let sets = store.allSets(languageID: language.id)
                             if !sets.isEmpty {
+                                Section("Дополнительная практика") {
+                                    NavigationLink {
+                                        LearningSetPickerView(store: store, language: language, sets: sets, purpose: .weakWords)
+                                    } label: {
+                                        Label("Сложные слова", systemImage: "brain.head.profile")
+                                    }
+                                    NavigationLink {
+                                        LearningSetPickerView(store: store, language: language, sets: sets, purpose: .mixSets)
+                                    } label: {
+                                        Label("Смешать наборы", systemImage: "square.stack.3d.up")
+                                    }
+                                }
+                            }
+                            if !sets.isEmpty {
                                 Section(language.name) {
                                     ForEach(sets) { set in
                                         NavigationLink {
