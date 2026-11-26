@@ -1,9 +1,14 @@
-﻿name: LMR
+name: LMR
 
 options:
   bundleIdPrefix: com.eduardtavalbi
   deploymentTarget:
     iOS: "17.0"
+
+packages:
+  GRDB:
+    url: https://github.com/groue/GRDB.swift
+    from: 7.0.0
 
 targets:
   LMR:
@@ -12,6 +17,9 @@ targets:
     sources:
       - path: App
       - path: Core
+    dependencies:
+      - package: GRDB
+        product: GRDB
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr
@@ -29,6 +37,8 @@ targets:
       - path: Tests
     dependencies:
       - target: LMR
+      - package: GRDB
+        product: GRDB
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr.tests

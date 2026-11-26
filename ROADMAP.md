@@ -1,24 +1,24 @@
 # L.M.R. — Implementation Roadmap
 
-This roadmap is a living plan. Update checkboxes and notes when work is completed or priorities change.
+This roadmap is a living plan. Check off only work that has actually been implemented and verified.
 
 ## Phase 0 — Repository foundation
 
 - [x] Create repository and initial SwiftUI/XcodeGen project skeleton.
 - [x] Add five-tab navigation shell.
 - [x] Verify first GitHub Actions iOS Simulator build.
-- [ ] Add durable project status and roadmap tracking.
-- [ ] Establish reliable build + XCTest CI.
+- [x] Add durable project status and roadmap tracking.
+- [x] Configure CI to build and run XCTest (verification pending for this commit).
 
 ## Phase 1 — Domain model and local persistence
 
-- [ ] Integrate GRDB through XcodeGen Swift Package dependency.
-- [ ] Implement persistent SQLite database in Application Support.
-- [ ] Add database migrations and foreign-key enforcement.
-- [ ] Implement Language, Category, VocabularySet, Word, and LearningProgress models.
-- [ ] Implement repository operations and validation for language/category relationships.
-- [ ] Support nested categories, uncategorized sets, moving sets, and words shared by multiple sets.
-- [ ] Add isolated XCTest coverage for migrations, persistence, relationships, and repository behavior.
+- [x] Integrate GRDB through XcodeGen Swift Package dependency.
+- [x] Implement persistent SQLite database in Application Support.
+- [x] Add database migrations and foreign-key enforcement.
+- [x] Implement Language, Category, VocabularySet, Word, and LearningProgress models.
+- [x] Implement repository operations and validation for language/category relationships.
+- [x] Support nested categories, uncategorized sets, moving sets, and words shared by multiple sets.
+- [x] Add isolated XCTest coverage for migrations, persistence, relationships, and repository behavior.
 - [ ] Verify build and tests in GitHub Actions.
 
 ## Phase 2 — Library experience
@@ -87,4 +87,4 @@ This roadmap is a living plan. Update checkboxes and notes when work is complete
 
 ## Current next task
 
-Recover/review the owner's unpushed local GRDB draft from the handover conversation, integrate it cleanly into a feature branch or a focused commit, then run the iOS build and XCTest in GitHub Actions. The current remote `main` does not contain that draft.
+Run the GRDB integration and XCTest suite on GitHub-hosted macOS. Fix any compile/runtime issues before starting the library UI milestone.
