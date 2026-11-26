@@ -17,6 +17,7 @@ enum LibraryRepositoryError: Error, Equatable {
     case wordNotFound
     case wordLanguageMismatch
     case setLanguageMismatch
+    case invalidImportRow
 }
 
 final class LibraryRepository {
@@ -120,6 +121,76 @@ final class LibraryRepository {
                 try db.execute(sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)", arguments: [setID, word.id])
             }
             return word
+        }
+    }
+
+    /// Imports a batch atomically. Duplicate choices are applied per preview row.
+    func importWords(_ drafts: [WordImportDraft], intoSet setID: String) throws -> WordImportSummary {
+        try database.dbQueue.write { db in
+            guard let set = try VocabularySet.fetchOne(db, key: setID) else {
+                throw LibraryRepositoryError.setNotFound
+            }
+            var existingWords = try Word.filter(Column("languageID") == set.languageID).fetchAll(db)
+            var summary = WordImportSummary()
+
+            for draft in drafts {
+                guard draft.validationError == nil else { throw LibraryRepositoryError.invalidImportRow }
+                let text = draft.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                let translation = draft.translation.trimmingCharacters(in: .whitespacesAndNewlines)
+                let transcription = draft.transcription.trimmingCharacters(in: .whitespacesAndNewlines)
+                let example = draft.example.trimmingCharacters(in: .whitespacesAndNewlines)
+                let duplicate = existingWords.first {
+                    Self.normalizedDuplicateValue($0.text) == Self.normalizedDuplicateValue(text)
+                        && Self.normalizedDuplicateValue($0.translation) == Self.normalizedDuplicateValue(translation)
+                }
+
+                if let duplicate {
+                    switch draft.duplicateResolution {
+                    case .skip:
+                        summary.skipped += 1
+                        continue
+                    case .merge:
+                        try db.execute(
+                            sql: "INSERT OR IGNORE INTO set_words (setID, wordID) VALUES (?, ?)",
+                            arguments: [setID, duplicate.id]
+                        )
+                        var updated = duplicate
+                        if (updated.transcription?.isEmpty ?? true) && !transcription.isEmpty {
+                            updated.transcription = transcription
+                        }
+                        if (updated.example?.isEmpty ?? true) && !example.isEmpty {
+                            updated.example = example
+                        }
+                        updated.updatedAt = .now
+                        try updated.update(db)
+                        if let index = existingWords.firstIndex(where: { $0.id == duplicate.id }) {
+                            existingWords[index] = updated
+                        }
+                        summary.merged += 1
+                        continue
+                    case .keepBoth:
+                        break
+                    }
+                }
+
+                var word = Word(
+                    languageID: set.languageID,
+                    text: text,
+                    translation: translation,
+                    transcription: transcription.isEmpty ? nil : transcription,
+                    example: example.isEmpty ? nil : example
+                )
+                try word.insert(db)
+                var progress = LearningProgress(wordID: word.id)
+                try progress.insert(db)
+                try db.execute(
+                    sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)",
+                    arguments: [setID, word.id]
+                )
+                existingWords.append(word)
+                summary.imported += 1
+            }
+            return summary
         }
     }
 

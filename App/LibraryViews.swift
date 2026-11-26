@@ -319,6 +319,7 @@ struct VocabularySetView: View {
     let language: Language
     let set: VocabularySet
     @State private var showingWord = false
+    @State private var showingImport = false
     @State private var showingMoveSet = false
     @State private var showingEditSet = false
     @State private var confirmingDeleteSet = false
@@ -355,6 +356,7 @@ struct VocabularySetView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button("Добавить слово", systemImage: "plus") { showingWord = true }
+                    Button("Импортировать слова", systemImage: "square.and.arrow.down") { showingImport = true }
                     Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
                     Button("Изменить набор", systemImage: "pencil") { showingEditSet = true }
                     Button("Удалить набор", systemImage: "trash", role: .destructive) { confirmingDeleteSet = true }
@@ -362,6 +364,7 @@ struct VocabularySetView: View {
             }
         }
         .sheet(isPresented: $showingWord) { CreateWordSheet(store: store, language: language, set: set) }
+        .sheet(isPresented: $showingImport) { ImportWordsSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingMoveSet) { MoveSetSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingEditSet) { EditSetSheet(store: store, set: set) }
         .sheet(item: $editingWord) { word in EditWordSheet(store: store, word: word) }

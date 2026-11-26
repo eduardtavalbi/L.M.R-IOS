@@ -127,6 +127,13 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    func importWords(_ drafts: [WordImportDraft], intoSet setID: String) throws -> WordImportSummary {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        let summary = try repository.importWords(drafts, intoSet: setID)
+        objectWillChange.send()
+        return summary
+    }
+
     func duplicateWord(languageID: String, text: String, translation: String) -> Word? {
         do {
             return try repository?.findDuplicateWord(languageID: languageID, text: text, translation: translation)
