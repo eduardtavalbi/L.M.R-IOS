@@ -55,6 +55,15 @@ struct LearningView: View {
                                                 Text(set.name).foregroundStyle(.secondary)
                                             }
                                         }
+                                        NavigationLink {
+                                            MissingWordGameView(store: store, set: set)
+                                        } label: {
+                                            HStack {
+                                                Label("Missing", systemImage: "text.viewfinder")
+                                                Spacer()
+                                                Text(set.name).foregroundStyle(.secondary)
+                                            }
+                                        }
                                     }
                                 }
                             }
