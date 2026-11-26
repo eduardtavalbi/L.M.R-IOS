@@ -256,7 +256,7 @@ struct VocabularySetView: View {
 }
 
 private struct MoveSetSheet: View {
-    @Environment(\\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var store: LibraryStore
     let language: Language
     let set: VocabularySet
