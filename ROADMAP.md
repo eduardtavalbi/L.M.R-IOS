@@ -41,7 +41,7 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Word-level progress shared across sets.
 - [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
 - [ ] Multiple-choice, typing, and audio sessions.
-- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred.
+- [ ] Due-review queue: new words and due reviews are included; future-due reviews are deferred (awaiting CI verification after a date-comparison fix).
 - [ ] Weak-word and selected-set training.
 - [ ] Mix Sets.
 

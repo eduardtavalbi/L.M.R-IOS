@@ -328,17 +328,44 @@ final class LibraryRepository {
 
     /// Returns new words and reviews whose scheduled due date has arrived.
     /// Future-due cards stay out of the active queue until they are ready.
+    /// Date comparisons are performed after decoding GRDB values so SQLite's
+    /// storage affinity cannot change the meaning of a Date comparison.
     func fetchLearningQueue(inSet setID: String, dueAt: Date = .now) throws -> [Word] {
         try database.dbQueue.read { db in
-            try Word.fetchAll(db, sql: """
+            let words = try Word.fetchAll(db, sql: """
                 SELECT words.* FROM words
                 INNER JOIN set_words ON set_words.wordID = words.id
-                LEFT JOIN learningProgress ON learningProgress.wordID = words.id
                 WHERE set_words.setID = ?
-                  AND (learningProgress.dueAt IS NULL OR learningProgress.dueAt <= ?)
-                ORDER BY CASE WHEN learningProgress.dueAt IS NULL THEN 0 ELSE 1 END,
-                         learningProgress.dueAt ASC, words.text COLLATE NOCASE
-                """, arguments: [setID, dueAt])
+                """, arguments: [setID])
+            guard !words.isEmpty else { return [] }
+
+            let progressRows = try LearningProgress
+                .filter(Column("wordID").in(words.map(\\.id)))
+                .fetchAll(db)
+            let progressByWordID = Dictionary(
+                uniqueKeysWithValues: progressRows.map { ($0.wordID, $0) }
+            )
+
+            return words
+                .filter { word in
+                    guard let scheduledDate = progressByWordID[word.id]?.dueAt else { return true }
+                    return scheduledDate <= dueAt
+                }
+                .sorted { lhs, rhs in
+                    let lhsDueDate = progressByWordID[lhs.id]?.dueAt
+                    let rhsDueDate = progressByWordID[rhs.id]?.dueAt
+                    switch (lhsDueDate, rhsDueDate) {
+                    case (nil, nil):
+                        return lhs.text.localizedCaseInsensitiveCompare(rhs.text) == .orderedAscending
+                    case (nil, _):
+                        return true
+                    case (_, nil):
+                        return false
+                    case let (left?, right?):
+                        if left != right { return left < right }
+                        return lhs.text.localizedCaseInsensitiveCompare(rhs.text) == .orderedAscending
+                    }
+                }
         }
     }
 
