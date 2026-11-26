@@ -176,6 +176,8 @@ struct LanguageLibraryView: View {
     let language: Language
     @State private var showingCategory = false
     @State private var showingSet = false
+    @State private var showingEditLanguage = false
+    @State private var confirmingDeleteLanguage = false
 
     var body: some View {
         List {
@@ -214,11 +216,22 @@ struct LanguageLibraryView: View {
                 Menu {
                     Button("Новая категория", systemImage: "folder.badge.plus") { showingCategory = true }
                     Button("Новый набор", systemImage: "plus") { showingSet = true }
+                    Divider()
+                    Button("Изменить язык", systemImage: "pencil") { showingEditLanguage = true }
+                    Button("Удалить язык", systemImage: "trash", role: .destructive) { confirmingDeleteLanguage = true }
                 } label: { Image(systemName: "plus") }
             }
         }
         .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: nil) }
         .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: nil) }
+        .sheet(isPresented: $showingEditLanguage) { EditLanguageSheet(store: store, language: language) }
+        .confirmationDialog("Удалить язык «\\(language.name)»?", isPresented: $confirmingDeleteLanguage, titleVisibility: .visible) {
+            Button("Удалить язык и всё его содержимое", role: .destructive) {
+                do { try store.deleteLanguage(language.id) } catch { store.lastError = error.localizedDescription }
+            }
+        } message: {
+            Text("Будут удалены все категории, наборы, слова и прогресс этого языка. Это действие нельзя отменить.")
+        }
     }
 }
 
@@ -228,6 +241,8 @@ struct CategoryLibraryView: View {
     let category: Category
     @State private var showingCategory = false
     @State private var showingSet = false
+    @State private var showingEditCategory = false
+    @State private var confirmingDeleteCategory = false
 
     var body: some View {
         List {
@@ -264,11 +279,22 @@ struct CategoryLibraryView: View {
                 Menu {
                     Button("Вложенная категория", systemImage: "folder.badge.plus") { showingCategory = true }
                     Button("Новый набор", systemImage: "plus") { showingSet = true }
+                    Divider()
+                    Button("Изменить категорию", systemImage: "pencil") { showingEditCategory = true }
+                    Button("Удалить категорию", systemImage: "trash", role: .destructive) { confirmingDeleteCategory = true }
                 } label: { Image(systemName: "plus") }
             }
         }
         .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: category.id) }
         .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: category.id) }
+        .sheet(isPresented: $showingEditCategory) { EditCategorySheet(store: store, category: category) }
+        .confirmationDialog("Удалить категорию «\\(category.name)»?", isPresented: $confirmingDeleteCategory, titleVisibility: .visible) {
+            Button("Удалить категорию", role: .destructive) {
+                do { try store.deleteCategory(category.id) } catch { store.lastError = error.localizedDescription }
+            }
+        } message: {
+            Text("Вложенные категории тоже будут удалены. Наборы из этой категории останутся в библиотеке без категории.")
+        }
     }
 }
 
@@ -294,6 +320,10 @@ struct VocabularySetView: View {
     let set: VocabularySet
     @State private var showingWord = false
     @State private var showingMoveSet = false
+    @State private var showingEditSet = false
+    @State private var confirmingDeleteSet = false
+    @State private var editingWord: Word?
+    @State private var deletingWord: Word?
 
     var body: some View {
         List {
@@ -313,6 +343,10 @@ struct VocabularySetView: View {
                         .font(.subheadline)
                     }
                     .padding(.vertical, 4)
+                    .contextMenu {
+                        Button("Изменить", systemImage: "pencil") { editingWord = word }
+                        Button("Удалить", systemImage: "trash", role: .destructive) { deletingWord = word }
+                    }
                 }
             }
         }
@@ -322,11 +356,35 @@ struct VocabularySetView: View {
                 Menu {
                     Button("Добавить слово", systemImage: "plus") { showingWord = true }
                     Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
+                    Button("Изменить набор", systemImage: "pencil") { showingEditSet = true }
+                    Button("Удалить набор", systemImage: "trash", role: .destructive) { confirmingDeleteSet = true }
                 } label: { Image(systemName: "ellipsis.circle") }
             }
         }
         .sheet(isPresented: $showingWord) { CreateWordSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingMoveSet) { MoveSetSheet(store: store, language: language, set: set) }
+        .sheet(isPresented: $showingEditSet) { EditSetSheet(store: store, set: set) }
+        .sheet(item: $editingWord) { word in EditWordSheet(store: store, word: word) }
+        .confirmationDialog("Удалить набор «\\(set.name)»?", isPresented: $confirmingDeleteSet, titleVisibility: .visible) {
+            Button("Удалить набор", role: .destructive) {
+                do { try store.deleteSet(set.id) } catch { store.lastError = error.localizedDescription }
+            }
+        } message: {
+            Text("Сам набор и его связи будут удалены. Слова останутся в других наборах, если они там используются.")
+        }
+        .confirmationDialog("Удалить слово «\\(deletingWord?.text ?? "")»?", isPresented: Binding(
+            get: { deletingWord != nil },
+            set: { if !$0 { deletingWord = nil } }
+        ), titleVisibility: .visible) {
+            Button("Удалить слово", role: .destructive) {
+                if let word = deletingWord {
+                    do { try store.deleteWord(word.id) } catch { store.lastError = error.localizedDescription }
+                }
+                deletingWord = nil
+            }
+        } message: {
+            Text("Слово будет удалено из всех наборов вместе с историей обучения.")
+        }
     }
 }
 
@@ -511,6 +569,173 @@ private struct CreateWordSheet: View {
                 }
             }
             .alert("Не удалось добавить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(error ?? "") }
+        }
+    }
+}
+
+
+private struct EditLanguageSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var store: LibraryStore
+    let language: Language
+    @State private var name: String
+    @State private var code: String
+    @State private var error: String?
+
+    init(store: LibraryStore, language: Language) {
+        self.store = store
+        self.language = language
+        _name = State(initialValue: language.name)
+        _code = State(initialValue: language.code ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Название языка", text: $name)
+                TextField("Код языка", text: $code).textInputAutocapitalization(.never).autocorrectionDisabled()
+            }
+            .navigationTitle("Изменить язык")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        do {
+                            try store.updateLanguage(language.id, name: name, code: code.isEmpty ? nil : code)
+                            dismiss()
+                        } catch { errorMessage(error) }
+                    }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .alert("Не удалось сохранить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(error ?? "") }
+        }
+    }
+
+    private func errorMessage(_ caught: Error) { error = caught.localizedDescription }
+}
+
+private struct EditCategorySheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var store: LibraryStore
+    let category: Category
+    @State private var name: String
+    @State private var error: String?
+
+    init(store: LibraryStore, category: Category) {
+        self.store = store
+        self.category = category
+        _name = State(initialValue: category.name)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form { TextField("Название категории", text: $name) }
+                .navigationTitle("Изменить категорию")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Сохранить") {
+                            do {
+                                try store.updateCategory(category.id, name: name)
+                                dismiss()
+                            } catch { error = error.localizedDescription }
+                        }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+                .alert("Не удалось сохранить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                    Button("OK", role: .cancel) {}
+                } message: { Text(error ?? "") }
+        }
+    }
+}
+
+private struct EditSetSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var store: LibraryStore
+    let set: VocabularySet
+    @State private var name: String
+    @State private var details: String
+    @State private var error: String?
+
+    init(store: LibraryStore, set: VocabularySet) {
+        self.store = store
+        self.set = set
+        _name = State(initialValue: set.name)
+        _details = State(initialValue: set.details ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Название набора", text: $name)
+                TextField("Описание (необязательно)", text: $details, axis: .vertical)
+                    .lineLimit(2...5)
+            }
+            .navigationTitle("Изменить набор")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        do {
+                            try store.updateSet(set.id, name: name, details: details)
+                            dismiss()
+                        } catch { error = error.localizedDescription }
+                    }.disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .alert("Не удалось сохранить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(error ?? "") }
+        }
+    }
+}
+
+private struct EditWordSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var store: LibraryStore
+    let word: Word
+    @State private var text: String
+    @State private var translation: String
+    @State private var transcription: String
+    @State private var error: String?
+
+    init(store: LibraryStore, word: Word) {
+        self.store = store
+        self.word = word
+        _text = State(initialValue: word.text)
+        _translation = State(initialValue: word.translation)
+        _transcription = State(initialValue: word.transcription ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Слово", text: $text)
+                TextField("Перевод", text: $translation)
+                TextField("Транскрипция / пиньинь", text: $transcription)
+            }
+            .navigationTitle("Изменить слово")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        do {
+                            try store.updateWord(
+                                word.id,
+                                text: text,
+                                translation: translation,
+                                transcription: transcription.isEmpty ? nil : transcription
+                            )
+                            dismiss()
+                        } catch { error = error.localizedDescription }
+                    }.disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .alert("Не удалось сохранить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
                 Button("OK", role: .cancel) {}
             } message: { Text(error ?? "") }
         }

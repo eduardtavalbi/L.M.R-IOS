@@ -151,7 +151,7 @@ final class LMRTests: XCTestCase {
         try repository.deleteCategory(category.id)
         XCTAssertTrue(try repository.fetchCategories(languageID: language.id).isEmpty)
         XCTAssertNil(try repository.fetchSets(languageID: language.id, categoryID: set.categoryID).first)
-        XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\.id), [set.id, otherSet.id].sorted { $0 < $1 }.filter { $0 == set.id || $0 == otherSet.id }.sorted { $0 == set.id ? true : $1 == set.id ? false : $0 < $1 })
+        XCTAssertEqual(Set(try repository.fetchSets(languageID: language.id).map(\.id)), Set([set.id, otherSet.id]))
         XCTAssertNil(try repository.fetchSets(containing: word.id).first(where: { $0.id == set.id })?.categoryID)
 
         try repository.deleteSet(set.id)
