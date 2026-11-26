@@ -231,7 +231,11 @@ struct ImportWordsSheet: View {
                 if hasAccess { url.stopAccessingSecurityScopedResource() }
             }
             let data = try Data(contentsOf: url)
-            if url.pathExtension.lowercased() == "pdf" {\n                xlsxWorksheets = []\n                source = try PDFImportParser.extractText(from: data)\n                return\n            }\n            if url.pathExtension.lowercased() == "xlsx" {
+            if url.pathExtension.lowercased() == "pdf" {
+                xlsxWorksheets = []
+                source = try PDFImportParser.extractText(from: data)
+                return
+            }\n            if url.pathExtension.lowercased() == "xlsx" {
                 xlsxWorksheets = try XLSXImportParser.parse(data: data)
                 selectedWorksheetID = xlsxWorksheets.first?.id ?? ""
                 source = ""
