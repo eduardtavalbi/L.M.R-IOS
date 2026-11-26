@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ImportWordsSheet: View {
     @Environment(\.dismiss) private var dismiss
@@ -11,6 +12,7 @@ struct ImportWordsSheet: View {
     @State private var showingPreview = false
     @State private var error: String?
     @State private var summary: WordImportSummary?
+    @State private var showingFileImporter = false
 
     private var validRows: [WordImportDraft] {
         rows.filter { $0.validationError == nil }
@@ -52,6 +54,13 @@ struct ImportWordsSheet: View {
             } message: {
                 Text(error ?? "")
             }
+            .fileImporter(
+                isPresented: $showingFileImporter,
+                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText],
+                allowsMultipleSelection: false
+            ) { result in
+                loadSelectedFile(result)
+            }
         }
     }
 
@@ -76,6 +85,11 @@ struct ImportWordsSheet: View {
             }
             .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12))
             .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
+            Button("Выбрать CSV / TXT файл", systemImage: "doc") {
+                showingFileImporter = true
+            }
+            .buttonStyle(.bordered)
+            .frame(maxWidth: .infinity)
             Button("Разобрать и проверить") { parseSource() }
                 .buttonStyle(.borderedProminent)
                 .frame(maxWidth: .infinity)
@@ -151,6 +165,28 @@ struct ImportWordsSheet: View {
                 .buttonStyle(.borderedProminent)
         }
         .padding()
+    }
+
+
+    private func loadSelectedFile(_ result: Result<[URL], Error>) {
+        do {
+            guard let url = try result.get().first else { return }
+            let hasAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if hasAccess { url.stopAccessingSecurityScopedResource() }
+            }
+            let data = try Data(contentsOf: url)
+            guard let fileText = String(data: data, encoding: .utf8)
+                    ?? String(data: data, encoding: .utf16)
+                    ?? String(data: data, encoding: .windowsCP1251) else {
+                error = "Не удалось прочитать файл. Сохрани его в UTF-8 и попробуй снова."
+                return
+            }
+            source = fileText
+            parseSource()
+        } catch {
+            self.error = "Не удалось открыть файл: \\(error.localizedDescription)"
+        }
     }
 
     private func parseSource() {
