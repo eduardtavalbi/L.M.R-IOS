@@ -22,8 +22,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Full build and XCTest verification: run #15 succeeded.
 - Learning modes and SRS baseline: run #28 succeeded.
 - Weak-word and Mix Sets integration: run #32 succeeded; iOS Simulator build and all 22 XCTest cases passed.
-- Pairs game: run #33 succeeded on commit 036c77f147f5a1e8853be97149c0f46f1bc5bab8; build and tests passed.
-- Audio choice: run #34 succeeded on commit 2378a55d1fd6a4c59ab12f11a1387bcebafacd58; build and tests passed.
+- Pairs game: run #33 succeeded on commit 036c77f147f5a1e8853be97149c0f46f1bc5bab8.
+- Audio choice: run #34 succeeded on commit 2378a55d1fd6a4c59ab12f11a1387bcebafacd58.
+- Speed game: run #36 succeeded on commit 5b5d47b72610407b48a7541d38edff705c374f8e; iOS Simulator build and XCTest passed.
 
 ## Current implementation
 
@@ -40,16 +41,19 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
 - Multi-set learning combines selected sets without duplicate shared words. Weak-word practice includes words with recorded mistakes, even when their next review is in the future.
 - Learning UI exposes per-set sessions, weak-word practice, and Mix Sets; each supports flashcards, multiple choice, and typing.
-- Pairs is a matching game with shuffled word/translation cards, feedback, move counter, completion, and restart. It does not update SRS because matching is recognition practice.
-- Audio choice is implemented with system text-to-speech, spoken prompts, randomized translation choices, score, and replay. It does not update SRS; audio voices depend on the language code and voices available on the device.
 - Global library search covers original words, translations, set names, and category names; word results include all containing sets.
 
-### Verification
+### Games
 
-- GitHub Actions is authoritative because the owner does not have Xcode locally.
-- Run #32 succeeded with weak-word and multi-set query coverage.
-- Run #33 succeeded: Pairs app integration and four PairsGameEngine tests passed.
+- Pairs: shuffled word/translation matching, feedback, move counter, completion, and restart. It does not update SRS.
+- Audio choice: system text-to-speech prompts, randomized translation choices, score, and replay. Voice availability depends on iOS language assets. It does not update SRS.
+- Speed: 60-second translation typing challenge, streak bonuses, score, skip, and restart. It does not update SRS.
+- Missing word in sentence is the next game under implementation.
+
+## Verification
+
+GitHub Actions on macos-latest is authoritative because the owner develops on Windows and has no local Xcode. Every feature is expected to pass an iOS Simulator build and XCTest before being marked complete.
 
 ## Next
 
-Audio choice is implemented and CI-verified (run #34). Next game: Speed.
+Implement Missing word in sentence, then continue with import flows and the remaining product roadmap.

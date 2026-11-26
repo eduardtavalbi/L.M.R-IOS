@@ -50,9 +50,9 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 - [x] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart (run #33).
 - [x] Audio choice: spoken prompt, translation choices, score and replay (run #34).
-- [ ] Speed.
+- [x] Speed: 60-second typing challenge, streak bonuses, score and restart (run #36).
 - [ ] Missing word in sentence.
-- [x] Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs and Audio choice are recognition games.
+- [x] Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs, Audio choice, and Speed are independent practice games.
 
 ## Phase 5 — Import and AI
 
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Implement Speed game.
+Implement Missing word in sentence, then continue with import and AI foundations.
