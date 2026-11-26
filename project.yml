@@ -1,0 +1,36 @@
+﻿name: LMR
+
+options:
+  bundleIdPrefix: com.eduardtavalbi
+  deploymentTarget:
+    iOS: "17.0"
+
+targets:
+  LMR:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+      - path: Core
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr
+        PRODUCT_NAME: L.M.R.
+        INFOPLIST_KEY_CFBundleDisplayName: L.M.R.
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+
+  LMRTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: LMR
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
