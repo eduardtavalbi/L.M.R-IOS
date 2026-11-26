@@ -1,10 +1,12 @@
-﻿import SwiftUI
+import SwiftUI
 
 @main
 struct LMRApp: App {
+    @StateObject private var store = LibraryStore()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(store: store)
         }
     }
 }

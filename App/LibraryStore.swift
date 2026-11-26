@@ -1,0 +1,98 @@
+import Foundation
+import SwiftUI
+
+@MainActor
+final class LibraryStore: ObservableObject {
+    @Published private(set) var languages: [Language] = []
+    @Published private(set) var lastError: String?
+
+    private let database: DatabaseManager?
+    private let repository: LibraryRepository?
+
+    init() {
+        do {
+            let database = try DatabaseManager()
+            self.database = database
+            self.repository = LibraryRepository(database: database)
+            refreshLanguages()
+        } catch {
+            self.database = nil
+            self.repository = nil
+            self.lastError = error.localizedDescription
+        }
+    }
+
+    func refreshLanguages() {
+        do {
+            languages = try repository?.fetchLanguages() ?? []
+            lastError = nil
+        } catch {
+            lastError = error.localizedDescription
+        }
+    }
+
+    func categories(languageID: String, parentID: String? = nil) -> [Category] {
+        do {
+            return try repository?.fetchCategories(languageID: languageID)
+                .filter { $0.parentID == parentID } ?? []
+        } catch {
+            lastError = error.localizedDescription
+            return []
+        }
+    }
+
+    func sets(languageID: String, categoryID: String? = nil) -> [VocabularySet] {
+        do {
+            return try repository?.fetchSets(languageID: languageID, categoryID: categoryID) ?? []
+        } catch {
+            lastError = error.localizedDescription
+            return []
+        }
+    }
+
+    func words(setID: String) -> [Word] {
+        do {
+            return try repository?.fetchWords(inSet: setID) ?? []
+        } catch {
+            lastError = error.localizedDescription
+            return []
+        }
+    }
+
+    func createLanguage(name: String, code: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.createLanguage(name: name, code: code)
+        refreshLanguages()
+    }
+
+    func createCategory(languageID: String, name: String, parentID: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.createCategory(languageID: languageID, name: name, parentID: parentID)
+        objectWillChange.send()
+    }
+
+    func createSet(languageID: String, name: String, categoryID: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.createSet(languageID: languageID, name: name, categoryID: categoryID)
+        objectWillChange.send()
+    }
+
+    func createWord(languageID: String, setID: String, text: String, translation: String, transcription: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.createWord(
+            languageID: languageID,
+            text: text,
+            translation: translation,
+            transcription: transcription,
+            inSet: setID
+        )
+        objectWillChange.send()
+    }
+
+    enum StoreError: LocalizedError {
+        case databaseUnavailable
+        var errorDescription: String? {
+            "Не удалось открыть локальную базу данных."
+        }
+    }
+}
