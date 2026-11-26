@@ -116,6 +116,36 @@ final class LMRTests: XCTestCase {
         XCTAssertTrue(try repository.searchLibrary("   ").isEmpty)
     }
 
+    func testDuplicateDetectionMatchesNormalizedOriginalAndTranslationTogether() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let otherLanguage = try repository.createLanguage(name: "Spanish")
+        let existing = try repository.createWord(languageID: language.id, text: "  Ice   Cream ", translation: "Мороженое")
+
+        let duplicate = try repository.findDuplicateWord(languageID: language.id, text: "ice cream", translation: "мороженое")
+        XCTAssertEqual(duplicate?.id, existing.id)
+        XCTAssertNil(try repository.findDuplicateWord(languageID: language.id, text: "Gelato", translation: "Мороженое"))
+        XCTAssertNil(try repository.findDuplicateWord(languageID: otherLanguage.id, text: "Ice Cream", translation: "Мороженое"))
+    }
+
+    func testMergingDuplicateAddsExistingWordToSetAndPreservesSharedProgress() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "Chinese", code: "zh")
+        let firstSet = try repository.createSet(languageID: language.id, name: "Food")
+        let secondSet = try repository.createSet(languageID: language.id, name: "Daily")
+        let existing = try repository.createWord(languageID: language.id, text: "苹果", translation: "яблоко", inSet: firstSet.id)
+        let progressBefore = try repository.fetchProgress(for: existing.id)
+
+        let duplicate = try repository.findDuplicateWord(languageID: language.id, text: " 苹果 ", translation: " ЯБЛОКО ")
+        XCTAssertEqual(duplicate?.id, existing.id)
+        try repository.addWord(existing.id, toSet: secondSet.id)
+
+        XCTAssertEqual(try repository.fetchWords(inSet: firstSet.id).map(\.id), [existing.id])
+        XCTAssertEqual(try repository.fetchWords(inSet: secondSet.id).map(\.id), [existing.id])
+        XCTAssertEqual(try repository.fetchProgress(for: existing.id), progressBefore)
+        XCTAssertEqual(try repository.fetchSets(containing: existing.id).count, 2)
+    }
+
     func testLibraryEntitiesCanBeEdited() throws {
         let repository = LibraryRepository(database: try DatabaseManager.inMemory())
         let language = try repository.createLanguage(name: "Chinese", code: "zh")

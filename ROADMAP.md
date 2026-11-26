@@ -31,8 +31,8 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Create vocabulary words with translation and transcription.
 - [x] Global search across original words, translations, set names, and categories.
 - [x] Show all sets containing a matching word.
-- [ ] Edit/delete language, category, set, and word.
-- [ ] Duplicate detection and skip/keep-both/merge flow.
+- [x] Edit/delete language, category, set, and word.
+- [x] Duplicate detection and skip/keep-both/merge flow.
 
 ## Phase 3 — Learning engine
 
@@ -89,4 +89,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Validate the global search milestone on GitHub-hosted macOS. Then continue editing/deleting library entities and duplicate resolution.
+Complete the first usable learning flow: card presentation, flashcard sessions, word-level progress, and a basic spaced-repetition schedule.

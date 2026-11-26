@@ -32,7 +32,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - In-memory database initializer for isolated tests.
 - Versioned migration for languages, nested categories, vocabulary sets, words, set membership, and word-level learning progress.
 - SQLite foreign keys, cascade/set-null behavior, and lookup indexes.
-- Repository operations for language/category/set/word creation, set movement, set membership, and library reads.
+- Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
+- Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
 - Language consistency validation for repository operations.
 
 ### Library UI
@@ -40,7 +41,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Five-tab SwiftUI navigation shell.
 - Local library screen with language list and empty state.
 - Nested category navigation and uncategorized sets.
-- Create language, category, set, and word flows.
+- Create, edit, and delete language, category, set, and word flows with confirmation for destructive actions.
+- Duplicate-word detection with skip, keep-both, and merge choices.
 - Move sets between categories or to the uncategorized area.
 - Global search across original words, translations, set names, and category names.
 - Word search results show every set containing that word and link into each set.
@@ -48,7 +50,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ## Verification
 
 - GitHub Actions is the authoritative build/test environment because the owner does not have Xcode locally.
-- Run #15 completed successfully: iOS Simulator app build and all 6 XCTest cases passed.
+- Run #20 completed successfully: iOS Simulator app build and all 10 XCTest cases passed.
 - New changes must be considered unverified until their own GitHub Actions run completes successfully.
 
 ## Next

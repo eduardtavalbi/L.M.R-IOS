@@ -539,6 +539,7 @@ private struct CreateWordSheet: View {
     @State private var translation = ""
     @State private var transcription = ""
     @State private var error: String?
+    @State private var duplicate: Word?
 
     var body: some View {
         NavigationStack {
@@ -553,24 +554,68 @@ private struct CreateWordSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Добавить") {
-                        do {
-                            try store.createWord(
-                                languageID: language.id,
-                                setID: set.id,
-                                text: text,
-                                translation: translation,
-                                transcription: transcription.isEmpty ? nil : transcription
-                            )
-                            dismiss()
-                        } catch let caughtError { error = caughtError.localizedDescription }
+                    Button("Добавить") { addWord() }
+                        .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .confirmationDialog(
+                "Похожая карточка уже существует",
+                isPresented: Binding(
+                    get: { duplicate != nil },
+                    set: { if !$0 { duplicate = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Пропустить") {
+                    duplicate = nil
+                    dismiss()
+                }
+                Button("Объединить — использовать существующее слово") {
+                    guard let duplicate else { return }
+                    do {
+                        try store.addWord(duplicate.id, toSet: set.id)
+                        self.duplicate = nil
+                        dismiss()
+                    } catch let caughtError {
+                        error = caughtError.localizedDescription
+                        self.duplicate = nil
                     }
-                    .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+                Button("Оставить оба", role: .destructive) {
+                    createNewWord()
+                }
+            } message: {
+                if let duplicate {
+                    Text("«\(duplicate.text)» — «\(duplicate.translation)». Можно добавить существующую карточку в этот набор или создать отдельную.")
                 }
             }
             .alert("Не удалось добавить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
                 Button("OK", role: .cancel) {}
             } message: { Text(error ?? "") }
+        }
+    }
+
+    private func addWord() {
+        if let match = store.duplicateWord(languageID: language.id, text: text, translation: translation) {
+            duplicate = match
+        } else {
+            createNewWord()
+        }
+    }
+
+    private func createNewWord() {
+        do {
+            try store.createWord(
+                languageID: language.id,
+                setID: set.id,
+                text: text,
+                translation: translation,
+                transcription: transcription.isEmpty ? nil : transcription
+            )
+            duplicate = nil
+            dismiss()
+        } catch let caughtError {
+            error = caughtError.localizedDescription
         }
     }
 }

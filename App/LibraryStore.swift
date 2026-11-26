@@ -93,6 +93,21 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    func duplicateWord(languageID: String, text: String, translation: String) -> Word? {
+        do {
+            return try repository?.findDuplicateWord(languageID: languageID, text: text, translation: translation)
+        } catch {
+            lastError = error.localizedDescription
+            return nil
+        }
+    }
+
+    func addWord(_ wordID: String, toSet setID: String) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.addWord(wordID, toSet: setID)
+        objectWillChange.send()
+    }
+
     func createWord(languageID: String, setID: String, text: String, translation: String, transcription: String?) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.createWord(

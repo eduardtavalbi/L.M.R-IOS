@@ -123,6 +123,26 @@ final class LibraryRepository {
         }
     }
 
+    func findDuplicateWord(languageID: String, text: String, translation: String) throws -> Word? {
+        let normalizedText = Self.normalizedDuplicateValue(text)
+        let normalizedTranslation = Self.normalizedDuplicateValue(translation)
+        guard !normalizedText.isEmpty, !normalizedTranslation.isEmpty else { return nil }
+
+        return try database.dbQueue.read { db in
+            let candidates = try Word.filter(Column("languageID") == languageID).fetchAll(db)
+            return candidates.first {
+                Self.normalizedDuplicateValue($0.text) == normalizedText
+                    && Self.normalizedDuplicateValue($0.translation) == normalizedTranslation
+            }
+        }
+    }
+
+    private static func normalizedDuplicateValue(_ value: String) -> String {
+        value.split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+    }
+
     func addWord(_ wordID: String, toSet setID: String) throws {
         try database.dbQueue.write { db in
             guard let word = try Word.fetchOne(db, key: wordID) else {
