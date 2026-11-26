@@ -45,7 +45,7 @@ final class WordImportParserTests: XCTestCase {
     func testParsesSpreadsheetRowsUsingSelectedColumns() throws {
         let rows = try WordImportParser.parse(
             rows: [
-                ["Example", "Meaning", "IPA", "Sentence", "Notes"],
+                ["Word", "Translation", "IPA", "Sentence", "Notes"],
                 ["hello", "привет", "həˈləʊ", "Hello there!", "keep"],
                 ["book", "книга", "", "", ""]
             ],
