@@ -64,16 +64,18 @@ final class WordImportRepositoryTests: XCTestCase {
         XCTAssertTrue(try repository.fetchWords(inSet: set.id).isEmpty)
     }
 
-    func testImportRejectsSetFromAnotherLanguage() throws {
+    func testImportRejectsUnknownSetAndLeavesDatabaseUnchanged() throws {
         let repository = LibraryRepository(database: try DatabaseManager.inMemory())
-        let english = try repository.createLanguage(name: "English")
-        let chinese = try repository.createLanguage(name: "Chinese")
-        let chineseSet = try repository.createSet(languageID: chinese.id, name: "Basics")
+        let language = try repository.createLanguage(name: "English")
+        let set = try repository.createSet(languageID: language.id, name: "Basics")
 
-        XCTAssertThrowsError(try repository.importWords([
-            WordImportDraft(text: "hello", translation: "привет")
-        ], intoSet: chineseSet.id))
-        XCTAssertTrue(try repository.fetchWords(inSet: chineseSet.id).isEmpty)
-        _ = english
+        XCTAssertThrowsError(
+            try repository.importWords([
+                WordImportDraft(text: "hello", translation: "привет")
+            ], intoSet: "missing-set")
+        ) { error in
+            XCTAssertEqual(error as? LibraryRepositoryError, .setNotFound)
+        }
+        XCTAssertTrue(try repository.fetchWords(inSet: set.id).isEmpty)
     }
 }
