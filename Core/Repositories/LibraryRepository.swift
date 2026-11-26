@@ -26,7 +26,7 @@ final class LibraryRepository {
     func createLanguage(name: String, code: String? = nil) throws -> Language {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
-        let language = Language(name: normalizedName, code: code)
+        var language = Language(name: normalizedName, code: code)
         try database.dbQueue.write { db in try language.insert(db) }
         return language
     }
@@ -52,7 +52,7 @@ final class LibraryRepository {
                     throw LibraryRepositoryError.parentCategoryLanguageMismatch
                 }
             }
-            let category = Category(languageID: languageID, parentID: parentID, name: normalizedName)
+            var category = Category(languageID: languageID, parentID: parentID, name: normalizedName)
             try category.insert(db)
             return category
         }
@@ -80,7 +80,7 @@ final class LibraryRepository {
                     throw LibraryRepositoryError.categoryLanguageMismatch
                 }
             }
-            let set = VocabularySet(
+            var set = VocabularySet(
                 languageID: languageID,
                 categoryID: categoryID,
                 name: normalizedName,
@@ -119,7 +119,7 @@ final class LibraryRepository {
                 }
             }
 
-            let word = Word(
+            var word = Word(
                 languageID: languageID,
                 text: normalizedText,
                 translation: normalizedTranslation,
@@ -128,7 +128,8 @@ final class LibraryRepository {
                 example: example
             )
             try word.insert(db)
-            try LearningProgress(wordID: word.id).insert(db)
+            var progress = LearningProgress(wordID: word.id)
+            try progress.insert(db)
             if let setID {
                 try db.execute(
                     sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)",
@@ -204,16 +205,17 @@ final class LibraryRepository {
 
     func fetchWords(inSet setID: String) throws -> [Word] {
         try database.dbQueue.read { db in
-            try Word
-                .joining(
-                    required: SQLRelation(
-                        to: "set_words",
-                        condition: ForeignKey(["id"], to: ["wordID"])
-                    )
-                )
-                .filter(Column("setID") == setID)
-                .order(Column("text"))
-                .fetchAll(db)
+            try Word.fetchAll(
+                db,
+                sql: """
+                    SELECT words.*
+                    FROM words
+                    INNER JOIN set_words ON set_words.wordID = words.id
+                    WHERE set_words.setID = ?
+                    ORDER BY words.text COLLATE NOCASE
+                    """,
+                arguments: [setID]
+            )
         }
     }
 
@@ -225,16 +227,17 @@ final class LibraryRepository {
 
     func fetchSets(containing wordID: String) throws -> [VocabularySet] {
         try database.dbQueue.read { db in
-            try VocabularySet
-                .joining(
-                    required: SQLRelation(
-                        to: "set_words",
-                        condition: ForeignKey(["id"], to: ["setID"])
-                    )
-                )
-                .filter(Column("wordID") == wordID)
-                .order(Column("name"))
-                .fetchAll(db)
+            try VocabularySet.fetchAll(
+                db,
+                sql: """
+                    SELECT vocabulary_sets.*
+                    FROM vocabulary_sets
+                    INNER JOIN set_words ON set_words.setID = vocabulary_sets.id
+                    WHERE set_words.wordID = ?
+                    ORDER BY vocabulary_sets.name COLLATE NOCASE
+                    """,
+                arguments: [wordID]
+            )
         }
     }
 }
