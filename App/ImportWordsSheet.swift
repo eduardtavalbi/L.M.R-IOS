@@ -235,7 +235,8 @@ struct ImportWordsSheet: View {
                 xlsxWorksheets = []
                 source = try PDFImportParser.extractText(from: data)
                 return
-            }\n            if url.pathExtension.lowercased() == "xlsx" {
+            }
+            if url.pathExtension.lowercased() == "xlsx" {
                 xlsxWorksheets = try XLSXImportParser.parse(data: data)
                 selectedWorksheetID = xlsxWorksheets.first?.id ?? ""
                 source = ""
