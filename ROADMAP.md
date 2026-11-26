@@ -19,7 +19,7 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Implement repository operations and validation for language/category relationships.
 - [x] Support nested categories, uncategorized sets, moving sets, and words shared by multiple sets.
 - [x] Add isolated XCTest coverage for migrations, persistence, relationships, and repository behavior.
-- [x] Verify build and tests in GitHub Actions (run #15, 6 tests passed).
+- [x] Verify build and tests in GitHub Actions (run #15).
 
 ## Phase 2 — Library experience
 
@@ -40,19 +40,19 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Basic flashcard session with reveal, "Знаю", and "Повторить" actions.
 - [x] Word-level progress shared across sets.
 - [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
-- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (GitHub Actions run #27 succeeded).
-- [x] Multiple-choice learning mode (GitHub Actions run #28).
-- [x] Typing learning mode (GitHub Actions run #28).
+- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (run #27).
+- [x] Multiple-choice learning mode (run #28).
+- [x] Typing learning mode (run #28).
 - [x] Weak-word and multi-set repository queries, deduplicated by word ID.
-- [x] Weak-word practice and Mix Sets UI, with flashcard, multiple-choice, and typing sessions (GitHub Actions run #32).
+- [x] Weak-word practice and Mix Sets UI, with flashcard, multiple-choice, and typing sessions (run #32).
 
 ## Phase 4 — Games
 
-- [ ] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart.
-- [ ] Audio choice.
+- [x] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart (run #33).
+- [ ] Audio choice: spoken prompt, translation choices, score and replay.
 - [ ] Speed.
 - [ ] Missing word in sentence.
-- [ ] Explicit rules for whether a game result affects SRS.
+- [x] Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs and Audio choice are recognition games.
 
 ## Phase 5 — Import and AI
 
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Verify Pairs in GitHub Actions, fix any build/test issues, then implement Audio choice.
+Verify Audio choice in GitHub Actions, fix any build/test issues, then implement Speed.

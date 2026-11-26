@@ -37,6 +37,15 @@ struct LearningView: View {
                                                 Text(set.name).foregroundStyle(.secondary)
                                             }
                                         }
+                                        NavigationLink {
+                                            AudioChoiceGameView(store: store, set: set)
+                                        } label: {
+                                            HStack {
+                                                Label("Audio choice", systemImage: "ear")
+                                                Spacer()
+                                                Text(set.name).foregroundStyle(.secondary)
+                                            }
+                                        }
                                     }
                                 }
                             }

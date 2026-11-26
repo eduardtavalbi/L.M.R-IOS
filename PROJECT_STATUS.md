@@ -19,11 +19,10 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Verified remote baseline
 
-- Initial commit: 78767ec4f2ef7757e933820116bd15b77ba64eff.
-- Initial iOS Simulator build: GitHub Actions run #1 succeeded.
-- Full build and XCTest verification: run #15 succeeded on commit de338c2d1afc61f2097a7b131e7e05b1d91ecfe6.
-- Learning modes and SRS baseline: run #28 succeeded on commit faca40a73e5beed23a57f09ba6841123ac2f7e98.
-- Latest learning integration: GitHub Actions run #32 succeeded on commit 87e47be9946c0276becf1cabac9581243759e626; iOS Simulator build and all 22 XCTest cases passed.
+- Full build and XCTest verification: run #15 succeeded.
+- Learning modes and SRS baseline: run #28 succeeded.
+- Weak-word and Mix Sets integration: run #32 succeeded; iOS Simulator build and all 22 XCTest cases passed.
+- Pairs game: run #33 succeeded on commit 036c77f147f5a1e8853be97149c0f46f1bc5bab8; build and tests passed.
 
 ## Current implementation
 
@@ -40,16 +39,16 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
 - Multi-set learning combines selected sets without duplicate shared words. Weak-word practice includes words with recorded mistakes, even when their next review is in the future.
 - Learning UI exposes per-set sessions, weak-word practice, and Mix Sets; each supports flashcards, multiple choice, and typing.
+- Pairs is a matching game with shuffled word/translation cards, feedback, move counter, completion, and restart. It does not update SRS because matching is recognition practice.
+- Audio choice is implemented with system text-to-speech, spoken prompts, randomized translation choices, score, and replay. It does not update SRS; audio voices depend on the language code and voices available on the device.
 - Global library search covers original words, translations, set names, and category names; word results include all containing sets.
 
 ### Verification
 
 - GitHub Actions is authoritative because the owner does not have Xcode locally.
-- Run #23 succeeded: iOS Simulator build and 14 XCTest cases passed.
-- Run #27 succeeded after correcting the due-queue fixture and retaining the SQL due-date filter.
-- Run #28 succeeded with multiple-choice and typing modes.
-- Run #32 succeeded: iOS Simulator build and 22 XCTest cases passed, including weak-word and multi-set query coverage.
+- Run #32 succeeded with weak-word and multi-set query coverage.
+- Run #33 succeeded: Pairs app integration and four PairsGameEngine tests passed.
 
 ## Next
 
-Pairs game is implemented in the current branch and awaiting CI verification. Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs is recognition/matching practice and does not update SRS.
+Audio choice is implemented in the current branch and awaiting CI verification. Next game after a green run: Speed.
