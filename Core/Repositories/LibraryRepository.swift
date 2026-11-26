@@ -346,6 +346,7 @@ final class LibraryRepository {
         let ids = Array(Set(setIDs)).sorted()
         guard !ids.isEmpty else { return [] }
         let placeholders = Array(repeating: "?", count: ids.count).joined(separator: ", ")
+        let arguments: [DatabaseValueConvertible?] = ids.map { $0 } + [dueAt]
         return try database.dbQueue.read { db in
             try Word.fetchAll(db, sql: """
                 SELECT DISTINCT words.* FROM words
@@ -355,7 +356,7 @@ final class LibraryRepository {
                   AND (learningProgress.dueAt IS NULL OR learningProgress.dueAt <= ?)
                 ORDER BY CASE WHEN learningProgress.dueAt IS NULL THEN 0 ELSE 1 END,
                          learningProgress.dueAt ASC, words.text COLLATE NOCASE
-                """, arguments: StatementArguments(ids + [dueAt]))
+                """, arguments: arguments)
         }
     }
 

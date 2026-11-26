@@ -1,6 +1,6 @@
 import SwiftUI
 
-private enum LearningExtraPurpose {
+enum LearningExtraPurpose {
     case weakWords
     case mixSets
 
