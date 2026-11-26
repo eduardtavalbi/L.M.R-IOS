@@ -23,7 +23,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr
-        PRODUCT_NAME: L.M.R.
         INFOPLIST_KEY_CFBundleDisplayName: L.M.R.
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
