@@ -49,7 +49,7 @@ This roadmap is a living plan. Check off only work that has actually been implem
 ## Phase 4 — Games
 
 - [x] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart (run #33).
-- [ ] Audio choice: spoken prompt, translation choices, score and replay.
+- [x] Audio choice: spoken prompt, translation choices, score and replay (run #34).
 - [ ] Speed.
 - [ ] Missing word in sentence.
 - [x] Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs and Audio choice are recognition games.
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Verify Audio choice in GitHub Actions, fix any build/test issues, then implement Speed.
+Implement Speed game.

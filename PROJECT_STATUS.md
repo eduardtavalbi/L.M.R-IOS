@@ -23,6 +23,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Learning modes and SRS baseline: run #28 succeeded.
 - Weak-word and Mix Sets integration: run #32 succeeded; iOS Simulator build and all 22 XCTest cases passed.
 - Pairs game: run #33 succeeded on commit 036c77f147f5a1e8853be97149c0f46f1bc5bab8; build and tests passed.
+- Audio choice: run #34 succeeded on commit 2378a55d1fd6a4c59ab12f11a1387bcebafacd58; build and tests passed.
 
 ## Current implementation
 
@@ -51,4 +52,4 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Next
 
-Audio choice is implemented in the current branch and awaiting CI verification. Next game after a green run: Speed.
+Audio choice is implemented and CI-verified (run #34). Next game: Speed.
