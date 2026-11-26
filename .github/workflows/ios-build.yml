@@ -43,6 +43,6 @@ jobs:
           xcodebuild \
             -project LMR.xcodeproj \
             -scheme LMR \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,name=iPad (A16),OS=26.5' \
             CODE_SIGNING_ALLOWED=NO \
             test
