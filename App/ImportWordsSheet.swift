@@ -13,6 +13,12 @@ struct ImportWordsSheet: View {
     @State private var error: String?
     @State private var summary: WordImportSummary?
     @State private var showingFileImporter = false
+    @State private var xlsxWorksheets: [XLSXWorksheet] = []
+    @State private var selectedWorksheetID = ""
+    @State private var wordColumn = 0
+    @State private var translationColumn = 1
+    @State private var transcriptionColumn = 2
+    @State private var exampleColumn = 3
 
     private var validRows: [WordImportDraft] {
         rows.filter { $0.validationError == nil }
@@ -20,6 +26,18 @@ struct ImportWordsSheet: View {
 
     private var invalidCount: Int {
         rows.count - validRows.count
+    }
+
+    private var selectedWorksheet: XLSXWorksheet? {
+        xlsxWorksheets.first { $0.id == selectedWorksheetID }
+    }
+
+    private var spreadsheetColumnCount: Int {
+        max(selectedWorksheet?.rows.map(\.count).max() ?? 0, 2)
+    }
+
+    private var spreadsheetColumnOptions: [Int] {
+        Array(0..<max(spreadsheetColumnCount, 4))
     }
 
     var body: some View {
@@ -56,7 +74,7 @@ struct ImportWordsSheet: View {
             }
             .fileImporter(
                 isPresented: $showingFileImporter,
-                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText],
+                allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, UTType(filenameExtension: "xlsx") ?? .data],
                 allowsMultipleSelection: false
             ) { result in
                 loadSelectedFile(result)
@@ -66,37 +84,75 @@ struct ImportWordsSheet: View {
 
     private var inputView: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Вставь пары слов из таблицы или текстового файла.")
+            Text("Вставь пары слов из таблицы или выбери файл.")
                 .font(.headline)
-            Text("Поддерживаются TAB, запятая и точка с запятой. Колонки: слово, перевод, транскрипция, пример. Последние две необязательны.")
+            Text("Текстовые файлы: TAB, запятая или точка с запятой. Колонки: слово, перевод, транскрипция, пример. Последние две необязательны.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            ZStack(alignment: .topLeading) {
-                if source.isEmpty {
-                    Text("apple\tяблоко\nbook\tкнига\nhello\tпривет\thəˈləʊ\tHello!")
-                        .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 12)
+
+            if !xlsxWorksheets.isEmpty {
+                GroupBox("Настройки Excel") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Picker("Лист", selection: $selectedWorksheetID) {
+                            ForEach(xlsxWorksheets) { worksheet in
+                                Text(worksheet.name).tag(worksheet.id)
+                            }
+                        }
+                        columnPicker("Слово", selection: $wordColumn)
+                        columnPicker("Перевод", selection: $translationColumn)
+                        columnPicker("Транскрипция", selection: $transcriptionColumn)
+                        columnPicker("Пример", selection: $exampleColumn)
+                    }
                 }
-                TextEditor(text: $source)
-                    .font(.body.monospaced())
-                    .scrollContentBackground(.hidden)
-                    .padding(4)
+            } else {
+                ZStack(alignment: .topLeading) {
+                    if source.isEmpty {
+                        Text("apple\tяблоко\nbook\tкнига\nhello\tпривет\thəˈləʊ\tHello!")
+                            .foregroundStyle(.tertiary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 12)
+                    }
+                    TextEditor(text: $source)
+                        .font(.body.monospaced())
+                        .scrollContentBackground(.hidden)
+                        .padding(4)
+                }
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12))
+                .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
             }
-            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12))
-            .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
-            Button("Выбрать CSV / TXT файл", systemImage: "doc") {
+
+            Button("Выбрать CSV / TXT / XLSX файл", systemImage: "doc") {
                 showingFileImporter = true
             }
             .buttonStyle(.bordered)
             .frame(maxWidth: .infinity)
+
             Button("Разобрать и проверить") { parseSource() }
                 .buttonStyle(.borderedProminent)
                 .frame(maxWidth: .infinity)
-                .disabled(source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .disabled(xlsxWorksheets.isEmpty && source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             Spacer(minLength: 0)
         }
         .padding()
+    }
+
+    private func columnPicker(_ title: String, selection: Binding<Int>) -> some View {
+        Picker(title, selection: selection) {
+            ForEach(spreadsheetColumnOptions, id: \.self) { index in
+                Text(excelColumnName(index)).tag(index)
+            }
+        }
+    }
+
+    private func excelColumnName(_ index: Int) -> String {
+        var value = index + 1
+        var result = ""
+        while value > 0 {
+            let remainder = (value - 1) % 26
+            result = String(UnicodeScalar(65 + remainder)!) + result
+            value = (value - 1) / 26
+        }
+        return result
     }
 
     private var previewView: some View {
@@ -167,7 +223,6 @@ struct ImportWordsSheet: View {
         .padding()
     }
 
-
     private func loadSelectedFile(_ result: Result<[URL], Error>) {
         do {
             guard let url = try result.get().first else { return }
@@ -176,6 +231,18 @@ struct ImportWordsSheet: View {
                 if hasAccess { url.stopAccessingSecurityScopedResource() }
             }
             let data = try Data(contentsOf: url)
+            if url.pathExtension.lowercased() == "xlsx" {
+                xlsxWorksheets = try XLSXImportParser.parse(data: data)
+                selectedWorksheetID = xlsxWorksheets.first?.id ?? ""
+                source = ""
+                wordColumn = 0
+                translationColumn = 1
+                transcriptionColumn = 2
+                exampleColumn = 3
+                return
+            }
+
+            xlsxWorksheets = []
             guard let fileText = String(data: data, encoding: .utf8)
                     ?? String(data: data, encoding: .utf16)
                     ?? String(data: data, encoding: .windowsCP1251) else {
@@ -183,19 +250,25 @@ struct ImportWordsSheet: View {
                 return
             }
             source = fileText
-            parseSource()
         } catch {
-            self.error = "Не удалось открыть файл: \\(error.localizedDescription)"
+            self.error = "Не удалось открыть файл: \(error.localizedDescription)"
         }
     }
 
     private func parseSource() {
         do {
-            rows = try WordImportParser.parse(source)
+            if let worksheet = selectedWorksheet {
+                rows = try WordImportParser.parse(
+                    rows: worksheet.rows,
+                    columnIndices: [wordColumn, translationColumn, transcriptionColumn, exampleColumn]
+                )
+            } else {
+                rows = try WordImportParser.parse(source)
+            }
             guard !rows.isEmpty else { throw WordImportParser.ParseError.noRows }
             showingPreview = true
         } catch {
-            self.error = "Не удалось распознать строки. Используй две обязательные колонки: слово и перевод."
+            self.error = "Не удалось распознать строки. Проверь лист и соответствие колонок: слово и перевод обязательны."
         }
     }
 

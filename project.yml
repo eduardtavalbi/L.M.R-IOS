@@ -9,6 +9,9 @@ packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift
     from: 7.0.0
+  CoreXLSX:
+    url: https://github.com/CoreOffice/CoreXLSX.git
+    from: 0.14.1
 
 targets:
   LMR:
@@ -20,6 +23,8 @@ targets:
     dependencies:
       - package: GRDB
         product: GRDB
+      - package: CoreXLSX
+        product: CoreXLSX
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr
@@ -38,6 +43,8 @@ targets:
       - target: LMR
       - package: GRDB
         product: GRDB
+      - package: CoreXLSX
+        product: CoreXLSX
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr.tests

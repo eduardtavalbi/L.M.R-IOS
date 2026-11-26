@@ -41,4 +41,30 @@ final class WordImportParserTests: XCTestCase {
     func testEmptyInputThrows() {
         XCTAssertThrowsError(try WordImportParser.parse(" \n\t\n"))
     }
+
+    func testParsesSpreadsheetRowsUsingSelectedColumns() throws {
+        let rows = try WordImportParser.parse(
+            rows: [
+                ["Example", "Meaning", "IPA", "Sentence", "Notes"],
+                ["hello", "привет", "həˈləʊ", "Hello there!", "keep"],
+                ["book", "книга", "", "", ""]
+            ],
+            columnIndices: [0, 1, 2, 3]
+        )
+        XCTAssertEqual(rows.count, 2)
+        XCTAssertEqual(rows[0].text, "hello")
+        XCTAssertEqual(rows[0].translation, "привет")
+        XCTAssertEqual(rows[0].transcription, "həˈləʊ")
+        XCTAssertEqual(rows[0].example, "Hello there!")
+    }
+
+    func testSpreadsheetColumnMappingCanReorderFields() throws {
+        let rows = try WordImportParser.parse(
+            rows: [["translation", "word"], ["яблоко", "apple"]],
+            columnIndices: [1, 0]
+        )
+        XCTAssertEqual(rows.first?.text, "apple")
+        XCTAssertEqual(rows.first?.translation, "яблоко")
+        XCTAssertEqual(rows.first?.transcription, "")
+    }
 }

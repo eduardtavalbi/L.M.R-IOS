@@ -70,20 +70,38 @@ enum WordImportParser {
         guard !lines.isEmpty else { throw ParseError.noRows }
 
         let delimiter = detectDelimiter(in: lines[0])
-        var rows = lines.compactMap { parseLine($0, delimiter: delimiter) }
-        guard !rows.isEmpty else { throw ParseError.noRows }
+        let fields = lines.compactMap { parseLine($0, delimiter: delimiter) }
+        guard !fields.isEmpty else { throw ParseError.noRows }
+        return try parse(rows: fields)
+    }
 
-        if let first = rows.first, isHeader(first) {
-            rows.removeFirst()
+    /// Converts already separated spreadsheet rows using zero-based column indexes.
+    static func parse(rows: [[String]], columnIndices: [Int] = [0, 1, 2, 3]) throws -> [WordImportDraft] {
+        guard !rows.isEmpty else { throw ParseError.noRows }
+        guard columnIndices.count >= 2, columnIndices.allSatisfy({ $0 >= 0 }) else {
+            throw ParseError.unsupportedFormat
         }
 
-        let drafts = rows.compactMap { fields -> WordImportDraft? in
-            guard fields.count >= 2 else { return nil }
+        var sourceRows = rows.filter { $0.contains { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } }
+        guard !sourceRows.isEmpty else { throw ParseError.noRows }
+
+        if let first = sourceRows.first, isHeader(first) {
+            sourceRows.removeFirst()
+        }
+
+        let drafts = sourceRows.map { row in
+            func value(at mappingIndex: Int) -> String {
+                guard columnIndices.indices.contains(mappingIndex) else { return "" }
+                let column = columnIndices[mappingIndex]
+                guard row.indices.contains(column) else { return "" }
+                return row[column].trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+
             return WordImportDraft(
-                text: fields[0],
-                translation: fields[1],
-                transcription: fields.count > 2 ? fields[2] : "",
-                example: fields.count > 3 ? fields[3] : ""
+                text: value(at: 0),
+                translation: value(at: 1),
+                transcription: value(at: 2),
+                example: value(at: 3)
             )
         }
         guard !drafts.isEmpty else { throw ParseError.unsupportedFormat }
