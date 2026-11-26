@@ -36,10 +36,12 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Phase 3 — Learning engine
 
-- [ ] Card presentation and details.
-- [ ] Flashcard, multiple-choice, typing, and audio sessions.
-- [ ] Word-level progress shared across sets.
-- [ ] SRS scheduling and due-review queue.
+- [x] Card presentation and details.
+- [x] Basic flashcard session with reveal, "Знаю", and "Повторить" actions.
+- [x] Word-level progress shared across sets.
+- [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
+- [ ] Multiple-choice, typing, and audio sessions.
+- [ ] Due-review queue and prioritization.
 - [ ] Weak-word and selected-set training.
 - [ ] Mix Sets.
 

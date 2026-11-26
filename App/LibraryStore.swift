@@ -60,6 +60,22 @@ final class LibraryStore: ObservableObject {
         }
     }
 
+    func allSets(languageID: String) -> [VocabularySet] {
+        do { return try repository?.fetchAllSets(languageID: languageID) ?? [] }
+        catch { lastError = error.localizedDescription; return [] }
+    }
+
+    func learningWords(setID: String) -> [Word] {
+        do { return try repository?.fetchLearningQueue(inSet: setID) ?? [] }
+        catch { lastError = error.localizedDescription; return [] }
+    }
+
+    func recordLearningAnswer(wordID: String, knewAnswer: Bool) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.recordLearningAnswer(wordID: wordID, knewAnswer: knewAnswer)
+        objectWillChange.send()
+    }
+
     func words(setID: String) -> [Word] {
         do {
             return try repository?.fetchWords(inSet: setID) ?? []

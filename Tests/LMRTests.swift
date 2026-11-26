@@ -146,6 +146,40 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(try repository.fetchSets(containing: existing.id).count, 2)
     }
 
+    func testSpacedRepetitionSchedulesKnownAndUnknownAnswers() throws {
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        let initial = LearningProgress(wordID: "word")
+        let first = SpacedRepetitionScheduler.applying(knewAnswer: true, to: initial, reviewedAt: start)
+        XCTAssertEqual(first.intervalDays, 1)
+        XCTAssertEqual(first.streak, 1)
+        XCTAssertEqual(first.correctAnswers, 1)
+        XCTAssertEqual(first.dueAt, Calendar.current.date(byAdding: .day, value: 1, to: start))
+        let second = SpacedRepetitionScheduler.applying(knewAnswer: true, to: first, reviewedAt: start)
+        XCTAssertEqual(second.intervalDays, 3)
+        XCTAssertEqual(second.streak, 2)
+        let forgotten = SpacedRepetitionScheduler.applying(knewAnswer: false, to: second, reviewedAt: start)
+        XCTAssertEqual(forgotten.intervalDays, 0)
+        XCTAssertEqual(forgotten.streak, 0)
+        XCTAssertEqual(forgotten.repetitions, 0)
+        XCTAssertEqual(forgotten.incorrectAnswers, 1)
+        XCTAssertEqual(forgotten.dueAt, start.addingTimeInterval(600))
+    }
+
+    func testReviewProgressPersistsAndIsSharedAcrossSets() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let firstSet = try repository.createSet(languageID: language.id, name: "First")
+        let secondSet = try repository.createSet(languageID: language.id, name: "Second")
+        let word = try repository.createWord(languageID: language.id, text: "hello", translation: "привет", inSet: firstSet.id)
+        try repository.addWord(word.id, toSet: secondSet.id)
+        let reviewedAt = Date(timeIntervalSince1970: 1_800_000_000)
+        try repository.recordLearningAnswer(wordID: word.id, knewAnswer: true, reviewedAt: reviewedAt)
+        let progress = try XCTUnwrap(repository.fetchProgress(for: word.id))
+        XCTAssertEqual(progress.correctAnswers, 1)
+        XCTAssertEqual(progress.intervalDays, 1)
+        XCTAssertEqual(try repository.fetchWords(inSet: secondSet.id).first?.id, word.id)
+    }
+
     func testLibraryEntitiesCanBeEdited() throws {
         let repository = LibraryRepository(database: try DatabaseManager.inMemory())
         let language = try repository.createLanguage(name: "Chinese", code: "zh")

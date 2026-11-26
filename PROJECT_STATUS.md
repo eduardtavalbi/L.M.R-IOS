@@ -34,11 +34,13 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - SQLite foreign keys, cascade/set-null behavior, and lookup indexes.
 - Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
 - Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
+- Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
+- Basic flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary.
 - Language consistency validation for repository operations.
 
 ### Library UI
 
-- Five-tab SwiftUI navigation shell.
+- Five-tab SwiftUI navigation shell with a working Learning tab.
 - Local library screen with language list and empty state.
 - Nested category navigation and uncategorized sets.
 - Create, edit, and delete language, category, set, and word flows with confirmation for destructive actions.
@@ -55,4 +57,4 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Next
 
-Continue library completeness: edit/delete flows, category-path clarity, duplicate resolution (skip/keep both/merge), and richer word/set membership management. Then build the learning engine.
+Expand learning beyond flashcards: multiple-choice and typing sessions, due-review queue, weak-word practice, and Mix Sets.

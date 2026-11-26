@@ -18,7 +18,7 @@ struct ContentView: View {
                 .tabItem { Label("Главная", systemImage: "books.vertical") }
                 .tag(AppTab.library)
 
-            PlaceholderView(title: "Обучение", symbol: "brain.head.profile")
+            LearningView(store: store)
                 .tabItem { Label("Обучение", systemImage: "brain.head.profile") }
                 .tag(AppTab.learning)
 

@@ -319,6 +319,35 @@ final class LibraryRepository {
         }
     }
 
+    func fetchAllSets(languageID: String) throws -> [VocabularySet] {
+        try database.dbQueue.read { db in
+            try VocabularySet.filter(Column("languageID") == languageID)
+                .order(Column("name").collating(.localizedCaseInsensitiveCompare)).fetchAll(db)
+        }
+    }
+
+    func fetchLearningQueue(inSet setID: String) throws -> [Word] {
+        try database.dbQueue.read { db in
+            try Word.fetchAll(db, sql: """
+                SELECT words.* FROM words
+                INNER JOIN set_words ON set_words.wordID = words.id
+                LEFT JOIN learningProgress ON learningProgress.wordID = words.id
+                WHERE set_words.setID = ?
+                ORDER BY CASE WHEN learningProgress.dueAt IS NULL THEN 0 ELSE 1 END,
+                         learningProgress.dueAt ASC, words.text COLLATE NOCASE
+                """, arguments: [setID])
+        }
+    }
+
+    func recordLearningAnswer(wordID: String, knewAnswer: Bool, reviewedAt: Date = .now) throws {
+        try database.dbQueue.write { db in
+            guard try Word.fetchOne(db, key: wordID) != nil else { throw LibraryRepositoryError.wordNotFound }
+            let current = try LearningProgress.fetchOne(db, key: wordID) ?? LearningProgress(wordID: wordID)
+            var updated = SpacedRepetitionScheduler.applying(knewAnswer: knewAnswer, to: current, reviewedAt: reviewedAt)
+            try updated.save(db)
+        }
+    }
+
     func fetchProgress(for wordID: String) throws -> LearningProgress? {
         try database.dbQueue.read { db in try LearningProgress.fetchOne(db, key: wordID) }
     }
