@@ -56,10 +56,11 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Phase 5 — Import and AI
 
-- [ ] Paste/import text pairs with editable preview and duplicate handling.
-- [ ] CSV import/export.
-- [ ] XLSX and document import.
-- [ ] PDF and image OCR pipeline with review screen.
+- [x] Paste text pairs with editable preview, validation, and duplicate handling (run #43).
+- [x] CSV/TSV/TXT file import into the selected set (run #44).
+- [ ] XLSX spreadsheet import with worksheet and column mapping.
+- [ ] PDF text extraction and reviewable import.
+- [ ] Image OCR pipeline with review screen.
 - [ ] AI provider abstraction and Keychain-backed API key storage.
 - [ ] AI vocabulary generation, enrichment, and document-to-cards flow.
 - [ ] AI Mix Sets and learning assistance.
@@ -92,4 +93,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Implement pasted text-pair import with a fully editable preview, validation, duplicate resolution, and transactional save into a selected vocabulary set.
+Implement XLSX spreadsheet import with safe parsing, worksheet selection, column mapping, editable preview, duplicate handling, and transactional save.

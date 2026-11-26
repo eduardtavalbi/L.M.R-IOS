@@ -26,6 +26,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Audio choice: run #34 succeeded.
 - Speed game: run #36 succeeded.
 - Missing word in sentence: run #38 succeeded on commit f8866b60b8b92dd2754ce888ce04ec4fb697acc4.
+- Text-pair import parser and editable preview: run #43 succeeded.
+- CSV/TXT file picker and import flow: run #44 succeeded; both iOS Simulator build and XCTest passed.
 
 ## Current implementation
 
@@ -51,10 +53,20 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Speed: 60-second translation typing challenge, streak bonuses, score, skip, and restart. It does not update SRS.
 - Missing: translation-guided sentence completion, answer normalization, score, progress, and restart. Eligible cards require an example containing the target word. It does not update SRS.
 
+### Import
+
+- Paste tab-, comma-, or semicolon-delimited word pairs.
+- Parse preview with editable original, translation, transcription, and example fields.
+- Required-field validation and duplicate resolution (skip, keep both, merge).
+- Transactional batch import into a selected vocabulary set.
+- CSV, TSV, and plain-text file selection with UTF-8, UTF-16, and Windows-1251 decoding fallback.
+- Import repository tests cover metadata, duplicate policies, transaction rollback, and missing target sets.
+- XLSX, PDF, and image OCR are not implemented yet.
+
 ## Verification
 
 GitHub Actions on macos-latest is authoritative because the owner develops on Windows and has no local Xcode. Every feature is expected to pass an iOS Simulator build and XCTest before being marked complete.
 
 ## Next
 
-Implement the import foundation: paste word/translation pairs into an editable preview, validate duplicates, and save accepted rows to the selected set. Then add CSV/XLSX and document/OCR import paths.
+Add XLSX spreadsheet import with worksheet selection/mapping, then PDF text extraction and image OCR through a reviewable import pipeline.
