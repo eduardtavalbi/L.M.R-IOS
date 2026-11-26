@@ -5,7 +5,6 @@ import SwiftUI
 final class LibraryStore: ObservableObject {
     @Published private(set) var languages: [Language] = []
     @Published var lastError: String?
-
     private let database: DatabaseManager?
     private let repository: LibraryRepository?
 
@@ -31,10 +30,21 @@ final class LibraryStore: ObservableObject {
         }
     }
 
+    func language(id: String) -> Language? { languages.first { $0.id == id } }
+
+    func search(query: String) -> LibrarySearchResults {
+        do {
+            return try repository?.searchLibrary(query)
+                ?? LibrarySearchResults(words: [], sets: [], categories: [])
+        } catch {
+            lastError = error.localizedDescription
+            return LibrarySearchResults(words: [], sets: [], categories: [])
+        }
+    }
+
     func categories(languageID: String, parentID: String? = nil) -> [Category] {
         do {
-            return try repository?.fetchCategories(languageID: languageID)
-                .filter { $0.parentID == parentID } ?? []
+            return try repository?.fetchCategories(languageID: languageID).filter { $0.parentID == parentID } ?? []
         } catch {
             lastError = error.localizedDescription
             return []
@@ -97,8 +107,6 @@ final class LibraryStore: ObservableObject {
 
     enum StoreError: LocalizedError {
         case databaseUnavailable
-        var errorDescription: String? {
-            "Не удалось открыть локальную базу данных."
-        }
+        var errorDescription: String? { "Не удалось открыть локальную базу данных." }
     }
 }

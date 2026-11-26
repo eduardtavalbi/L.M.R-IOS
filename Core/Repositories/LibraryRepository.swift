@@ -32,14 +32,9 @@ final class LibraryRepository {
     }
 
     @discardableResult
-    func createCategory(
-        languageID: String,
-        name: String,
-        parentID: String? = nil
-    ) throws -> Category {
+    func createCategory(languageID: String, name: String, parentID: String? = nil) throws -> Category {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
-
         return try database.dbQueue.write { db in
             guard try Language.fetchOne(db, key: languageID) != nil else {
                 throw LibraryRepositoryError.languageNotFound
@@ -59,15 +54,9 @@ final class LibraryRepository {
     }
 
     @discardableResult
-    func createSet(
-        languageID: String,
-        name: String,
-        categoryID: String? = nil,
-        details: String? = nil
-    ) throws -> VocabularySet {
+    func createSet(languageID: String, name: String, categoryID: String? = nil, details: String? = nil) throws -> VocabularySet {
         let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedName.isEmpty else { throw LibraryRepositoryError.emptyName }
-
         return try database.dbQueue.write { db in
             guard try Language.fetchOne(db, key: languageID) != nil else {
                 throw LibraryRepositoryError.languageNotFound
@@ -80,12 +69,7 @@ final class LibraryRepository {
                     throw LibraryRepositoryError.categoryLanguageMismatch
                 }
             }
-            var set = VocabularySet(
-                languageID: languageID,
-                categoryID: categoryID,
-                name: normalizedName,
-                details: details
-            )
+            var set = VocabularySet(languageID: languageID, categoryID: categoryID, name: normalizedName, details: details)
             try set.insert(db)
             return set
         }
@@ -105,7 +89,6 @@ final class LibraryRepository {
         let normalizedTranslation = translation.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalizedText.isEmpty else { throw LibraryRepositoryError.emptyWord }
         guard !normalizedTranslation.isEmpty else { throw LibraryRepositoryError.emptyTranslation }
-
         return try database.dbQueue.write { db in
             guard try Language.fetchOne(db, key: languageID) != nil else {
                 throw LibraryRepositoryError.languageNotFound
@@ -118,7 +101,6 @@ final class LibraryRepository {
                     throw LibraryRepositoryError.setLanguageMismatch
                 }
             }
-
             var word = Word(
                 languageID: languageID,
                 text: normalizedText,
@@ -131,10 +113,7 @@ final class LibraryRepository {
             var progress = LearningProgress(wordID: word.id)
             try progress.insert(db)
             if let setID {
-                try db.execute(
-                    sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)",
-                    arguments: [setID, word.id]
-                )
+                try db.execute(sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)", arguments: [setID, word.id])
             }
             return word
         }
@@ -151,10 +130,7 @@ final class LibraryRepository {
             guard word.languageID == set.languageID else {
                 throw LibraryRepositoryError.setLanguageMismatch
             }
-            try db.execute(
-                sql: "INSERT OR IGNORE INTO set_words (setID, wordID) VALUES (?, ?)",
-                arguments: [setID, wordID]
-            )
+            try db.execute(sql: "INSERT OR IGNORE INTO set_words (setID, wordID) VALUES (?, ?)", arguments: [setID, wordID])
         }
     }
 
@@ -183,11 +159,14 @@ final class LibraryRepository {
         }
     }
 
+    func fetchLanguage(id: String) throws -> Language? {
+        try database.dbQueue.read { db in try Language.fetchOne(db, key: id) }
+    }
+
     func fetchCategories(languageID: String) throws -> [Category] {
         try database.dbQueue.read { db in
             try Category.filter(Column("languageID") == languageID)
-                .order(Column("name").collating(.localizedCaseInsensitiveCompare))
-                .fetchAll(db)
+                .order(Column("name").collating(.localizedCaseInsensitiveCompare)).fetchAll(db)
         }
     }
 
@@ -205,39 +184,65 @@ final class LibraryRepository {
 
     func fetchWords(inSet setID: String) throws -> [Word] {
         try database.dbQueue.read { db in
-            try Word.fetchAll(
-                db,
-                sql: """
-                    SELECT words.*
-                    FROM words
-                    INNER JOIN set_words ON set_words.wordID = words.id
-                    WHERE set_words.setID = ?
-                    ORDER BY words.text COLLATE NOCASE
-                    """,
-                arguments: [setID]
-            )
+            try Word.fetchAll(db, sql: """
+                SELECT words.* FROM words
+                INNER JOIN set_words ON set_words.wordID = words.id
+                WHERE set_words.setID = ?
+                ORDER BY words.text COLLATE NOCASE
+                """, arguments: [setID])
         }
     }
 
     func fetchProgress(for wordID: String) throws -> LearningProgress? {
-        try database.dbQueue.read { db in
-            try LearningProgress.fetchOne(db, key: wordID)
-        }
+        try database.dbQueue.read { db in try LearningProgress.fetchOne(db, key: wordID) }
     }
 
     func fetchSets(containing wordID: String) throws -> [VocabularySet] {
         try database.dbQueue.read { db in
-            try VocabularySet.fetchAll(
-                db,
-                sql: """
-                    SELECT vocabularySets.*
-                    FROM vocabularySets
+            try VocabularySet.fetchAll(db, sql: """
+                SELECT vocabularySets.* FROM vocabularySets
+                INNER JOIN set_words ON set_words.setID = vocabularySets.id
+                WHERE set_words.wordID = ?
+                ORDER BY vocabularySets.name COLLATE NOCASE
+                """, arguments: [wordID])
+        }
+    }
+
+    func searchLibrary(_ rawQuery: String) throws -> LibrarySearchResults {
+        let query = rawQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            return LibrarySearchResults(words: [], sets: [], categories: [])
+        }
+        let escapedQuery = query
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "%", with: "\\%")
+            .replacingOccurrences(of: "_", with: "\\_")
+        let pattern = "%\(escapedQuery)%"
+
+        return try database.dbQueue.read { db in
+            let words = try Word.fetchAll(db, sql: """
+                SELECT * FROM words
+                WHERE text LIKE ? ESCAPE '\\' OR translation LIKE ? ESCAPE '\\'
+                ORDER BY text COLLATE NOCASE LIMIT 100
+                """, arguments: [pattern, pattern])
+            let matches = try words.map { word in
+                let sets = try VocabularySet.fetchAll(db, sql: """
+                    SELECT vocabularySets.* FROM vocabularySets
                     INNER JOIN set_words ON set_words.setID = vocabularySets.id
                     WHERE set_words.wordID = ?
                     ORDER BY vocabularySets.name COLLATE NOCASE
-                    """,
-                arguments: [wordID]
-            )
+                    """, arguments: [word.id])
+                return WordSearchMatch(word: word, sets: sets)
+            }
+            let sets = try VocabularySet.fetchAll(db, sql: """
+                SELECT * FROM vocabularySets WHERE name LIKE ? ESCAPE '\\'
+                ORDER BY name COLLATE NOCASE LIMIT 100
+                """, arguments: [pattern])
+            let categories = try Category.fetchAll(db, sql: """
+                SELECT * FROM categories WHERE name LIKE ? ESCAPE '\\'
+                ORDER BY name COLLATE NOCASE LIMIT 100
+                """, arguments: [pattern])
+            return LibrarySearchResults(words: matches, sets: sets, categories: categories)
         }
     }
 }

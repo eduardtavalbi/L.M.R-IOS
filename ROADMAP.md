@@ -8,7 +8,7 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Add five-tab navigation shell.
 - [x] Verify first GitHub Actions iOS Simulator build.
 - [x] Add durable project status and roadmap tracking.
-- [x] Configure CI to build and run XCTest (verification pending for this commit).
+- [x] Configure CI to build and run XCTest.
 
 ## Phase 1 — Domain model and local persistence
 
@@ -19,17 +19,19 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Implement repository operations and validation for language/category relationships.
 - [x] Support nested categories, uncategorized sets, moving sets, and words shared by multiple sets.
 - [x] Add isolated XCTest coverage for migrations, persistence, relationships, and repository behavior.
-- [ ] Verify build and tests in GitHub Actions.
+- [x] Verify build and tests in GitHub Actions (run #15, 6 tests passed).
 
 ## Phase 2 — Library experience
 
 - [ ] App bootstrap and dependency container.
 - [ ] First-run onboarding: welcome, appearance, language, first set.
-- [ ] Library screen and empty states.
-- [ ] Language and category management, including nested navigation.
-- [ ] Vocabulary set list, create/edit/move/delete.
-- [ ] Word creation/editing and set membership.
-- [ ] Global search across words, translations, sets, and categories.
+- [x] Library screen and empty states.
+- [x] Language and category navigation, including nested categories.
+- [x] Create vocabulary sets and move them between categories.
+- [x] Create vocabulary words with translation and transcription.
+- [x] Global search across original words, translations, set names, and categories.
+- [x] Show all sets containing a matching word.
+- [ ] Edit/delete language, category, set, and word.
 - [ ] Duplicate detection and skip/keep-both/merge flow.
 
 ## Phase 3 — Learning engine
@@ -87,4 +89,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Run the GRDB integration and XCTest suite on GitHub-hosted macOS. Fix any compile/runtime issues before starting the library UI milestone.
+Validate the global search milestone on GitHub-hosted macOS. Then continue editing/deleting library entities and duplicate resolution.

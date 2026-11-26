@@ -3,11 +3,18 @@ import SwiftUI
 struct LibraryView: View {
     @ObservedObject var store: LibraryStore
     @State private var showingCreateLanguage = false
+    @State private var searchText = ""
+
+    private var normalizedSearchText: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         NavigationStack {
             Group {
-                if store.languages.isEmpty {
+                if !normalizedSearchText.isEmpty {
+                    LibrarySearchView(store: store, query: normalizedSearchText)
+                } else if store.languages.isEmpty {
                     ContentUnavailableView {
                         Label("Библиотека пока пуста", systemImage: "books.vertical")
                     } description: {
@@ -25,15 +32,13 @@ struct LibraryView: View {
                                 } label: {
                                     HStack(spacing: 14) {
                                         Image(systemName: "character.book.closed")
-                                            .font(.title2)
-                                            .foregroundStyle(.tint)
+                                            .font(.title2).foregroundStyle(.tint)
                                             .frame(width: 42, height: 42)
                                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(language.name).font(.headline)
                                             Text(language.code?.uppercased() ?? "Язык")
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                                .font(.caption).foregroundStyle(.secondary)
                                         }
                                     }
                                     .padding(.vertical, 4)
@@ -47,17 +52,14 @@ struct LibraryView: View {
                 }
             }
             .navigationTitle("Библиотека")
+            .searchable(text: $searchText, prompt: "Слово, перевод, набор или категория")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button { showingCreateLanguage = true } label: {
-                        Image(systemName: "plus")
-                    }
-                    .accessibilityLabel("Добавить язык")
+                    Button { showingCreateLanguage = true } label: { Image(systemName: "plus") }
+                        .accessibilityLabel("Добавить язык")
                 }
             }
-            .sheet(isPresented: $showingCreateLanguage) {
-                CreateLanguageSheet(store: store)
-            }
+            .sheet(isPresented: $showingCreateLanguage) { CreateLanguageSheet(store: store) }
             .alert("Ошибка", isPresented: Binding(
                 get: { store.lastError != nil },
                 set: { if !$0 { store.lastError = nil } }
@@ -67,6 +69,105 @@ struct LibraryView: View {
                 Text(store.lastError ?? "")
             }
         }
+    }
+}
+
+private struct LibrarySearchView: View {
+    @ObservedObject var store: LibraryStore
+    let query: String
+
+    private var results: LibrarySearchResults { store.search(query: query) }
+
+    var body: some View {
+        let results = results
+        List {
+            if results.isEmpty { ContentUnavailableView.search(text: query) }
+
+            if !results.words.isEmpty {
+                Section("Слова и переводы") {
+                    ForEach(results.words) { match in
+                        NavigationLink {
+                            WordSearchDetailView(store: store, match: match)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(match.word.text).font(.headline)
+                                Text(match.word.translation).font(.subheadline).foregroundStyle(.secondary)
+                                Text(match.sets.isEmpty
+                                     ? "Пока не входит ни в один набор"
+                                     : match.sets.map(\.name).joined(separator: " · "))
+                                    .font(.caption).foregroundStyle(.tint).lineLimit(2)
+                            }
+                            .padding(.vertical, 3)
+                        }
+                    }
+                }
+            }
+
+            if !results.sets.isEmpty {
+                Section("Наборы") {
+                    ForEach(results.sets) { set in
+                        if let language = store.language(id: set.languageID) {
+                            NavigationLink {
+                                VocabularySetView(store: store, language: language, set: set)
+                            } label: {
+                                Label(set.name, systemImage: "rectangle.stack")
+                            }
+                        }
+                    }
+                }
+            }
+
+            if !results.categories.isEmpty {
+                Section("Категории") {
+                    ForEach(results.categories) { category in
+                        if let language = store.language(id: category.languageID) {
+                            NavigationLink {
+                                CategoryLibraryView(store: store, language: language, category: category)
+                            } label: {
+                                Label(category.name, systemImage: "folder")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+    }
+}
+
+private struct WordSearchDetailView: View {
+    @ObservedObject var store: LibraryStore
+    let match: WordSearchMatch
+
+    var body: some View {
+        List {
+            Section("Карточка") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(match.word.text).font(.title2.weight(.semibold))
+                    Text(match.word.translation).foregroundStyle(.secondary)
+                    if let transcription = match.word.transcription, !transcription.isEmpty {
+                        Text(transcription).font(.subheadline).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+            Section("Встречается в наборах") {
+                if match.sets.isEmpty {
+                    ContentUnavailableView("Нет связанных наборов", systemImage: "rectangle.stack")
+                } else {
+                    ForEach(match.sets) { set in
+                        if let language = store.language(id: set.languageID) {
+                            NavigationLink {
+                                VocabularySetView(store: store, language: language, set: set)
+                            } label: {
+                                Label(set.name, systemImage: "rectangle.stack")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle("Результат поиска")
     }
 }
 
@@ -80,7 +181,6 @@ struct LanguageLibraryView: View {
         List {
             let categories = store.categories(languageID: language.id)
             let sets = store.sets(languageID: language.id)
-
             if !categories.isEmpty {
                 Section("Категории") {
                     ForEach(categories) { category in
@@ -92,7 +192,6 @@ struct LanguageLibraryView: View {
                     }
                 }
             }
-
             Section {
                 if sets.isEmpty {
                     ContentUnavailableView("Нет наборов без категории", systemImage: "square.stack.3d.up")
@@ -115,17 +214,11 @@ struct LanguageLibraryView: View {
                 Menu {
                     Button("Новая категория", systemImage: "folder.badge.plus") { showingCategory = true }
                     Button("Новый набор", systemImage: "plus") { showingSet = true }
-                } label: {
-                    Image(systemName: "plus")
-                }
+                } label: { Image(systemName: "plus") }
             }
         }
-        .sheet(isPresented: $showingCategory) {
-            CreateCategorySheet(store: store, language: language, parentID: nil)
-        }
-        .sheet(isPresented: $showingSet) {
-            CreateSetSheet(store: store, language: language, categoryID: nil)
-        }
+        .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: nil) }
+        .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: nil) }
     }
 }
 
@@ -140,7 +233,6 @@ struct CategoryLibraryView: View {
         List {
             let children = store.categories(languageID: language.id, parentID: category.id)
             let sets = store.sets(languageID: language.id, categoryID: category.id)
-
             if !children.isEmpty {
                 Section("Вложенные категории") {
                     ForEach(children) { child in
@@ -152,7 +244,6 @@ struct CategoryLibraryView: View {
                     }
                 }
             }
-
             Section("Наборы") {
                 if sets.isEmpty {
                     ContentUnavailableView("В этой категории пока нет наборов", systemImage: "square.stack.3d.up")
@@ -173,17 +264,11 @@ struct CategoryLibraryView: View {
                 Menu {
                     Button("Вложенная категория", systemImage: "folder.badge.plus") { showingCategory = true }
                     Button("Новый набор", systemImage: "plus") { showingSet = true }
-                } label: {
-                    Image(systemName: "plus")
-                }
+                } label: { Image(systemName: "plus") }
             }
         }
-        .sheet(isPresented: $showingCategory) {
-            CreateCategorySheet(store: store, language: language, parentID: category.id)
-        }
-        .sheet(isPresented: $showingSet) {
-            CreateSetSheet(store: store, language: language, categoryID: category.id)
-        }
+        .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: category.id) }
+        .sheet(isPresented: $showingSet) { CreateSetSheet(store: store, language: language, categoryID: category.id) }
     }
 }
 
@@ -193,14 +278,10 @@ struct SetRow: View {
 
     var body: some View {
         HStack {
-            Image(systemName: "rectangle.stack")
-                .foregroundStyle(.tint)
-                .frame(width: 34)
+            Image(systemName: "rectangle.stack").foregroundStyle(.tint).frame(width: 34)
             VStack(alignment: .leading, spacing: 3) {
                 Text(set.name).font(.body.weight(.medium))
-                Text("\(store.words(setID: set.id).count) слов")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text("\(store.words(setID: set.id).count) слов").font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 3)
@@ -241,17 +322,11 @@ struct VocabularySetView: View {
                 Menu {
                     Button("Добавить слово", systemImage: "plus") { showingWord = true }
                     Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
+                } label: { Image(systemName: "ellipsis.circle") }
             }
         }
-        .sheet(isPresented: $showingWord) {
-            CreateWordSheet(store: store, language: language, set: set)
-        }
-        .sheet(isPresented: $showingMoveSet) {
-            MoveSetSheet(store: store, language: language, set: set)
-        }
+        .sheet(isPresented: $showingWord) { CreateWordSheet(store: store, language: language, set: set) }
+        .sheet(isPresented: $showingMoveSet) { MoveSetSheet(store: store, language: language, set: set) }
     }
 }
 
@@ -313,8 +388,7 @@ private struct CreateLanguageSheet: View {
             Form {
                 TextField("Например, Китайский", text: $name)
                 TextField("Код языка (необязательно)", text: $code)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never).autocorrectionDisabled()
             }
             .navigationTitle("Новый язык")
             .toolbar {

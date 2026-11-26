@@ -10,15 +10,9 @@ final class LMRTests: XCTestCase {
     func testLanguageCategoryAndNestedCategoryPersistence() throws {
         let database = try DatabaseManager.inMemory()
         let repository = LibraryRepository(database: database)
-
         let language = try repository.createLanguage(name: "Chinese", code: "zh")
         let parent = try repository.createCategory(languageID: language.id, name: "Food")
-        let child = try repository.createCategory(
-            languageID: language.id,
-            name: "Fruit",
-            parentID: parent.id
-        )
-
+        let child = try repository.createCategory(languageID: language.id, name: "Fruit", parentID: parent.id)
         let fetched = try repository.fetchCategories(languageID: language.id)
         XCTAssertEqual(fetched.map(\.id), [parent.id, child.id])
         XCTAssertEqual(fetched.map(\.name), ["Food", "Fruit"])
@@ -34,16 +28,13 @@ final class LMRTests: XCTestCase {
         let first = try repository.createCategory(languageID: language.id, name: "Travel")
         let second = try repository.createCategory(languageID: language.id, name: "Work")
         let set = try repository.createSet(languageID: language.id, name: "Phrases")
-
         let uncategorized = try repository.fetchSets(languageID: language.id)
         XCTAssertEqual(uncategorized.map(\.id), [set.id])
         XCTAssertNil(uncategorized.first?.categoryID)
-
         try repository.moveSet(set.id, toCategory: first.id)
         let inFirst = try repository.fetchSets(languageID: language.id, categoryID: first.id)
         XCTAssertEqual(inFirst.first?.id, set.id)
         XCTAssertEqual(inFirst.first?.categoryID, first.id)
-
         try repository.moveSet(set.id, toCategory: second.id)
         let inSecond = try repository.fetchSets(languageID: language.id, categoryID: second.id)
         XCTAssertEqual(inSecond.first?.id, set.id)
@@ -56,16 +47,8 @@ final class LMRTests: XCTestCase {
         let language = try repository.createLanguage(name: "Chinese", code: "zh")
         let firstSet = try repository.createSet(languageID: language.id, name: "Food")
         let secondSet = try repository.createSet(languageID: language.id, name: "Daily")
-        let word = try repository.createWord(
-            languageID: language.id,
-            text: "苹果",
-            translation: "яблоко",
-            transcription: "píngguǒ",
-            inSet: firstSet.id
-        )
-
+        let word = try repository.createWord(languageID: language.id, text: "苹果", translation: "яблоко", transcription: "píngguǒ", inSet: firstSet.id)
         try repository.addWord(word.id, toSet: secondSet.id)
-
         XCTAssertEqual(try repository.fetchWords(inSet: firstSet.id).map(\.id), [word.id])
         XCTAssertEqual(try repository.fetchWords(inSet: secondSet.id).map(\.id), [word.id])
         XCTAssertEqual(try repository.fetchProgress(for: word.id)?.wordID, word.id)
@@ -79,20 +62,10 @@ final class LMRTests: XCTestCase {
         let english = try repository.createLanguage(name: "English")
         let category = try repository.createCategory(languageID: chinese.id, name: "Food")
         let englishSet = try repository.createSet(languageID: english.id, name: "Food")
-
-        XCTAssertThrowsError(try repository.createSet(
-            languageID: english.id,
-            name: "Invalid",
-            categoryID: category.id
-        )) { error in
+        XCTAssertThrowsError(try repository.createSet(languageID: english.id, name: "Invalid", categoryID: category.id)) { error in
             XCTAssertEqual(error as? LibraryRepositoryError, .categoryLanguageMismatch)
         }
-
-        let chineseWord = try repository.createWord(
-            languageID: chinese.id,
-            text: "你好",
-            translation: "hello"
-        )
+        let chineseWord = try repository.createWord(languageID: chinese.id, text: "你好", translation: "hello")
         XCTAssertThrowsError(try repository.addWord(chineseWord.id, toSet: englishSet.id)) { error in
             XCTAssertEqual(error as? LibraryRepositoryError, .setLanguageMismatch)
         }
@@ -102,21 +75,44 @@ final class LMRTests: XCTestCase {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathComponent("library.sqlite")
-        try FileManager.default.createDirectory(
-            at: url.deletingLastPathComponent(),
-            withIntermediateDirectories: true
-        )
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
-
         let languageID: String
         do {
             let database = try DatabaseManager(path: url.path)
             let repository = LibraryRepository(database: database)
             languageID = try repository.createLanguage(name: "Japanese", code: "ja").id
         }
-
         let reopened = try DatabaseManager(path: url.path)
         let languages = try LibraryRepository(database: reopened).fetchLanguages()
         XCTAssertEqual(languages.map(\.id), [languageID])
+    }
+
+    func testGlobalSearchFindsWordsTranslationsSetsAndCategories() throws {
+        let database = try DatabaseManager.inMemory()
+        let repository = LibraryRepository(database: database)
+        let language = try repository.createLanguage(name: "Chinese", code: "zh")
+        let category = try repository.createCategory(languageID: language.id, name: "Food and drinks")
+        let foodSet = try repository.createSet(languageID: language.id, name: "Breakfast", categoryID: category.id)
+        let dailySet = try repository.createSet(languageID: language.id, name: "Daily phrases")
+        let word = try repository.createWord(
+            languageID: language.id,
+            text: "苹果",
+            translation: "green apple",
+            transcription: "píngguǒ",
+            inSet: foodSet.id
+        )
+        try repository.addWord(word.id, toSet: dailySet.id)
+
+        let byOriginal = try repository.searchLibrary("苹果")
+        XCTAssertEqual(byOriginal.words.map(\.word.id), [word.id])
+        XCTAssertEqual(Set(byOriginal.words[0].sets.map(\.id)), Set([foodSet.id, dailySet.id]))
+        let byTranslation = try repository.searchLibrary("GREEN")
+        XCTAssertEqual(byTranslation.words.map(\.word.id), [word.id])
+        let bySetName = try repository.searchLibrary("break")
+        XCTAssertEqual(bySetName.sets.map(\.id), [foodSet.id])
+        let byCategoryName = try repository.searchLibrary("drinks")
+        XCTAssertEqual(byCategoryName.categories.map(\.id), [category.id])
+        XCTAssertTrue(try repository.searchLibrary("   ").isEmpty)
     }
 }
