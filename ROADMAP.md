@@ -51,12 +51,12 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart (run #33).
 - [x] Audio choice: spoken prompt, translation choices, score and replay (run #34).
 - [x] Speed: 60-second typing challenge, streak bonuses, score and restart (run #36).
-- [ ] Missing word in sentence.
-- [x] Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs, Audio choice, and Speed are independent practice games.
+- [x] Missing: sentence completion with the target word removed, answer normalization, scoring, and restart (run #38).
+- [x] Games remain independent practice and do not alter SRS.
 
 ## Phase 5 — Import and AI
 
-- [ ] Paste/import text pairs.
+- [ ] Paste/import text pairs with editable preview and duplicate handling.
 - [ ] CSV import/export.
 - [ ] XLSX and document import.
 - [ ] PDF and image OCR pipeline with review screen.
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Implement Missing word in sentence, then continue with import and AI foundations.
+Implement pasted text-pair import with a fully editable preview, validation, duplicate resolution, and transactional save into a selected vocabulary set.

@@ -22,9 +22,10 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Full build and XCTest verification: run #15 succeeded.
 - Learning modes and SRS baseline: run #28 succeeded.
 - Weak-word and Mix Sets integration: run #32 succeeded; iOS Simulator build and all 22 XCTest cases passed.
-- Pairs game: run #33 succeeded on commit 036c77f147f5a1e8853be97149c0f46f1bc5bab8.
-- Audio choice: run #34 succeeded on commit 2378a55d1fd6a4c59ab12f11a1387bcebafacd58.
-- Speed game: run #36 succeeded on commit 5b5d47b72610407b48a7541d38edff705c374f8e; iOS Simulator build and XCTest passed.
+- Pairs game: run #33 succeeded.
+- Audio choice: run #34 succeeded.
+- Speed game: run #36 succeeded.
+- Missing word in sentence: run #38 succeeded on commit f8866b60b8b92dd2754ce888ce04ec4fb697acc4.
 
 ## Current implementation
 
@@ -48,7 +49,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Pairs: shuffled word/translation matching, feedback, move counter, completion, and restart. It does not update SRS.
 - Audio choice: system text-to-speech prompts, randomized translation choices, score, and replay. Voice availability depends on iOS language assets. It does not update SRS.
 - Speed: 60-second translation typing challenge, streak bonuses, score, skip, and restart. It does not update SRS.
-- Missing word in sentence is the next game under implementation.
+- Missing: translation-guided sentence completion, answer normalization, score, progress, and restart. Eligible cards require an example containing the target word. It does not update SRS.
 
 ## Verification
 
@@ -56,4 +57,4 @@ GitHub Actions on macos-latest is authoritative because the owner develops on Wi
 
 ## Next
 
-Implement Missing word in sentence, then continue with import flows and the remaining product roadmap.
+Implement the import foundation: paste word/translation pairs into an editable preview, validate duplicates, and save accepted rows to the selected set. Then add CSV/XLSX and document/OCR import paths.
