@@ -230,11 +230,11 @@ final class LibraryRepository {
             try VocabularySet.fetchAll(
                 db,
                 sql: """
-                    SELECT vocabulary_sets.*
-                    FROM vocabulary_sets
-                    INNER JOIN set_words ON set_words.setID = vocabulary_sets.id
+                    SELECT vocabularySets.*
+                    FROM vocabularySets
+                    INNER JOIN set_words ON set_words.setID = vocabularySets.id
                     WHERE set_words.wordID = ?
-                    ORDER BY vocabulary_sets.name COLLATE NOCASE
+                    ORDER BY vocabularySets.name COLLATE NOCASE
                     """,
                 arguments: [wordID]
             )
