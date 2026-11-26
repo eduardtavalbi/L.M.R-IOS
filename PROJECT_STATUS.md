@@ -22,8 +22,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Initial commit: 78767ec4f2ef7757e933820116bd15b77ba64eff.
 - Initial iOS Simulator build: GitHub Actions run #1 succeeded.
 - Full build and XCTest verification: run #15 succeeded on commit de338c2d1afc61f2097a7b131e7e05b1d91ecfe6.
-- Previous unpushed local changes were not present on GitHub and were not overwritten.
-- Latest verified learning baseline: run #28 succeeded on commit faca40a73e5beed23a57f09ba6841123ac2f7e98; iOS Simulator build and XCTest job both passed.
+- Learning modes and SRS baseline: run #28 succeeded on commit faca40a73e5beed23a57f09ba6841123ac2f7e98.
+- Latest learning integration: GitHub Actions run #32 succeeded on commit 87e47be9946c0276becf1cabac9581243759e626; iOS Simulator build and all 22 XCTest cases passed.
 
 ## Current implementation
 
@@ -36,17 +36,20 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
 - Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
 - Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
-- Flashcard sessions support reveal, "Знаю", and "Повторить", with a session summary. Multiple-choice and typing modes use the same SRS answer recording.
-- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date. Repository queries combine multiple sets without duplicate shared words and retrieve words with recorded mistakes for targeted practice.
+- Flashcard sessions support reveal, "Знаю", and "Повторить"; multiple-choice and typing modes use the same SRS answer recording.
+- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
+- Multi-set learning combines selected sets without duplicate shared words. Weak-word practice includes words with recorded mistakes, even when their next review is in the future.
+- Learning UI exposes per-set sessions, weak-word practice, and Mix Sets; each supports flashcards, multiple choice, and typing.
 - Global library search covers original words, translations, set names, and category names; word results include all containing sets.
 
 ### Verification
 
 - GitHub Actions is authoritative because the owner does not have Xcode locally.
 - Run #23 succeeded: iOS Simulator build and 14 XCTest cases passed.
-- Run #24 exposed an incorrect due-queue test fixture; commit 0104c8d corrected its review timestamp.
-- Run #27 succeeded after the correction and after retaining the SQL due-date filter. Run #28 succeeded with multiple-choice and typing modes plus four StudyModeEngine tests.
+- Run #27 succeeded after correcting the due-queue fixture and retaining the SQL due-date filter.
+- Run #28 succeeded with multiple-choice and typing modes.
+- Run #32 succeeded: iOS Simulator build and 22 XCTest cases passed, including weak-word and multi-set query coverage.
 
 ## Next
 
-Expose weak-word practice and Mix Sets in the learning interface, then continue with game modes. All learning modes share word-level SRS progress.
+Pairs game is implemented in the current branch and awaiting CI verification. Games do not alter SRS unless a game explicitly provides a reliable recall result; Pairs is recognition/matching practice and does not update SRS.

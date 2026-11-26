@@ -25,6 +25,20 @@ struct LearningView: View {
                                         Label("Смешать наборы", systemImage: "square.stack.3d.up")
                                     }
                                 }
+
+                                Section("Игры · \(language.name)") {
+                                    ForEach(sets) { set in
+                                        NavigationLink {
+                                            PairsGameView(store: store, set: set)
+                                        } label: {
+                                            HStack {
+                                                Label("Pairs", systemImage: "square.grid.2x2")
+                                                Spacer()
+                                                Text(set.name).foregroundStyle(.secondary)
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             if !sets.isEmpty {
                                 Section(language.name) {
@@ -232,10 +246,7 @@ private struct LearningSessionView: View {
                     Button {
                         submit(answer: choice, expected: correctTranslation)
                     } label: {
-                        Text(choice)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 13)
-                            .contentShape(Rectangle())
+                        Text(choice).frame(maxWidth: .infinity).padding(.vertical, 13).contentShape(Rectangle())
                     }
                     .buttonStyle(.bordered)
                 }
@@ -249,31 +260,25 @@ private struct LearningSessionView: View {
                 answerFeedback(correctTranslation: correctTranslation)
             } else {
                 TextField("Введи перевод", text: $typedAnswer)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .submitLabel(.done)
+                    .textInputAutocapitalization(.never).autocorrectionDisabled().submitLabel(.done)
                     .onSubmit { submit(answer: typedAnswer, expected: correctTranslation) }
                     .textFieldStyle(.roundedBorder)
-                Button("Проверить") {
-                    submit(answer: typedAnswer, expected: correctTranslation)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(typedAnswer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                Button("Проверить") { submit(answer: typedAnswer, expected: correctTranslation) }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(typedAnswer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
         }
     }
 
     private func answerFeedback(correctTranslation: String) -> some View {
         VStack(spacing: 10) {
-            Label(lastAnswerCorrect ? "Верно" : "Пока не получилось", systemImage: lastAnswerCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .font(.headline)
-                .foregroundStyle(lastAnswerCorrect ? .green : .orange)
+            Label(lastAnswerCorrect ? "Верно" : "Пока не получилось",
+                  systemImage: lastAnswerCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.headline).foregroundStyle(lastAnswerCorrect ? .green : .orange)
             if !lastAnswerCorrect {
-                Text("Правильный ответ: \(correctTranslation)")
-                    .font(.subheadline).multilineTextAlignment(.center)
+                Text("Правильный ответ: \(correctTranslation)").font(.subheadline).multilineTextAlignment(.center)
             }
-            Button("Дальше") { advance() }
-                .buttonStyle(.borderedProminent)
+            Button("Дальше") { advance() }.buttonStyle(.borderedProminent)
         }
         .padding(.vertical, 8)
     }

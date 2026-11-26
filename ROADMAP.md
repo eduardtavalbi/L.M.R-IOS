@@ -43,12 +43,12 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (GitHub Actions run #27 succeeded).
 - [x] Multiple-choice learning mode (GitHub Actions run #28).
 - [x] Typing learning mode (GitHub Actions run #28).
-- [x] Weak-word and multi-set repository queries, deduplicated by word ID (UI integration next).
-- [x] Mix Sets repository queue combining selected sets without duplicate shared words (UI integration next).
+- [x] Weak-word and multi-set repository queries, deduplicated by word ID.
+- [x] Weak-word practice and Mix Sets UI, with flashcard, multiple-choice, and typing sessions (GitHub Actions run #32).
 
 ## Phase 4 — Games
 
-- [ ] Pairs.
+- [ ] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart.
 - [ ] Audio choice.
 - [ ] Speed.
 - [ ] Missing word in sentence.
@@ -92,4 +92,4 @@ This roadmap is a living plan. Check off only work that has actually been implem
 
 ## Current next task
 
-Finish the learning UI for weak-word practice and Mix Sets, then implement game modes.
+Verify Pairs in GitHub Actions, fix any build/test issues, then implement Audio choice.
