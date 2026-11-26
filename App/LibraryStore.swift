@@ -77,6 +77,12 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    func moveSet(_ setID: String, to categoryID: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.moveSet(setID, toCategory: categoryID)
+        objectWillChange.send()
+    }
+
     func createWord(languageID: String, setID: String, text: String, translation: String, transcription: String?) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.createWord(

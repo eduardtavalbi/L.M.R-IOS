@@ -212,6 +212,7 @@ struct VocabularySetView: View {
     let language: Language
     let set: VocabularySet
     @State private var showingWord = false
+    @State private var showingMoveSet = false
 
     var body: some View {
         List {
@@ -237,12 +238,65 @@ struct VocabularySetView: View {
         .navigationTitle(set.name)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button { showingWord = true } label: { Image(systemName: "plus") }
-                    .accessibilityLabel("Добавить слово")
+                Menu {
+                    Button("Добавить слово", systemImage: "plus") { showingWord = true }
+                    Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
             }
         }
         .sheet(isPresented: $showingWord) {
             CreateWordSheet(store: store, language: language, set: set)
+        }
+        .sheet(isPresented: $showingMoveSet) {
+            MoveSetSheet(store: store, language: language, set: set)
+        }
+    }
+}
+
+private struct MoveSetSheet: View {
+    @Environment(\\.dismiss) private var dismiss
+    @ObservedObject var store: LibraryStore
+    let language: Language
+    let set: VocabularySet
+    @State private var selectedCategoryID: String
+    @State private var error: String?
+
+    init(store: LibraryStore, language: Language, set: VocabularySet) {
+        self.store = store
+        self.language = language
+        self.set = set
+        _selectedCategoryID = State(initialValue: set.categoryID ?? "")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Picker("Расположение", selection: $selectedCategoryID) {
+                    Text("Без категории").tag("")
+                    ForEach(store.categories(languageID: language.id)) { category in
+                        Text(category.name).tag(category.id)
+                    }
+                }
+            }
+            .navigationTitle("Переместить набор")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Отмена") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Сохранить") {
+                        do {
+                            try store.moveSet(set.id, to: selectedCategoryID.isEmpty ? nil : selectedCategoryID)
+                            dismiss()
+                        } catch let caughtError {
+                            error = caughtError.localizedDescription
+                        }
+                    }
+                }
+            }
+            .alert("Не удалось переместить", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+                Button("OK", role: .cancel) {}
+            } message: { Text(error ?? "") }
         }
     }
 }
