@@ -174,7 +174,9 @@ final class LMRTests: XCTestCase {
         let futureWord = try repository.createWord(languageID: language.id, text: "future", translation: "позже", inSet: set.id)
         let start = Date(timeIntervalSince1970: 1_800_000_000)
 
-        try repository.recordLearningAnswer(wordID: dueWord.id, knewAnswer: false, reviewedAt: start)
+        // A forgotten card reviewed 700 seconds earlier is already overdue.
+        try repository.recordLearningAnswer(wordID: dueWord.id, knewAnswer: false, reviewedAt: start.addingTimeInterval(-700))
+        // A known card reviewed now is scheduled for tomorrow and must stay hidden.
         try repository.recordLearningAnswer(wordID: futureWord.id, knewAnswer: true, reviewedAt: start)
 
         let beforeDue = try repository.fetchLearningQueue(inSet: set.id, dueAt: start.addingTimeInterval(300))

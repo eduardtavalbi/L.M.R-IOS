@@ -54,7 +54,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 - GitHub Actions is the authoritative build/test environment because the owner does not have Xcode locally.
 - Run #23 completed successfully: iOS Simulator app build and all 14 XCTest cases passed (commit 7f1a2f9).
-- New changes must be considered unverified until their own GitHub Actions run completes successfully.
+- Run #24 (commit `f890fa0`) built the app successfully but exposed one failing queue test: its fixture incorrectly expected a 10-minute relearning card to be due after only 5 minutes. The test fixture is being corrected; the feature is not considered verified until the follow-up run passes.
 
 ## Next
 
