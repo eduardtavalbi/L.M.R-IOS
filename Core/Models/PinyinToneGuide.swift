@@ -38,7 +38,7 @@ enum PinyinToneGuide {
             case 0x030C: detected.append(3) // caron
             case 0x0300: detected.append(4) // grave
             case 49...53:
-                if let value = scalar.wholeNumberValue { detected.append(value) }
+                detected.append(Int(scalar.value - 48))
             default:
                 continue
             }
