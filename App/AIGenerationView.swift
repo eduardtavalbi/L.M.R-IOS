@@ -241,4 +241,5 @@ struct AIGenerationView: View {
         } catch {
             errorMessage = error.localizedDescription
         }
-    }}
+    }
+}
