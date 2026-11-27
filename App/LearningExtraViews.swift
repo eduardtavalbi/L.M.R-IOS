@@ -180,6 +180,7 @@ private struct MultiSetLearningSessionView: View {
                     .multilineTextAlignment(.center)
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).foregroundStyle(.secondary)
+                    ChineseToneGuideView(transcription: transcription, languageCode: store.language(id: sets.first?.languageID ?? "")?.code)
                 }
                 PronunciationControlsView(word: word, languageCode: store.language(id: sets.first?.languageID ?? "")?.code)
                 if activeMode == .flashcards && revealed {

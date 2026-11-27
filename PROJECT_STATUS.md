@@ -14,13 +14,14 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #91 is green.
+- CI: GitHub Actions on macOS; latest verified run #92 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `3b7357c` — reference speech, personal voice recording/playback, and English US/UK voice selection.
-- Workflow run #91: successful iOS Simulator build and XCTest, including pronunciation voice-option tests.
+- Commit: `ad6078a` — speech recognition with transparent text-match feedback.
+- Workflow run #92: successful iOS Simulator build and XCTest, including pronunciation normalization and language-locale tests.
+- Reference speech, personal voice recording/playback, and English US/UK voice selection are verified by CI #91.
 - CSV export and per-set review/error statistics are verified by CI #89.
 - Import coverage includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
 - OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
@@ -43,7 +44,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ### Pronunciation
 - System text-to-speech reference playback, with US/UK English voice choice.
 - Per-word AAC voice recording and playback stored locally on the device.
-- Speech recognition compares the recognized text with the card's original word and shows transparent text-match feedback. It does not claim acoustic scoring or Chinese tone analysis.
+- Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; no acoustic score or tone analysis is claimed.
 - Speech and microphone permission descriptions are configured in the generated Info.plist.
 
 ### Import
@@ -91,4 +92,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Next: verify the speech-recognition feedback stage in CI, then implement language-specific Chinese pinyin/tone guidance. Device packaging remains a separate final milestone.
+Next: verify the Chinese pinyin tone guidance stage, then continue onboarding and library quality improvements. Device packaging remains a separate final milestone.

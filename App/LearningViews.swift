@@ -214,6 +214,7 @@ private struct LearningSessionView: View {
                     .multilineTextAlignment(.center).minimumScaleFactor(0.65).lineLimit(4)
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).font(.title3).foregroundStyle(.secondary)
+                    ChineseToneGuideView(transcription: transcription, languageCode: store.language(id: set.languageID)?.code)
                 }
                 PronunciationControlsView(word: word, languageCode: store.language(id: set.languageID)?.code)
                 if activeMode == .flashcards && isRevealed {

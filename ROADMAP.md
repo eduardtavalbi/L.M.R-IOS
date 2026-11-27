@@ -53,7 +53,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 ## Phase 6 — Pronunciation
 - [x] Reference audio playback and English UK/US variants.
 - [x] Voice recording and playback.
-- [ ] Speech recognition and transparent pronunciation feedback.
+- [x] Speech recognition and transparent text-match feedback (CI #92).
 - [ ] Chinese pinyin and tone support.
 
 ## Phase 7 — Progress, profile, and backup
@@ -74,4 +74,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Implement and verify on-device speech recognition with honest text-match feedback. Then add Chinese pinyin/tone guidance without claiming unsupported acoustic tone scoring. Keep device installation claims separate from Simulator CI verification.
+Add and verify pinyin tone hints sourced from card transcription. Keep these distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.

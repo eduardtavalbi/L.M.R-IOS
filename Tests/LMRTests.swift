@@ -7,6 +7,19 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(AppInfo.fullName, "Learn. Memorize. Repeat.")
     }
 
+    func testPinyinToneGuideReadsToneMarksAndNumberNotation() {
+        XCTAssertEqual(PinyinToneGuide.tones(in: "nǐ hǎo").map(\.number), [3, 3])
+        XCTAssertEqual(PinyinToneGuide.tones(in: "mā má mǎ mà ma").map(\.number), [1, 2, 3, 4])
+        XCTAssertEqual(PinyinToneGuide.tones(in: "ni3 hao3 ma5").map(\.number), [3, 3, 5])
+    }
+
+    func testPinyinToneGuideOnlyAppearsForChineseLanguages() {
+        XCTAssertTrue(PinyinToneGuide.isChineseLanguage("zh"))
+        XCTAssertTrue(PinyinToneGuide.isChineseLanguage("zh-CN"))
+        XCTAssertFalse(PinyinToneGuide.isChineseLanguage("en"))
+        XCTAssertFalse(PinyinToneGuide.isChineseLanguage(nil))
+    }
+
     func testEnglishPronunciationVoiceOptions() {
         XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "en"), ["en-US", "en-GB"])
         XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "en-GB"), ["en-US", "en-GB"])
