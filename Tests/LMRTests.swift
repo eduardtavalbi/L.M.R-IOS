@@ -277,4 +277,44 @@ final class LMRTests: XCTestCase {
         XCTAssertNil(try repository.fetchProgress(for: anotherWord.id))
     }
 
+
+    func testStudyActivityAggregatesReviewsAndCountsFirstReviewOnce() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let set = try repository.createSet(languageID: language.id, name: "Daily")
+        let word = try repository.createWord(languageID: language.id, text: "hello", translation: "привет", inSet: set.id)
+        let day = try XCTUnwrap(Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 10, hour: 12)))
+        try repository.recordLearningAnswer(wordID: word.id, knewAnswer: true, reviewedAt: day)
+        try repository.recordLearningAnswer(wordID: word.id, knewAnswer: false, reviewedAt: day.addingTimeInterval(3600))
+        try repository.recordLearningAnswer(wordID: word.id, knewAnswer: true, reviewedAt: day.addingTimeInterval(7200))
+        let stats = try repository.fetchLearningStatistics(for: day, now: day.addingTimeInterval(7200))
+        XCTAssertEqual(stats.totalWords, 1)
+        XCTAssertEqual(stats.totalReviews, 3)
+        XCTAssertEqual(stats.correctAnswers, 2)
+        XCTAssertEqual(stats.incorrectAnswers, 1)
+        XCTAssertEqual(stats.accuracy, 67)
+        XCTAssertEqual(stats.studyDays, 1)
+        XCTAssertEqual(stats.activity.first?.reviewCount, 3)
+        XCTAssertEqual(stats.activity.first?.newWordsCount, 1)
+    }
+
+    func testStudyActivityTracksStreakAcrossConsecutiveDays() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "Chinese")
+        let first = try repository.createWord(languageID: language.id, text: "你好", translation: "привет")
+        let second = try repository.createWord(languageID: language.id, text: "谢谢", translation: "спасибо")
+        let dayOne = try XCTUnwrap(Calendar.current.date(from: DateComponents(year: 2026, month: 11, day: 10, hour: 12)))
+        let dayTwo = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 1, to: dayOne))
+        let dayThree = try XCTUnwrap(Calendar.current.date(byAdding: .day, value: 1, to: dayTwo))
+        try repository.recordLearningAnswer(wordID: first.id, knewAnswer: true, reviewedAt: dayOne)
+        try repository.recordLearningAnswer(wordID: second.id, knewAnswer: true, reviewedAt: dayTwo)
+        try repository.recordLearningAnswer(wordID: first.id, knewAnswer: false, reviewedAt: dayThree)
+        let stats = try repository.fetchLearningStatistics(for: dayThree, now: dayThree)
+        XCTAssertEqual(stats.studyDays, 3)
+        XCTAssertEqual(stats.currentStreak, 3)
+        XCTAssertEqual(stats.activity.count, 3)
+        XCTAssertEqual(stats.activity.reduce(0) { $0 + $1.newWordsCount }, 2)
+    }
+
+
 }
