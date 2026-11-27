@@ -41,3 +41,17 @@ struct LearningProgress: Codable, FetchableRecord, MutablePersistableRecord, Ide
         self.updatedAt = updatedAt
     }
 }
+
+
+enum WordLearningStatus: Equatable {
+    case new
+    case learning
+    case mastered
+}
+
+extension LearningProgress {
+    var status: WordLearningStatus {
+        guard lastReviewedAt != nil else { return .new }
+        return intervalDays >= 7 && streak >= 3 ? .mastered : .learning
+    }
+}
