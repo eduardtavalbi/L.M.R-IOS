@@ -185,7 +185,7 @@ struct AIMixSetRequest: Equatable {
                   $0.correctAnswers >= 0 && $0.incorrectAnswers >= 0 &&
                   $0.streak >= 0 && $0.intervalDays >= 0
               }),
-              Set(candidates.map(\\.id)).count == candidates.count else {
+              Set(candidates.map(\.id)).count == candidates.count else {
             throw AIGenerationError.invalidRequest
         }
     }

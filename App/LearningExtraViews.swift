@@ -106,7 +106,7 @@ struct AIMixSetPickerView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(set.name).foregroundStyle(.primary)
-                                Text("\\(store.words(setID: set.id).count) слов").font(.caption).foregroundStyle(.secondary)
+                                Text("\(store.words(setID: set.id).count) слов").font(.caption).foregroundStyle(.secondary)
                             }
                             Spacer()
                             Image(systemName: selectedIDs.contains(set.id) ? "checkmark.circle.fill" : "circle")
@@ -121,9 +121,9 @@ struct AIMixSetPickerView: View {
             Section("Параметры AI-тренировки") {
                 TextField("Тема или цель", text: $topic)
                 Picker("Уровень", selection: $level) {
-                    ForEach(["Начальный", "Элементарный", "Средний", "Продвинутый"], id: \\.self) { Text($0) }
+                    ForEach(["Начальный", "Элементарный", "Средний", "Продвинутый"], id: \.self) { Text($0) }
                 }
-                Stepper("Карточек в тренировке: \\(selectionLimit)", value: $selectionLimit, in: 3...30)
+                Stepper("Карточек в тренировке: \(selectionLimit)", value: $selectionLimit, in: 3...30)
                 Text("AI выберет карточки только из отмеченных наборов. Новые слова не создаются, а история SRS сохраняется.")
                     .font(.footnote).foregroundStyle(.secondary)
                 Button {
@@ -140,9 +140,9 @@ struct AIMixSetPickerView: View {
             }
 
             if let recommendation {
-                Section("Предложенная тренировка · \\(recommendation.wordIDs.count) слов") {
+                Section("Предложенная тренировка · \(recommendation.wordIDs.count) слов") {
                     Text(recommendation.rationale).font(.subheadline).foregroundStyle(.secondary)
-                    ForEach(recommendation.wordIDs, id: \\.self) { id in
+                    ForEach(recommendation.wordIDs, id: \.self) { id in
                         if let word = candidateWords.first(where: { $0.id == id }) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(word.text).font(.headline)
@@ -217,7 +217,7 @@ private struct AIMixSetModeView: View {
     var body: some View {
         List {
             Section {
-                ForEach([StudyMode.flashcards, .multipleChoice, .typing], id: \\.self) { mode in
+                ForEach([StudyMode.flashcards, .multipleChoice, .typing], id: \.self) { mode in
                     NavigationLink {
                         MultiSetLearningSessionView(
                             store: store,
@@ -231,7 +231,7 @@ private struct AIMixSetModeView: View {
                     }
                 }
             } footer: {
-                Text("\\(selectedWordIDs.count) карточек, выбранных AI из твоей библиотеки.")
+                Text("\(selectedWordIDs.count) карточек, выбранных AI из твоей библиотеки.")
             }
         }
         .navigationTitle("Формат обучения")
