@@ -360,6 +360,8 @@ struct VocabularySetView: View {
                     LabeledContent("Ошибок", value: String(incorrect))
                     LabeledContent("Точность ответов", value: "\(accuracy)%")
                     ProgressView(value: Double(masteredCount), total: Double(max(words.count, 1)))
+                        .accessibilityLabel("Освоенные слова")
+                        .accessibilityValue("\(masteredCount) из \(words.count)")
                 }
             }
 
