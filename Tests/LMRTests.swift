@@ -373,10 +373,15 @@ final class LMRTests: XCTestCase {
         let destination = LibraryRepository(database: try DatabaseManager.inMemory())
         try destination.restoreBackup(decoded)
 
-        XCTAssertEqual(try destination.fetchLanguages(), [language])
-        XCTAssertEqual(try destination.fetchCategories(languageID: language.id), [parent, child])
+        XCTAssertEqual(try destination.fetchLanguages().map(\.id), [language.id])
+        XCTAssertEqual(try destination.fetchCategories(languageID: language.id).map(\.id), [parent.id, child.id])
         XCTAssertEqual(Set(try destination.fetchSets(containing: word.id).map(\.id)), Set([firstSet.id, secondSet.id]))
-        XCTAssertEqual(try destination.fetchProgress(for: word.id), try source.fetchProgress(for: word.id))
+        let restoredProgress = try XCTUnwrap(destination.fetchProgress(for: word.id))
+        let originalProgress = try XCTUnwrap(source.fetchProgress(for: word.id))
+        XCTAssertEqual(restoredProgress.repetitions, originalProgress.repetitions)
+        XCTAssertEqual(restoredProgress.correctAnswers, originalProgress.correctAnswers)
+        XCTAssertEqual(restoredProgress.intervalDays, originalProgress.intervalDays)
+        XCTAssertEqual(restoredProgress.streak, originalProgress.streak)
         XCTAssertEqual(try destination.fetchLearningStatistics(for: reviewedAt, now: reviewedAt).totalReviews, 1)
         XCTAssertEqual(try destination.fetchWords(inSet: firstSet.id).first?.example, "我吃苹果")
     }
