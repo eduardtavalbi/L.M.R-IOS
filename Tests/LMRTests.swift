@@ -333,4 +333,25 @@ final class LMRTests: XCTestCase {
     }
 
 
+
+    func testAchievementsUnlockAtTheirDefinedMilestones() {
+        let empty = LearningStatistics.empty
+        XCTAssertFalse(StudyAchievement.all(for: empty).contains(where: \\.isUnlocked))
+
+        var progress = empty
+        progress.totalWords = 50
+        progress.masteredWords = 1
+        progress.totalReviews = 100
+        progress.currentStreak = 7
+
+        let achievements = StudyAchievement.all(for: progress)
+        XCTAssertTrue(achievements.first(where: { $0.id == "first_word" })?.isUnlocked == true)
+        XCTAssertTrue(achievements.first(where: { $0.id == "word_collector" })?.isUnlocked == true)
+        XCTAssertTrue(achievements.first(where: { $0.id == "first_mastered" })?.isUnlocked == true)
+        XCTAssertTrue(achievements.first(where: { $0.id == "seven_day_streak" })?.isUnlocked == true)
+        XCTAssertTrue(achievements.first(where: { $0.id == "hundred_reviews" })?.isUnlocked == true)
+        XCTAssertFalse(achievements.first(where: { $0.id == "hundred_words" })?.isUnlocked ?? true)
+    }
+
+
 }

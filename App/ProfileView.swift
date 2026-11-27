@@ -38,7 +38,20 @@ struct LearningStatistics: Equatable {
 struct ProfileView: View {
     @ObservedObject var store: LibraryStore
     @State private var displayedMonth = Calendar.current.dateInterval(of: .month, for: .now)?.start ?? .now
+    @AppStorage("lmr.dailyReminder.enabled") private var reminderEnabled = false
+    @AppStorage("lmr.dailyReminder.hour") private var reminderHour = 19
+    @AppStorage("lmr.dailyReminder.minute") private var reminderMinute = 0
+    @State private var reminderError: String?
     private var stats: LearningStatistics { store.learningStatistics(for: displayedMonth) }
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: { Calendar.current.date(from: DateComponents(hour: reminderHour, minute: reminderMinute)) ?? .now },
+            set: {
+                reminderHour = Calendar.current.component(.hour, from: $0)
+                reminderMinute = Calendar.current.component(.minute, from: $0)
+            }
+        )
+    }
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 7)
     private let weekdays = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
@@ -62,6 +75,8 @@ struct ProfileView: View {
                         .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
                     }
                     calendar
+                    achievements
+                    reminderSettings
                     VStack(alignment: .leading, spacing: 10) {
                         Text("За месяц").font(.headline)
                         HStack {
@@ -79,6 +94,89 @@ struct ProfileView: View {
             }
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("Профиль")
+            .alert("Напоминание", isPresented: Binding(
+                get: { reminderError != nil },
+                set: { if !$0 { reminderError = nil } }
+            )) {
+                Button("Понятно", role: .cancel) { reminderError = nil }
+            } message: {
+                Text(reminderError ?? "")
+            }
+            .onChange(of: reminderEnabled) { _, enabled in
+                if enabled { updateReminder() } else { StudyReminderManager.cancel() }
+            }
+            .onChange(of: reminderHour) { _, _ in if reminderEnabled { updateReminder() } }
+            .onChange(of: reminderMinute) { _, _ in if reminderEnabled { updateReminder() } }
+            .task { if reminderEnabled { updateReminder() } }
+        }
+    }
+
+    private var achievements: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Достижения").font(.headline)
+                Spacer()
+                Text("\(StudyAchievement.all(for: stats).filter(\\.isUnlocked).count)/7")
+                    .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            }
+            ForEach(StudyAchievement.all(for: stats)) { achievement in
+                HStack(spacing: 12) {
+                    Image(systemName: achievement.symbol)
+                        .font(.title3)
+                        .foregroundStyle(achievement.isUnlocked ? Color.accentColor : Color.secondary)
+                        .frame(width: 38, height: 38)
+                        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 10))
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(achievement.title).font(.subheadline.weight(.semibold))
+                            Spacer()
+                            if achievement.isUnlocked {
+                                Image(systemName: "checkmark.seal.fill").foregroundStyle(.green)
+                            } else {
+                                Text("\(min(achievement.progress, achievement.goal))/\(achievement.goal)")
+                                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                            }
+                        }
+                        Text(achievement.detail).font(.caption).foregroundStyle(.secondary)
+                        if !achievement.isUnlocked { ProgressView(value: achievement.progressFraction) }
+                    }
+                }
+                .padding(10)
+                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
+    private var reminderSettings: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Ежедневное напоминание").font(.headline)
+            Toggle("Напоминать о занятиях", isOn: $reminderEnabled)
+            if reminderEnabled {
+                DatePicker("Время", selection: reminderTime, displayedComponents: .hourAndMinute)
+                    .datePickerStyle(.compact)
+                Text("Уведомление приходит ежедневно в выбранное время.")
+                    .font(.caption).foregroundStyle(.secondary)
+            } else {
+                Text("Напоминание выключено. Уведомления можно включить в любое время.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+        }
+        .padding(14)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func updateReminder() {
+        Task {
+            do {
+                let scheduled = try await StudyReminderManager.schedule(hour: reminderHour, minute: reminderMinute)
+                if !scheduled {
+                    reminderEnabled = false
+                    reminderError = "Разрешение на уведомления не выдано. Разреши уведомления для L.M.R. в настройках iPhone."
+                }
+            } catch {
+                reminderEnabled = false
+                reminderError = error.localizedDescription
+            }
         }
     }
 

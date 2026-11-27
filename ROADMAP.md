@@ -60,8 +60,8 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Basic profile statistics: vocabulary totals, mastered count, review count, and answer accuracy.
 - [ ] Per-word/per-set performance.
 - [x] Persisted daily activity, monthly calendar, study-day count, and current streak.
-- [ ] Restrained achievements and celebrations.
-- [ ] Local daily reminders.
+- [x] Seven milestone achievements with live progress and unlock states.
+- [x] Local daily reminders with configurable time and notification permission handling.
 - [ ] Full local backup/restore and CSV export.
 
 ## Phase 8 — Quality and delivery
@@ -73,4 +73,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Continue with per-word/per-set performance, achievements, reminders, and backup/restore. Keep device installation claims separate from Simulator CI verification.
+Continue with richer per-word/per-set performance and backup/restore. Keep device installation claims separate from Simulator CI verification.

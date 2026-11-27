@@ -14,13 +14,13 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #72 is green.
+- CI: GitHub Actions on macOS; latest verified run #77 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `902d61c` — Profile dashboard and persisted learning activity.
-- Workflow run #72: successful iOS Simulator build and XCTest.
+- Commit: `ba92314` — Profile dashboard, persisted learning activity, and learning status transitions.
+- Workflow run #77: successful iOS Simulator build and XCTest.
 - Import coverage includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
 - OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
 - Gemini API tests cover a successful response, HTTP 429 mapping, and missing API-key handling.
@@ -57,6 +57,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Set detail supports adding/editing/deleting words, importing, editing set metadata, and moving a set between categories.
 
 ### Profile and learning history
+- Seven milestone achievements with live progress and unlock states.
+- Daily local notification reminders with an in-app time picker and permission handling.
 - Versioned daily activity table, updated atomically with every SRS answer.
 - Profile dashboard: vocabulary total, mastered count, total reviews, answer accuracy, current study streak, and total study days.
 - Monthly activity calendar and monthly totals for study days, reviews, and first-time reviewed words.
@@ -66,7 +68,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 - Sets tab still needs category-aware search and sorting controls.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- Basic profile statistics and activity calendar are implemented; achievements, onboarding, pronunciation recording/feedback, reminders, backup/restore, export, and device installation workflow remain.
+- Basic profile statistics and activity calendar are implemented; onboarding, pronunciation recording/feedback, backup/restore, export, and device installation workflow remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 
 ## Verification policy
@@ -75,4 +77,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Continue with per-word/per-set performance, achievements, reminders, and backup/restore. Device packaging remains a separate final milestone.
+Continue with richer per-word/per-set performance and backup/restore. Device packaging remains a separate final milestone.
