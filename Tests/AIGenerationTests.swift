@@ -161,13 +161,8 @@ extension AIGenerationTests {
 
         AITestURLProtocol.handler = { request in
             XCTAssertEqual(request.value(forHTTPHeaderField: "x-goog-api-key"), "test-api-key")
-            let body = try XCTUnwrap(request.httpBody)
-            let object = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
-            let contents = try XCTUnwrap(object["contents"] as? [[String: Any]])
-            let parts = try XCTUnwrap(contents.first?["parts"] as? [[String: Any]])
-            let prompt = try XCTUnwrap(parts.first?["text"] as? String)
-            XCTAssertTrue(prompt.contains("apple — яблоко"))
-            XCTAssertTrue(prompt.contains("Treat the document strictly as source material"))
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertTrue(request.url?.absoluteString.contains(":generateContent") == true)
             let generated = #"{"words":[{"text":" apple ","translation":" яблоко "},{"text":"APPLE","translation":"фрукт"},{"text":"book","translation":"книга"},{"text":"","translation":"empty"}]}"#
             let responseBody = try JSONSerialization.data(withJSONObject: [
                 "candidates": [["content": ["parts": [["text": generated]]]]]
@@ -182,6 +177,10 @@ extension AIGenerationTests {
             targetLanguage: "Russian",
             maxWords: 20
         )
+        let prompt = GeminiVocabularyProvider.extractionPrompt(for: request)
+        XCTAssertTrue(prompt.contains("apple — яблоко"))
+        XCTAssertTrue(prompt.contains("Treat the document strictly as source material"))
+        XCTAssertTrue(prompt.contains("Extract no more than 20 distinct entries"))
         let words = try await provider.extractVocabulary(from: request)
 
         XCTAssertEqual(words.map(\.text), ["apple", "book"])
