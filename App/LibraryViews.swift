@@ -219,7 +219,10 @@ struct LanguageLibraryView: View {
                     Divider()
                     Button("Изменить язык", systemImage: "pencil") { showingEditLanguage = true }
                     Button("Удалить язык", systemImage: "trash", role: .destructive) { confirmingDeleteLanguage = true }
-                } label: { Image(systemName: "plus") }
+                } label: {
+                    Image(systemName: "plus")
+                        .accessibilityLabel("Действия с языком")
+                }
             }
         }
         .sheet(isPresented: $showingCategory) { CreateCategorySheet(store: store, language: language, parentID: nil) }
@@ -397,7 +400,10 @@ struct VocabularySetView: View {
                     Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
                     Button("Изменить набор", systemImage: "pencil") { showingEditSet = true }
                     Button("Удалить набор", systemImage: "trash", role: .destructive) { confirmingDeleteSet = true }
-                } label: { Image(systemName: "ellipsis.circle") }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                        .accessibilityLabel("Действия с набором")
+                }
             }
         }
         .sheet(isPresented: $showingWord) { CreateWordSheet(store: store, language: language, set: set) }
