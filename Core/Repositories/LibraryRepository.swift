@@ -387,7 +387,7 @@ final class LibraryRepository {
                 }
                 guard !ready.isEmpty else { throw LibraryBackupError.invalidRelationships }
                 for var category in ready { try category.insert(db) }
-                let readyIDs = Set(ready.map(\\.id))
+                let readyIDs = Set(ready.map(\.id))
                 pendingCategories.removeAll { readyIDs.contains($0.id) }
             }
 
