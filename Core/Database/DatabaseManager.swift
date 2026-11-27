@@ -113,6 +113,16 @@ final class DatabaseManager {
             try db.create(index: "progress_due", on: "learningProgress", columns: ["dueAt"])
         }
 
+        migrator.registerMigration("v2_create_study_activity") { db in
+            try db.create(table: "studyActivity") { table in
+                table.column("day", .text).primaryKey()
+                table.column("reviewCount", .integer).notNull().defaults(to: 0)
+                table.column("correctCount", .integer).notNull().defaults(to: 0)
+                table.column("incorrectCount", .integer).notNull().defaults(to: 0)
+                table.column("newWordsCount", .integer).notNull().defaults(to: 0)
+            }
+        }
+
         return migrator
     }
 }
