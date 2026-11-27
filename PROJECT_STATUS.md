@@ -14,15 +14,16 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified AI foundation run #57 is green.
+- CI: GitHub Actions on macOS; latest verified run #62 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `ff26269` — `feat(ai): add Gemini provider and Keychain secret storage`.
-- Workflow run #57: successful iOS Simulator build and XCTest.
+- Commit: `c7caa32` — mocked Gemini provider tests.
+- Workflow run #62: successful iOS Simulator build and XCTest.
 - Import coverage includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
 - OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
+- Gemini API tests cover a successful response, HTTP 429 mapping, and missing API-key handling.
 
 ## Current implementation
 
@@ -31,6 +32,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Versioned migrations for languages, nested categories, vocabulary sets, words, set membership, and word-level learning progress.
 - Repository operations for language/category/set/word CRUD, set movement, membership, duplicate resolution, and global search.
 - Shared words retain a single word-level learning history across sets.
+- Library screens support nested categories, uncategorized sets, set detail, word CRUD, import, and moving sets.
 
 ### Learning and games
 - SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date.
@@ -45,13 +47,19 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Provider protocol and request/response models.
 - Gemini generateContent client with JSON response parsing and input validation.
 - API key stored in iOS Keychain; no secret is embedded in source.
-- AI screen now supports key setup, topic/language/level/count, generation, editable draft review, and explicit save to a selected set. Generated content stays in memory until the user confirms saving.
+- AI screen supports key setup, topic/language/level/count, generation, editable draft review, and explicit save to a selected set.
+- Generated examples and explanations are saved separately; generated content stays in memory until the user confirms saving.
+
+### Sets tab
+- Cross-language set index with per-language grouping and search by set name.
+- Direct navigation to set detail and to the language's category-management/library screen.
+- Existing set detail supports adding/editing/deleting words, importing, editing set metadata, and moving a set between categories.
 
 ## Known gaps
 
+- Sets tab still needs richer category-aware browsing and direct set-creation flow.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- Sets and Profile tabs remain incomplete.
-- Onboarding, pronunciation recording/feedback, statistics/calendar, reminders, backup/restore, export, and device installation workflow remain.
+- Profile, onboarding, pronunciation recording/feedback, statistics/calendar, reminders, backup/restore, export, and device installation workflow remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 
 ## Verification policy
@@ -60,4 +68,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Verify the AI screen in CI, then improve generated-card persistence (including notes/explanations), add provider tests with a mocked network session, and continue the Sets/Profile experience.
+Continue the Sets experience with category-aware browsing and streamlined creation, then implement Profile and progress features. Device packaging remains a separate final milestone.

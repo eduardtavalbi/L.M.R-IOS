@@ -22,7 +22,7 @@ struct ContentView: View {
                 .tabItem { Label("Обучение", systemImage: "brain.head.profile") }
                 .tag(AppTab.learning)
 
-            PlaceholderView(title: "Наборы", symbol: "square.grid.2x2")
+            SetsView(store: store)
                 .tabItem { Label("Наборы", systemImage: "square.grid.2x2") }
                 .tag(AppTab.sets)
 

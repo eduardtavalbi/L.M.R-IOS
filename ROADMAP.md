@@ -19,6 +19,8 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
+- [x] Cross-language Sets tab with search and set-detail navigation.
+- [ ] Category-aware Sets browsing and direct set creation from the Sets tab.
 
 ## Phase 3 — Learning engine
 - [x] Flashcards and card details.
@@ -43,8 +45,9 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Quoted CSV fields, embedded delimiters/newlines, CRLF, and escaped quote handling.
 - [x] AI provider abstraction and Keychain-backed API-key storage.
 - [x] Gemini vocabulary generation client with JSON parsing and request validation.
-- [ ] AI screen with secure key setup, generation controls, and editable review.
-- [ ] Persist generated explanations as notes and add mocked network tests.
+- [x] AI screen with secure key setup, generation controls, and editable review.
+- [x] Persist generated explanations as notes and keep examples separate.
+- [x] Mocked Gemini network tests (success, rate limit, missing key).
 - [ ] AI document extraction, enrichment, weak-word analysis, and AI Mix Sets.
 
 ## Phase 6 — Pronunciation
@@ -69,4 +72,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Verify the AI generation screen in GitHub Actions. Then add network-mocked provider tests and preserve AI explanations in the word notes field. Keep generated content in draft state until the user explicitly saves it.
+Improve Sets browsing and creation, then build the Profile experience on top of persisted learning history. Keep device installation claims separate from Simulator CI verification.
