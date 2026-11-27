@@ -301,6 +301,33 @@ struct ImportWordsSheet: View {
         }
     }
 
+    @MainActor
+    private func extractWithAI() async {
+        isAIExtracting = true
+        defer { isAIExtracting = false }
+        do {
+            let request = AIImportRequest(
+                sourceText: source,
+                sourceLanguage: language.name,
+                targetLanguage: translationLanguage,
+                maxWords: 100
+            )
+            let extracted = try await GeminiVocabularyProvider().extractVocabulary(from: request)
+            rows = extracted.map { word in
+                WordImportDraft(
+                    text: word.text,
+                    translation: word.translation,
+                    transcription: word.transcription ?? "",
+                    example: word.example ?? ""
+                )
+            }
+            guard !rows.isEmpty else { throw AIGenerationError.invalidResponse }
+            showingPreview = true
+        } catch {
+            self.error = "Не удалось извлечь слова с AI: \(error.localizedDescription)"
+        }
+    }
+
     private func parseSource() {
         do {
             if let worksheet = selectedWorksheet {
