@@ -75,6 +75,9 @@ struct ImportWordsSheet: View {
             } message: {
                 Text(error ?? "")
             }
+            .task {
+                hasAIKey = (try? KeychainSecretStore().readSecret(for: "gemini.apiKey")) != nil
+            }
             .fileImporter(
                 isPresented: $showingFileImporter,
                 allowedContentTypes: [.commaSeparatedText, .tabSeparatedText, .plainText, .pdf, .image, UTType(filenameExtension: "xlsx") ?? .data],
