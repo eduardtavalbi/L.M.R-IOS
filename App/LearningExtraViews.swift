@@ -78,6 +78,167 @@ struct LearningSetPickerView: View {
     }
 }
 
+struct AIMixSetPickerView: View {
+    @ObservedObject var store: LibraryStore
+    let language: Language
+    let sets: [VocabularySet]
+
+    @State private var selectedIDs = Set<String>()
+    @State private var topic = "Слабые слова и повторение"
+    @State private var level = "Начальный"
+    @State private var selectionLimit = 15
+    @State private var recommendation: AIMixSetRecommendation?
+    @State private var candidateWords: [Word] = []
+    @State private var isGenerating = false
+    @State private var errorMessage: String?
+
+    private var selectedSets: [VocabularySet] { sets.filter { selectedIDs.contains($0.id) } }
+
+    var body: some View {
+        List {
+            Section("Наборы") {
+                ForEach(sets) { set in
+                    Button {
+                        if selectedIDs.contains(set.id) { selectedIDs.remove(set.id) }
+                        else { selectedIDs.insert(set.id) }
+                        recommendation = nil
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(set.name).foregroundStyle(.primary)
+                                Text("\\(store.words(setID: set.id).count) слов").font(.caption).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: selectedIDs.contains(set.id) ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(selectedIDs.contains(set.id) ? .tint : .tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
+            Section("Параметры AI-тренировки") {
+                TextField("Тема или цель", text: $topic)
+                Picker("Уровень", selection: $level) {
+                    ForEach(["Начальный", "Элементарный", "Средний", "Продвинутый"], id: \\.self) { Text($0) }
+                }
+                Stepper("Карточек в тренировке: \\(selectionLimit)", value: $selectionLimit, in: 3...30)
+                Text("AI выберет карточки только из отмеченных наборов. Новые слова не создаются, а история SRS сохраняется.")
+                    .font(.footnote).foregroundStyle(.secondary)
+                Button {
+                    Task { await buildRecommendation() }
+                } label: {
+                    HStack {
+                        Spacer()
+                        if isGenerating { ProgressView().padding(.trailing, 8) }
+                        Text(isGenerating ? "Подбираю карточки…" : "Составить AI-тренировку")
+                        Spacer()
+                    }
+                }
+                .disabled(isGenerating || selectedIDs.isEmpty || topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+
+            if let recommendation {
+                Section("Предложенная тренировка · \\(recommendation.wordIDs.count) слов") {
+                    Text(recommendation.rationale).font(.subheadline).foregroundStyle(.secondary)
+                    ForEach(recommendation.wordIDs, id: \\.self) { id in
+                        if let word = candidateWords.first(where: { $0.id == id }) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(word.text).font(.headline)
+                                Text(word.translation).font(.subheadline).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    NavigationLink {
+                        AIMixSetModeView(
+                            store: store,
+                            sets: selectedSets,
+                            words: candidateWords,
+                            selectedWordIDs: recommendation.wordIDs
+                        )
+                    } label: {
+                        Label("Начать тренировку", systemImage: "play.fill")
+                    }
+                }
+            }
+        }
+        .navigationTitle("AI Mix Sets")
+        .alert("Не удалось составить тренировку", isPresented: Binding(
+            get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: { Text(errorMessage ?? "") }
+    }
+
+    @MainActor
+    private func buildRecommendation() async {
+        isGenerating = true
+        defer { isGenerating = false }
+        do {
+            let words = store.words(setIDs: Array(selectedIDs))
+            guard (3...100).contains(words.count) else {
+                throw AIGenerationError.requestFailed("Выбери наборы, в которых суммарно от 3 до 100 уникальных карточек.")
+            }
+            candidateWords = words
+            let cards = words.map { word -> AIMixSetCandidate in
+                let progress = store.learningProgress(wordID: word.id)
+                return AIMixSetCandidate(
+                    id: word.id,
+                    text: word.text,
+                    translation: word.translation,
+                    correctAnswers: progress?.correctAnswers ?? 0,
+                    incorrectAnswers: progress?.incorrectAnswers ?? 0,
+                    streak: progress?.streak ?? 0,
+                    intervalDays: progress?.intervalDays ?? 0
+                )
+            }
+            let request = AIMixSetRequest(
+                candidates: cards,
+                sourceLanguage: language.name,
+                topic: topic.trimmingCharacters(in: .whitespacesAndNewlines),
+                level: level,
+                selectionLimit: min(selectionLimit, words.count)
+            )
+            recommendation = try await GeminiVocabularyProvider().recommendMixSet(request)
+        } catch {
+            recommendation = nil
+            errorMessage = error.localizedDescription
+        }
+    }
+}
+
+private struct AIMixSetModeView: View {
+    @ObservedObject var store: LibraryStore
+    let sets: [VocabularySet]
+    let words: [Word]
+    let selectedWordIDs: [String]
+
+    var body: some View {
+        List {
+            Section {
+                ForEach([StudyMode.flashcards, .multipleChoice, .typing], id: \\.self) { mode in
+                    NavigationLink {
+                        MultiSetLearningSessionView(
+                            store: store,
+                            sets: sets,
+                            purpose: .mixSets,
+                            mode: mode,
+                            selectedWordIDs: selectedWordIDs
+                        )
+                    } label: {
+                        Label(mode.title, systemImage: mode.symbol)
+                    }
+                }
+            } footer: {
+                Text("\\(selectedWordIDs.count) карточек, выбранных AI из твоей библиотеки.")
+            }
+        }
+        .navigationTitle("Формат обучения")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
 private struct ExtraLearningModeView: View {
     @ObservedObject var store: LibraryStore
     let sets: [VocabularySet]
@@ -159,9 +320,14 @@ private struct MultiSetLearningSessionView: View {
             guard words.isEmpty else { return }
             let ids = sets.map(\.id)
             allWords = store.words(setIDs: ids)
-            words = purpose == .weakWords
-                ? store.weakWords(setIDs: ids)
-                : store.learningWords(setIDs: ids)
+            if let selectedWordIDs {
+                let byID = Dictionary(uniqueKeysWithValues: allWords.map { ($0.id, $0) })
+                words = selectedWordIDs.compactMap { byID[$0] }
+            } else {
+                words = purpose == .weakWords
+                    ? store.weakWords(setIDs: ids)
+                    : store.learningWords(setIDs: ids)
+            }
         }
         .alert("Не удалось сохранить прогресс", isPresented: Binding(
             get: { error != nil }, set: { if !$0 { error = nil } }

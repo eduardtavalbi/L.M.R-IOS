@@ -301,3 +301,68 @@ extension AIGenerationTests {
         XCTAssertTrue(result[0].recommendation.contains("Повтори"))
     }
 }
+
+
+extension AIGenerationTests {
+    func testAIMixSetRequestValidatesUniqueExistingCandidates() throws {
+        let candidate = AIMixSetCandidate(
+            id: "word-1", text: "苹果", translation: "яблоко",
+            correctAnswers: 1, incorrectAnswers: 2, streak: 0, intervalDays: 0
+        )
+        let valid = AIMixSetRequest(
+            candidates: [candidate, AIMixSetCandidate(id: "word-2", text: "书", translation: "книга", correctAnswers: 0, incorrectAnswers: 0, streak: 0, intervalDays: 0), AIMixSetCandidate(id: "word-3", text: "水", translation: "вода", correctAnswers: 0, incorrectAnswers: 0, streak: 0, intervalDays: 0)],
+            sourceLanguage: "Chinese", topic: "Everyday words", level: "A1", selectionLimit: 2
+        )
+        XCTAssertNoThrow(try valid.validate())
+        let duplicate = AIMixSetRequest(
+            candidates: [candidate, candidate, AIMixSetCandidate(id: "word-3", text: "水", translation: "вода", correctAnswers: 0, incorrectAnswers: 0, streak: 0, intervalDays: 0)],
+            sourceLanguage: "Chinese", topic: "Everyday words", level: "A1", selectionLimit: 2
+        )
+        XCTAssertThrowsError(try duplicate.validate())
+    }
+
+    func testGeminiMixSetRecommendationRejectsUnknownIDsAndPreservesSelectionOrder() async throws {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            let generated = #"{ "wordIDs":["word-3","word-1"],"rationale":"Смешаны слова по теме и карточки, требующие повторения." }"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let candidates = [
+            AIMixSetCandidate(id: "word-1", text: "苹果", translation: "яблоко", correctAnswers: 0, incorrectAnswers: 2, streak: 0, intervalDays: 0),
+            AIMixSetCandidate(id: "word-2", text: "书", translation: "книга", correctAnswers: 2, incorrectAnswers: 0, streak: 2, intervalDays: 3),
+            AIMixSetCandidate(id: "word-3", text: "水", translation: "вода", correctAnswers: 1, incorrectAnswers: 1, streak: 0, intervalDays: 0)
+        ]
+        let result = try await provider.recommendMixSet(
+            AIMixSetRequest(candidates: candidates, sourceLanguage: "Chinese", topic: "Everyday words", level: "A1", selectionLimit: 2)
+        )
+        XCTAssertEqual(result.wordIDs, ["word-3", "word-1"])
+        XCTAssertTrue(result.rationale.contains("теме"))
+
+        AITestURLProtocol.handler = { request in
+            let generated = #"{ "wordIDs":["not-in-library"],"rationale":"Invalid selection" }"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+        do {
+            _ = try await provider.recommendMixSet(
+                AIMixSetRequest(candidates: candidates, sourceLanguage: "Chinese", topic: "Everyday words", level: "A1", selectionLimit: 2)
+            )
+            XCTFail("Expected unknown word ID to be rejected")
+        } catch {
+            XCTAssertEqual(error as? AIGenerationError, .invalidResponse)
+        }
+    }
+}

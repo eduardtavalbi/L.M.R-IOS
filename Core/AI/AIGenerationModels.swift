@@ -153,3 +153,45 @@ protocol AIGenerationProvider {
     func generateVocabulary(for request: AIGenerationRequest) async throws -> [AIGeneratedWord]
     func extractVocabulary(from request: AIImportRequest) async throws -> [AIGeneratedWord]
 }
+
+
+struct AIMixSetCandidate: Codable, Equatable {
+    let id: String
+    let text: String
+    let translation: String
+    let correctAnswers: Int
+    let incorrectAnswers: Int
+    let streak: Int
+    let intervalDays: Int
+}
+
+struct AIMixSetRequest: Equatable {
+    let candidates: [AIMixSetCandidate]
+    let sourceLanguage: String
+    let topic: String
+    let level: String
+    let selectionLimit: Int
+
+    func validate() throws {
+        guard (3...100).contains(candidates.count),
+              !sourceLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !level.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              (1...30).contains(selectionLimit),
+              !topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              candidates.allSatisfy({
+                  !$0.id.isEmpty &&
+                  !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  !$0.translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  $0.correctAnswers >= 0 && $0.incorrectAnswers >= 0 &&
+                  $0.streak >= 0 && $0.intervalDays >= 0
+              }),
+              Set(candidates.map(\\.id)).count == candidates.count else {
+            throw AIGenerationError.invalidRequest
+        }
+    }
+}
+
+struct AIMixSetRecommendation: Codable, Equatable {
+    let wordIDs: [String]
+    let rationale: String
+}

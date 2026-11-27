@@ -24,6 +24,11 @@ struct LearningView: View {
                                     } label: {
                                         Label("Смешать наборы", systemImage: "square.stack.3d.up")
                                     }
+                                    NavigationLink {
+                                        AIMixSetPickerView(store: store, language: language, sets: sets)
+                                    } label: {
+                                        Label("AI Mix Sets", systemImage: "sparkles")
+                                    }
                                 }
 
                                 Section("Игры · \(language.name)") {
