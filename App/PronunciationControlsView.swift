@@ -15,11 +15,12 @@ struct PronunciationControlsView: View {
     @State private var error: String?
 
     private var recordingURL: URL? {
-        guard let directory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+        guard let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
             return nil
         }
         let safeID = word.id.replacingOccurrences(of: "/", with: "_")
-        return directory.appendingPathComponent("Pronunciation", isDirectory: true)
+        return directory.appendingPathComponent("LMR", isDirectory: true)
+            .appendingPathComponent("Pronunciation", isDirectory: true)
             .appendingPathComponent("\(safeID).m4a")
     }
 
@@ -64,6 +65,11 @@ struct PronunciationControlsView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(isRecording || languageCode == nil || languageCode?.isEmpty == true)
             }
+
+            Text("Проверка использует только локальное распознавание iOS. Если для языка недоступен режим на устройстве, проверка не запускается. Записи голоса хранятся на iPhone и не включаются в резервную копию L.M.R.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
             if hasRecording {
                 Button(action: playRecording) {
@@ -173,6 +179,10 @@ struct PronunciationControlsView: View {
         do {
             let folder = recordingURL.deletingLastPathComponent()
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            var folderURL = folder
+            var resourceValues = URLResourceValues()
+            resourceValues.isExcludedFromBackup = true
+            try folderURL.setResourceValues(resourceValues)
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
             try session.setActive(true)

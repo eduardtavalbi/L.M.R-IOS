@@ -24,6 +24,10 @@ final class PronunciationRecognitionService: ObservableObject {
             errorMessage = "Распознавание речи сейчас недоступно. Попробуй позже."
             return
         }
+        guard recognizer.supportsOnDeviceRecognition else {
+            errorMessage = "Для этого языка iOS не поддерживает локальное распознавание. Проверка не запущена, аудио не отправлялось."
+            return
+        }
 
         errorMessage = nil
         recognizedText = nil
@@ -66,6 +70,7 @@ final class PronunciationRecognitionService: ObservableObject {
 
             let request = SFSpeechAudioBufferRecognitionRequest()
             request.shouldReportPartialResults = false
+            request.requiresOnDeviceRecognition = true
             recognitionRequest = request
 
             let input = audioEngine.inputNode
