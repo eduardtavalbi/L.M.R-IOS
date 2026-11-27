@@ -51,13 +51,14 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Generated examples and explanations are saved separately; generated content stays in memory until the user confirms saving.
 
 ### Sets tab
-- Cross-language set index with per-language grouping and search by set name.
+- Cross-language set catalogue with per-language grouping, nested category disclosure, uncategorized sets, and search by set name.
+- Quick set creation directly from the Sets tab, with language, nested category path, and optional description.
 - Direct navigation to set detail and to the language's category-management/library screen.
-- Existing set detail supports adding/editing/deleting words, importing, editing set metadata, and moving a set between categories.
+- Set detail supports adding/editing/deleting words, importing, editing set metadata, and moving a set between categories.
 
 ## Known gaps
 
-- Sets tab still needs richer category-aware browsing and direct set-creation flow.
+- Sets tab still needs category-aware search and sorting controls.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
 - Profile, onboarding, pronunciation recording/feedback, statistics/calendar, reminders, backup/restore, export, and device installation workflow remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.

@@ -21,6 +21,22 @@ final class LMRTests: XCTestCase {
         XCTAssertTrue(fetched.allSatisfy { $0.languageID == language.id })
     }
 
+    func testSetCreationPersistsOptionalDetailsAndCategory() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "Chinese")
+        let category = try repository.createCategory(languageID: language.id, name: "Travel")
+        let set = try repository.createSet(
+            languageID: language.id,
+            name: "At the airport",
+            categoryID: category.id,
+            details: "Useful airport vocabulary"
+        )
+
+        let fetched = try repository.fetchSets(languageID: language.id, categoryID: category.id)
+        XCTAssertEqual(fetched.first?.id, set.id)
+        XCTAssertEqual(fetched.first?.details, "Useful airport vocabulary")
+    }
+
     func testUncategorizedSetAndMovingBetweenCategories() throws {
         let database = try DatabaseManager.inMemory()
         let repository = LibraryRepository(database: database)

@@ -20,7 +20,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
 - [x] Cross-language Sets tab with search and set-detail navigation.
-- [ ] Category-aware Sets browsing and direct set creation from the Sets tab.
+- [x] Category-aware Sets browsing, nested category navigation, and direct set creation from the Sets tab.
 
 ## Phase 3 — Learning engine
 - [x] Flashcards and card details.
@@ -72,4 +72,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Improve Sets browsing and creation, then build the Profile experience on top of persisted learning history. Keep device installation claims separate from Simulator CI verification.
+Add category-aware search and sorting to Sets, then build the Profile experience on top of persisted learning history. Keep device installation claims separate from Simulator CI verification.

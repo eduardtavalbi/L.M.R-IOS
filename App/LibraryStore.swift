@@ -115,9 +115,9 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
-    func createSet(languageID: String, name: String, categoryID: String?) throws {
+    func createSet(languageID: String, name: String, categoryID: String?, details: String? = nil) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
-        try repository.createSet(languageID: languageID, name: name, categoryID: categoryID)
+        try repository.createSet(languageID: languageID, name: name, categoryID: categoryID, details: details)
         objectWillChange.send()
     }
 
