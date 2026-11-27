@@ -1,77 +1,63 @@
 # L.M.R. — Implementation Roadmap
 
-This roadmap is a living plan. Check off only work that has actually been implemented and verified.
+Check off work only after implementation and successful GitHub Actions verification.
 
 ## Phase 0 — Repository foundation
 
-- [x] Create repository and initial SwiftUI/XcodeGen project skeleton.
-- [x] Add five-tab navigation shell.
-- [x] Verify first GitHub Actions iOS Simulator build.
-- [x] Add durable project status and roadmap tracking.
-- [x] Configure CI to build and run XCTest.
+- [x] SwiftUI/XcodeGen project skeleton and five-tab navigation.
+- [x] GitHub Actions iOS Simulator build and XCTest.
 
 ## Phase 1 — Domain model and local persistence
 
-- [x] Integrate GRDB through XcodeGen Swift Package dependency.
-- [x] Implement persistent SQLite database in Application Support.
-- [x] Add database migrations and foreign-key enforcement.
-- [x] Implement Language, Category, VocabularySet, Word, and LearningProgress models.
-- [x] Implement repository operations and validation for language/category relationships.
-- [x] Support nested categories, uncategorized sets, moving sets, and words shared by multiple sets.
-- [x] Add isolated XCTest coverage for migrations, persistence, relationships, and repository behavior.
-- [x] Verify build and tests in GitHub Actions (run #15).
+- [x] GRDB-backed SQLite database, migrations, foreign keys, and indexes.
+- [x] Language, nested category, vocabulary set, word, membership, and learning progress models.
+- [x] Repository CRUD, relationships, shared words, and duplicate policies.
+- [x] Isolated persistence and repository tests.
 
 ## Phase 2 — Library experience
 
 - [ ] App bootstrap and dependency container.
-- [ ] First-run onboarding: welcome, appearance, language, first set.
-- [x] Library screen and empty states.
-- [x] Language and category navigation, including nested categories.
-- [x] Create vocabulary sets and move them between categories.
-- [x] Create vocabulary words with translation and transcription.
-- [x] Global search across original words, translations, set names, and categories.
-- [x] Show all sets containing a matching word.
-- [x] Edit/delete language, category, set, and word.
-- [x] Duplicate detection and skip/keep-both/merge flow.
+- [ ] First-run onboarding.
+- [x] Library navigation, nested categories, uncategorized sets, set movement.
+- [x] Word creation/editing and global search across words, translations, sets, and categories.
+- [x] Search results show all sets containing each word.
+- [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
 
 ## Phase 3 — Learning engine
 
-- [x] Card presentation and details.
-- [x] Basic flashcard session with reveal, "Знаю", and "Повторить" actions.
-- [x] Word-level progress shared across sets.
-- [x] Basic SRS scheduling with 1-day, 3-day, ease-adjusted intervals and 10-minute relearning for forgotten words.
-- [x] Due-review queue: new words and due reviews are included; future-due reviews are deferred (run #27).
-- [x] Multiple-choice learning mode (run #28).
-- [x] Typing learning mode (run #28).
-- [x] Weak-word and multi-set repository queries, deduplicated by word ID.
-- [x] Weak-word practice and Mix Sets UI, with flashcard, multiple-choice, and typing sessions (run #32).
+- [x] Flashcards and card details.
+- [x] Word-level SRS shared across sets.
+- [x] Due-review queue and future-review deferral.
+- [x] Multiple-choice and typed-answer modes.
+- [x] Weak-word practice and Mix Sets.
 
 ## Phase 4 — Games
 
-- [x] Pairs game: shuffled word/translation cards, matching feedback, move counter, completion and restart (run #33).
-- [x] Audio choice: spoken prompt, translation choices, score and replay (run #34).
-- [x] Speed: 60-second typing challenge, streak bonuses, score and restart (run #36).
-- [x] Missing: sentence completion with the target word removed, answer normalization, scoring, and restart (run #38).
-- [x] Games remain independent practice and do not alter SRS.
+- [x] Pairs matching game.
+- [x] Audio choice with system text-to-speech.
+- [x] Speed 60-second typing challenge.
+- [x] Missing-word sentence completion.
+- [x] Games do not modify SRS history.
 
 ## Phase 5 — Import and AI
 
-- [x] Paste text pairs with editable preview, validation, and duplicate handling (run #43).
-- [x] CSV/TSV/TXT file import into the selected set (run #44).
-- [x] XLSX spreadsheet import with worksheet and column mapping (run #48).
-- [ ] PDF text-layer extraction and reviewable import (implementation added; awaiting CI).
-- [ ] Image OCR pipeline with review screen.
-- [ ] AI provider abstraction and Keychain-backed API key storage.
-- [ ] AI vocabulary generation, enrichment, and document-to-cards flow.
-- [ ] AI Mix Sets and learning assistance.
+- [x] Paste text pairs with editable preview and validation.
+- [x] CSV/TSV/TXT file import.
+- [x] XLSX import with worksheet and column mapping.
+- [x] PDF text-layer extraction into editable review.
+- [x] On-device image OCR and scanned-PDF OCR via Apple Vision.
+- [x] Quoted CSV fields, embedded delimiters/newlines, CRLF, and escaped quote handling.
+- [ ] AI provider abstraction and Keychain-backed API-key storage.
+- [ ] Gemini vocabulary generation with topic, level, and count controls.
+- [ ] Editable AI result review before saving.
+- [ ] AI document extraction, enrichment, weak-word analysis, and AI Mix Sets.
 
 ## Phase 6 — Pronunciation
 
-- [ ] Reference audio playback.
+- [ ] Reference audio playback and English UK/US variants.
 - [ ] Voice recording and playback.
-- [ ] Speech recognition integration.
-- [ ] Pronunciation feedback with clearly stated accuracy limitations.
-- [ ] English UK/US pronunciation choice; Chinese pinyin and tones.
+- [ ] Speech recognition and transparent pronunciation feedback.
+- [ ] Chinese pinyin and tone support.
 
 ## Phase 7 — Progress, profile, and backup
 
@@ -79,18 +65,16 @@ This roadmap is a living plan. Check off only work that has actually been implem
 - [ ] Activity calendar, streaks, and history.
 - [ ] Restrained achievements and celebrations.
 - [ ] Local daily reminders.
-- [ ] Full local backup and restore.
-- [ ] CSV export.
+- [ ] Full local backup/restore and CSV export.
 
 ## Phase 8 — Quality and delivery
 
-- [ ] Accessibility and Dynamic Type.
-- [ ] Light/dark mode polish.
-- [ ] Performance and database migration checks.
-- [ ] Privacy review; ensure secrets never enter source control.
-- [ ] Decide on Apple signing and a safe SideStore-compatible installation workflow.
-- [ ] Verify installation on the owner's iPhone before calling the app device-ready.
+- [ ] App accessibility and Dynamic Type.
+- [ ] Light/dark appearance polish and performance checks.
+- [ ] Privacy review and secret-handling audit.
+- [ ] Apple signing and SideStore-compatible packaging workflow.
+- [ ] Verify installation on the owner's iPhone.
 
 ## Current next task
 
-Verify PDF text extraction in CI, then implement image OCR with a reviewable import flow.
+Build the AI foundation without embedding credentials: provider protocol, Keychain secret store, Gemini client, response validation, and a reviewable generation workflow. Keep all generated content in draft state until the user explicitly saves it.

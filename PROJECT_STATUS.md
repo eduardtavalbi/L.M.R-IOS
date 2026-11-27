@@ -13,60 +13,57 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
-- Project generation: XcodeGen (project.yml)
-- CI: GitHub Actions on macos-latest
+- Project generation: XcodeGen (`project.yml`)
+- CI: GitHub Actions on macOS; CI run #55 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
-## Verified remote baseline
+## Latest verified baseline
 
-- Full build and XCTest verification: run #15 succeeded.
-- Learning modes and SRS baseline: run #28 succeeded.
-- Weak-word and Mix Sets integration: run #32 succeeded; iOS Simulator build and all 22 XCTest cases passed.
-- Pairs game: run #33 succeeded.
-- Audio choice: run #34 succeeded.
-- Speed game: run #36 succeeded.
-- Missing word in sentence: run #38 succeeded on commit f8866b60b8b92dd2754ce888ce04ec4fb697acc4.
-- Text-pair import parser and editable preview: run #43 succeeded.
-- CSV/TXT file picker and import flow: run #44 succeeded; both iOS Simulator build and XCTest passed.\n- XLSX worksheet selection, column mapping, and editable import preview: run #48 succeeded; iOS Simulator build and XCTest passed.
+- Commit: `531a8aa` — `test(import): align quoted CSV fixture with column mapping`.
+- Workflow run #55: successful iOS Simulator build and XCTest.
+- Import coverage now includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
+- OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
+- CSV parser handles comma, semicolon, and tab delimiters, quoted delimiters, embedded newlines, CRLF, and doubled quote escaping.
 
 ## Current implementation
 
-### Persistence and repository
+### Persistence and library
 
-- GRDB.swift 7 with SQLite storage under Application Support/LMR/library.sqlite.
-- In-memory database initializer for isolated tests.
-- Versioned migration for languages, nested categories, vocabulary sets, words, set membership, and word-level learning progress.
-- SQLite foreign keys, cascade/set-null behavior, and lookup indexes.
+- GRDB.swift 7 with SQLite storage under Application Support/LMR/library.sqlite and an in-memory initializer for isolated tests.
+- Versioned migrations for languages, nested categories, vocabulary sets, words, set membership, and word-level learning progress.
 - Repository operations for language/category/set/word creation, editing/deletion, set movement, set membership, and library reads.
-- Duplicate detection is language-scoped and compares normalized original text plus translation; users can skip, keep both, or merge by linking the existing word to the current set.
-- Word-level SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date; progress is shared across sets.
-- Flashcard sessions support reveal, "Знаю", and "Повторить"; multiple-choice and typing modes use the same SRS answer recording.
-- The active learning queue includes new words and reviews due now; future-scheduled reviews are held back until their due date.
-- Multi-set learning combines selected sets without duplicate shared words. Weak-word practice includes words with recorded mistakes, even when their next review is in the future.
-- Learning UI exposes per-set sessions, weak-word practice, and Mix Sets; each supports flashcards, multiple choice, and typing.
-- Global library search covers original words, translations, set names, and category names; word results include all containing sets.
+- Duplicate detection is language-scoped; users can skip, keep both, or merge.
+- Shared words retain a single word-level learning history across sets.
+- Global search covers original words, translations, set names, and category names; word results include all containing sets.
 
-### Games
+### Learning and games
 
-- Pairs: shuffled word/translation matching, feedback, move counter, completion, and restart. It does not update SRS.
-- Audio choice: system text-to-speech prompts, randomized translation choices, score, and replay. Voice availability depends on iOS language assets. It does not update SRS.
-- Speed: 60-second translation typing challenge, streak bonuses, score, skip, and restart. It does not update SRS.
-- Missing: translation-guided sentence completion, answer normalization, score, progress, and restart. Eligible cards require an example containing the target word. It does not update SRS.
+- SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date.
+- Flashcards, multiple-choice, and typed-answer sessions share SRS answer recording.
+- Due-review queue, weak-word practice, and deduplicated Mix Sets.
+- Pairs, Audio choice (system TTS), Speed (60-second typing), and Missing (sentence completion) games.
+- Games are independent practice and do not alter SRS.
 
 ### Import
 
-- Paste tab-, comma-, or semicolon-delimited word pairs.
-- Parse preview with editable original, translation, transcription, and example fields.
-- Required-field validation and duplicate resolution (skip, keep both, merge).
-- Transactional batch import into a selected vocabulary set.
-- CSV, TSV, and plain-text file selection with UTF-8, UTF-16, and Windows-1251 decoding fallback.
-- Import repository tests cover metadata, duplicate policies, transaction rollback, and missing target sets.
-- XLSX spreadsheet import with worksheet selection, configurable column mapping, editable preview, duplicate resolution, and transactional save.\n- PDF text-layer extraction into the existing editable import workflow; scanned/image-only PDFs are explicitly reported as requiring OCR (pending CI verification).
+- Paste tab-, comma-, or semicolon-delimited word pairs with editable preview.
+- CSV, TSV, TXT, and XLSX file import; XLSX supports worksheet selection and configurable column mapping.
+- UTF-8, UTF-16, and Windows-1251 text decoding fallback.
+- PDF text-layer extraction and scanned/image-only PDF OCR.
+- Image and screenshot OCR via Apple Vision, processed on device.
+- All imported rows pass through editable preview, required-field validation, duplicate resolution, and transactional save.
+- Parser and repository tests cover metadata, duplicate policies, transaction rollback, malformed input, quoted delimiters, multiline values, and missing target sets.
 
-## Verification
+## Known product gaps
 
-GitHub Actions on macos-latest is authoritative because the owner develops on Windows and has no local Xcode. Every feature is expected to pass an iOS Simulator build and XCTest before being marked complete.
+- AI, Sets, and Profile tabs are still placeholders or incomplete; AI generation is the next major implementation milestone.
+- Onboarding, pronunciation recording/feedback, statistics/calendar, reminders, backup/restore, export, and device installation workflow remain.
+- Simulator CI success does not mean an installable, signed iPhone build has been produced.
+
+## Verification policy
+
+GitHub Actions on macos-latest is authoritative because development is performed on Windows without Xcode. A feature is marked verified only after the iOS Simulator build and XCTest pass.
 
 ## Next
 
-Next: verify PDF text extraction in CI, then add image OCR through the same reviewable import pipeline.
+Implement the AI foundation: provider abstraction, Keychain-backed user API-key storage, Gemini vocabulary generation, robust response parsing, and an editable review flow before any generated cards are saved.
