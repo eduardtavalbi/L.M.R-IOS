@@ -350,6 +350,60 @@ final class LibraryRepository {
         }
     }
 
+
+    func exportBackup() throws -> LibraryBackup {
+        try database.dbQueue.read { db in
+            let memberships = try Row.fetchAll(db, sql: "SELECT setID, wordID FROM set_words ORDER BY setID, wordID")
+                .map { LibraryBackupMembership(setID: $0["setID"], wordID: $0["wordID"]) }
+            return LibraryBackup(
+                languages: try Language.fetchAll(db),
+                categories: try Category.fetchAll(db),
+                sets: try VocabularySet.fetchAll(db),
+                words: try Word.fetchAll(db),
+                memberships: memberships,
+                learningProgress: try LearningProgress.fetchAll(db),
+                studyActivity: try StudyActivity.fetchAll(db)
+            )
+        }
+    }
+
+    func restoreBackup(_ backup: LibraryBackup) throws {
+        try backup.validate()
+        try database.dbQueue.write { db in
+            try db.execute(sql: "DELETE FROM set_words")
+            try db.execute(sql: "DELETE FROM learningProgress")
+            try db.execute(sql: "DELETE FROM studyActivity")
+            try db.execute(sql: "DELETE FROM words")
+            try db.execute(sql: "DELETE FROM vocabularySets")
+            try db.execute(sql: "DELETE FROM categories")
+            try db.execute(sql: "DELETE FROM languages")
+
+            for var language in backup.languages { try language.insert(db) }
+
+            var pendingCategories = backup.categories
+            while !pendingCategories.isEmpty {
+                let ready = pendingCategories.filter { category in
+                    category.parentID == nil || !pendingCategories.contains(where: { $0.id == category.parentID })
+                }
+                guard !ready.isEmpty else { throw LibraryBackupError.invalidRelationships }
+                for var category in ready { try category.insert(db) }
+                let readyIDs = Set(ready.map(\\.id))
+                pendingCategories.removeAll { readyIDs.contains($0.id) }
+            }
+
+            for var set in backup.sets { try set.insert(db) }
+            for var word in backup.words { try word.insert(db) }
+            for var progress in backup.learningProgress { try progress.insert(db) }
+            for var activity in backup.studyActivity { try activity.insert(db) }
+            for membership in backup.memberships {
+                try db.execute(
+                    sql: "INSERT INTO set_words (setID, wordID) VALUES (?, ?)",
+                    arguments: [membership.setID, membership.wordID]
+                )
+            }
+        }
+    }
+
     func fetchLanguages() throws -> [Language] {
         try database.dbQueue.read { db in
             try Language.order(Column("name").collating(.localizedCaseInsensitiveCompare)).fetchAll(db)

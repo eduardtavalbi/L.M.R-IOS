@@ -354,4 +354,48 @@ final class LMRTests: XCTestCase {
     }
 
 
+
+    func testBackupRoundTripPreservesRelationshipsProgressAndActivity() throws {
+        let source = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try source.createLanguage(name: "Chinese", code: "zh")
+        let parent = try source.createCategory(languageID: language.id, name: "Food")
+        let child = try source.createCategory(languageID: language.id, name: "Fruit", parentID: parent.id)
+        let firstSet = try source.createSet(languageID: language.id, name: "Market", categoryID: child.id, details: "Shopping words")
+        let secondSet = try source.createSet(languageID: language.id, name: "Daily")
+        let word = try source.createWord(languageID: language.id, text: "苹果", translation: "яблоко", transcription: "píngguǒ", notes: "Fruit", example: "我吃苹果", inSet: firstSet.id)
+        try source.addWord(word.id, toSet: secondSet.id)
+        let reviewedAt = Date(timeIntervalSince1970: 1_800_000_000)
+        try source.recordLearningAnswer(wordID: word.id, knewAnswer: true, reviewedAt: reviewedAt)
+
+        let backup = try source.exportBackup()
+        let encoded = try backup.encoded()
+        let decoded = try LibraryBackup.decode(encoded)
+        let destination = LibraryRepository(database: try DatabaseManager.inMemory())
+        try destination.restoreBackup(decoded)
+
+        XCTAssertEqual(try destination.fetchLanguages(), [language])
+        XCTAssertEqual(try destination.fetchCategories(languageID: language.id), [parent, child])
+        XCTAssertEqual(Set(try destination.fetchSets(containing: word.id).map(\\.id)), Set([firstSet.id, secondSet.id]))
+        XCTAssertEqual(try destination.fetchProgress(for: word.id), try source.fetchProgress(for: word.id))
+        XCTAssertEqual(try destination.fetchLearningStatistics(for: reviewedAt, now: reviewedAt).totalReviews, 1)
+        XCTAssertEqual(try destination.fetchWords(inSet: firstSet.id).first?.example, "我吃苹果")
+    }
+
+    func testBackupRejectsInvalidRelationshipsWithoutChangingExistingLibrary() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let set = try repository.createSet(languageID: language.id, name: "Existing")
+        let invalid = LibraryBackup(
+            languages: [language],
+            categories: [],
+            sets: [VocabularySet(languageID: "missing", name: "Broken")],
+            words: [],
+            memberships: [],
+            learningProgress: [],
+            studyActivity: []
+        )
+        XCTAssertThrowsError(try repository.restoreBackup(invalid))
+        XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\\.id), [set.id])
+    }
+
 }
