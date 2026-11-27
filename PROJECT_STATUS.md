@@ -14,11 +14,13 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #94 is green.
+- CI: GitHub Actions on macOS; latest verified run #97 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
+- Commit: `f7df86c` — set catalogue sorting (name, newest first, and word count); CI #97 is green. Sorting applies in uncategorized and nested-category groups, and word counts are loaded once per set when that sort mode is active.
+- Commit: `9239139` — first-run language onboarding; CI #96 is green.
 - Commit: `84d7d30` — pinyin tone hints and Unicode-compatible numeric tone parsing.
 - Workflow run #94: successful iOS Simulator build and XCTest, including tone-mark and numbered-pinyin tests.
 - Workflow run #92: successful iOS Simulator build and XCTest, including pronunciation normalization and language-locale tests.
@@ -61,7 +63,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Generated examples and explanations are saved separately; generated content stays in memory until the user confirms saving.
 
 ### Sets tab
-- Cross-language set catalogue with per-language grouping, nested category disclosure, uncategorized sets, and search by set name.
+- Cross-language set catalogue with per-language grouping, nested category disclosure, uncategorized sets, search by set name, and sorting by name, creation date, or word count.
 - Quick set creation directly from the Sets tab, with language, nested category path, and optional description.
 - Direct navigation to set detail and to the language's category-management/library screen.
 - Set detail supports adding/editing/deleting words, importing, editing set metadata, and moving a set between categories.
@@ -82,9 +84,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Known gaps
 
-- Sets tab still needs category-aware search and sorting controls.
+- Sets tab still needs category-aware search and clearer category-level navigation/filtering.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- First-run onboarding is implemented but awaiting CI verification.
+- First-run onboarding is implemented and verified by CI #96; users can select suggested languages or skip setup.
 - Accessibility/Dynamic Type and device installation workflow remain.
 - Speech recognition availability and quality depend on iOS language support, device settings, and network/on-device recognizer behavior.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
@@ -95,4 +97,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Next: verify first-run onboarding, then continue library quality improvements. Device packaging remains a separate final milestone. Device packaging remains a separate final milestone.
+Next: improve category-aware catalogue search and navigation, then continue AI workflows and delivery hardening. Device packaging remains a separate final milestone.

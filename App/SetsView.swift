@@ -27,11 +27,14 @@ struct SetsView: View {
                             let filteredSets = query.isEmpty
                                 ? sets
                                 : sets.filter { $0.name.localizedCaseInsensitiveContains(query) }
-                            let visibleSets = sortOrder.sorted(filteredSets, wordCount: { store.words(setID: $0.id).count })
+                            let wordCounts = sortOrder == .mostWords
+                                ? Dictionary(uniqueKeysWithValues: sets.map { ($0.id, store.words(setID: $0.id).count) })
+                                : [:]
+                            let visibleSets = sortOrder.sorted(filteredSets, wordCounts: wordCounts)
 
                             Section {
                                 if query.isEmpty {
-                                    let uncategorized = sortOrder.sorted(sets.filter { $0.categoryID == nil }, wordCount: { store.words(setID: $0.id).count })
+                                    let uncategorized = sortOrder.sorted(sets.filter { $0.categoryID == nil }, wordCounts: wordCounts)
                                     if !uncategorized.isEmpty {
                                         DisclosureGroup("Без категории · \(uncategorized.count)") {
                                             ForEach(uncategorized) { set in
@@ -153,7 +156,7 @@ private enum SetCatalogueSort: String, CaseIterable, Identifiable {
         }
     }
 
-    func sorted(_ sets: [VocabularySet], wordCount: (VocabularySet) -> Int) -> [VocabularySet] {
+    func sorted(_ sets: [VocabularySet], wordCounts: [String: Int]) -> [VocabularySet] {
         switch self {
         case .name:
             return sets.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
@@ -164,8 +167,8 @@ private enum SetCatalogueSort: String, CaseIterable, Identifiable {
             }
         case .mostWords:
             return sets.sorted {
-                let left = wordCount($0)
-                let right = wordCount($1)
+                let left = wordCounts[$0.id, default: 0]
+                let right = wordCounts[$1.id, default: 0]
                 if left != right { return left > right }
                 return $0.name.localizedStandardCompare($1.name) == .orderedAscending
             }
@@ -183,7 +186,10 @@ private struct CategorySetGroup: View {
     private var sets: [VocabularySet] {
         let all = store.sets(languageID: language.id, categoryID: category.id)
         let filtered = query.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(query) }
-        return sortOrder.sorted(filtered, wordCount: { store.words(setID: $0.id).count })
+        let wordCounts = sortOrder == .mostWords
+            ? Dictionary(uniqueKeysWithValues: all.map { ($0.id, store.words(setID: $0.id).count) })
+            : [:]
+        return sortOrder.sorted(filtered, wordCounts: wordCounts)
     }
 
     private var children: [Category] {

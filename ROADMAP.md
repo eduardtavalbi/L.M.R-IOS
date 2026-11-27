@@ -14,12 +14,13 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Phase 2 — Library experience
 - [ ] App bootstrap and dependency container.
-- [ ] First-run onboarding (implemented; awaiting CI verification).
+- [x] First-run onboarding with suggested language selection and skip option (CI #96).
 - [x] Library navigation, nested categories, uncategorized sets, set movement.
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
 - [x] Cross-language Sets tab with search and set-detail navigation.
+- [x] Set sorting by name, newest first, and word count across uncategorized and nested-category groups (CI #97).
 - [x] Category-aware Sets browsing, nested category navigation, and direct set creation from the Sets tab.
 
 ## Phase 3 — Learning engine
@@ -74,4 +75,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Verify the first-run onboarding implementation. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
+Improve category-aware catalogue search and navigation. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
