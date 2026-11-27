@@ -50,7 +50,7 @@ struct MissingWordGameView: View {
 
             VStack(spacing: 18) {
                 Text(word.translation)
-                    .font(.system(size: 30, weight: .semibold, design: .rounded))
+                    .font(.system(.title, design: .rounded).weight(.semibold))
                     .multilineTextAlignment(.center)
 
                 Text(MissingWordGameEngine.sentenceWithMissingWord(for: word) ?? "")
@@ -98,7 +98,7 @@ struct MissingWordGameView: View {
     private var resultView: some View {
         VStack(spacing: 20) {
             Image(systemName: "text.viewfinder")
-                .font(.system(size: 56))
+                .font(.largeTitle)
                 .foregroundStyle(.tint)
             Text("Игра завершена").font(.title2.weight(.semibold))
             Text("Правильных ответов: \(score) из \(words.count)")
