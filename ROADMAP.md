@@ -70,12 +70,18 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] CSV export of vocabulary fields.
 
 ## Phase 8 — Quality and delivery
-- [ ] App accessibility and Dynamic Type.
+- [ ] Complete app-wide accessibility audit (core Dynamic Type and VoiceOver improvements are implemented and CI-verified in learning, games, onboarding, import, and library flows; remaining screens and Voice Control/contrast still need review).
 - [ ] Light/dark appearance polish and performance checks.
-- [ ] Privacy review and secret-handling audit.
+- [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, and Gemini data-transfer disclosures implemented; source-wide logging, retention, and network review remains).
 - [ ] Apple signing and SideStore-compatible packaging workflow.
 - [ ] Verify installation on the owner's iPhone.
 
 ## Current next task
 
-Audit and improve accessibility and Dynamic Type across the main library and learning flows. Device installation claims remain separate from Simulator CI verification.
+Finish the app-wide accessibility audit, then perform a source-wide privacy/network and performance review. Device installation claims remain separate from Simulator CI verification.
+
+## Latest verification
+
+- `7c19156` — Gemini data-processing disclosures; GitHub Actions run #45986246891 passed (iOS Simulator build and XCTest).
+- `a736602` — core VoiceOver labels and values; GitHub Actions run #45983308627 passed.
+- Dynamic Type changes across core learning, game, onboarding, and import screens passed the associated GitHub Actions runs.

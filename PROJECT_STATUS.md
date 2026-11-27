@@ -14,11 +14,14 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #45978494297 is green (build and XCTest).
+- CI: GitHub Actions on macOS; latest verified run #45986246891 on commit `7c19156` is green (iOS Simulator build and XCTest).
 - Development machine: Windows; Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
+- Commit: `7c19156` — Gemini data-processing disclosures; iOS Simulator build and XCTest passed in workflow run #45986246891.
+- Commit: `a736602` — VoiceOver labels and values for core library, learning progress, game timers, set selection, and catalogue actions; latest relevant accessibility CI run #45983308627 passed.
+- Dynamic Type updates replaced fixed large text sizes in core learning screens, games, onboarding, and import review; the accessibility-related workflow runs passed.
 - Commit: `8d94f00` — AI Mix Sets implementation and compile fixes; build and XCTest passed in workflow run #45978494297.
 - Commit: `23b321f` — AI weak-word analysis; build and XCTest passed in workflow run #45976200195.
 - Commit: `62cb5a7` — reviewable AI vocabulary enrichment workflow; build and XCTest passed in workflow run #45974032162.
@@ -55,7 +58,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Gemini document extraction converts PDF/text/OCR content into vocabulary and reuses the editable import preview.
 - AI enrichment proposes missing transcription, examples, and explanations for an existing set; edits are reviewed before explicit save, and existing word/translation values are preserved.
 - AI weak-word analysis considers answer errors, correct/incorrect counts, streak, and review interval. It returns explanations, training recommendations, and a mini exercise for review.
-- AI analysis and enrichment do not silently rewrite cards or SRS progress. Gemini API keys are stored in iOS Keychain.
+- AI analysis and enrichment do not silently rewrite cards or SRS progress. Gemini API keys are stored in iOS Keychain using `WhenUnlockedThisDeviceOnly` accessibility.
+- AI screens now disclose that prompts, document text, card content, and/or learning statistics needed for a request are sent to Google Gemini. The import flow separately warns before document extraction. API keys are not part of the JSON backup model.
 - AI Mix Sets recommendations are constrained to supplied candidate IDs; unknown or duplicate IDs and invalid response sizes are rejected.
 - Mocked provider tests cover validation and representative successful/error responses.
 
@@ -89,4 +93,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Audit accessibility and Dynamic Type across the main learning and library flows, then continue appearance polish, privacy/secret handling, performance, and SideStore delivery work.
+Complete the app-wide accessibility audit, then finish the privacy/network review and performance checks before implementing and validating SideStore-compatible delivery.
