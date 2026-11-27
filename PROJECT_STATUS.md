@@ -14,12 +14,12 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #98 is green.
+- CI: GitHub Actions on macOS; latest verified run #99 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `4983826` — cached word counts during set sorting; CI #98 is green.
+- Commit: `3aa5ebc` — category-path search in the Sets catalogue; CI #99 is green. Commit `4983826` caches word counts during sorting; CI #98 is green.
 - Commit: `9239139` — first-run language onboarding; CI #96 is green.
 - Commit: `84d7d30` — pinyin tone hints and Unicode-compatible numeric tone parsing.
 - Workflow run #94: successful iOS Simulator build and XCTest, including tone-mark and numbered-pinyin tests.
@@ -59,7 +59,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Provider protocol and request/response models.
 - Gemini generateContent client with JSON response parsing and input validation.
 - API key stored in iOS Keychain; no secret is embedded in source.
-- AI screen supports key setup, topic/language/level/count, generation, editable draft review, and explicit save to a selected set.
+- AI screen supports key setup, topic/language/level/count, generation, editable draft review, and explicit save to a selected set.\n- AI document extraction sends extracted PDF/text/OCR content to Gemini, returns distinct vocabulary entries, and reuses the import preview and duplicate-resolution flow; source text is capped at 30,000 characters.
 - Generated examples and explanations are saved separately; generated content stays in memory until the user confirms saving.
 
 ### Sets tab
@@ -85,7 +85,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ## Known gaps
 
 - Sets tab category search now matches full nested paths and shows the matched set's category location; category-level filtering/navigation can be refined further.
-- AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
+- AI document enrichment, weak-word analysis, and AI Mix Sets remain.
 - First-run onboarding is implemented and verified by CI #96; users can select suggested languages or skip setup.
 - Accessibility/Dynamic Type and device installation workflow remain.
 - Speech recognition availability and quality depend on iOS language support, device settings, and network/on-device recognizer behavior.

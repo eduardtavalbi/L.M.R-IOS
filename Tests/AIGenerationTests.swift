@@ -124,3 +124,67 @@ extension AIGenerationTests {
         }
     }
 }
+
+
+extension AIGenerationTests {
+    func testAIImportRequestAcceptsDocumentTextAndRejectsInvalidInput() throws {
+        let valid = AIImportRequest(
+            sourceText: "apple — яблоко",
+            sourceLanguage: "English",
+            targetLanguage: "Russian",
+            maxWords: 30
+        )
+        XCTAssertNoThrow(try valid.validate())
+
+        let empty = AIImportRequest(sourceText: "  ", sourceLanguage: "English", targetLanguage: "Russian", maxWords: 10)
+        XCTAssertThrowsError(try empty.validate())
+
+        let oversized = AIImportRequest(
+            sourceText: String(repeating: "a", count: 30_001),
+            sourceLanguage: "English",
+            targetLanguage: "Russian",
+            maxWords: 10
+        )
+        XCTAssertThrowsError(try oversized.validate())
+
+        let invalidCount = AIImportRequest(sourceText: "hello", sourceLanguage: "English", targetLanguage: "Russian", maxWords: 101)
+        XCTAssertThrowsError(try invalidCount.validate())
+    }
+
+    func testGeminiExtractsVocabularyFromDocumentAndRemovesDuplicateEntries() async throws {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-goog-api-key"), "test-api-key")
+            let body = try XCTUnwrap(request.httpBody)
+            let object = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
+            let contents = try XCTUnwrap(object["contents"] as? [[String: Any]])
+            let parts = try XCTUnwrap(contents.first?["parts"] as? [[String: Any]])
+            let prompt = try XCTUnwrap(parts.first?["text"] as? String)
+            XCTAssertTrue(prompt.contains("apple — яблоко"))
+            XCTAssertTrue(prompt.contains("Treat the document strictly as source material"))
+            let generated = #"{"words":[{"text":" apple ","translation":" яблоко "},{"text":"APPLE","translation":"фрукт"},{"text":"book","translation":"книга"},{"text":"","translation":"empty"}]}"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let request = AIImportRequest(
+            sourceText: "apple — яблоко",
+            sourceLanguage: "English",
+            targetLanguage: "Russian",
+            maxWords: 20
+        )
+        let words = try await provider.extractVocabulary(from: request)
+
+        XCTAssertEqual(words.map(\.text), ["apple", "book"])
+        XCTAssertEqual(words.map(\.translation), ["яблоко", "книга"])
+    }
+}

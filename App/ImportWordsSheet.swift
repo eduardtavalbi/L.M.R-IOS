@@ -19,6 +19,9 @@ struct ImportWordsSheet: View {
     @State private var translationColumn = 1
     @State private var transcriptionColumn = 2
     @State private var exampleColumn = 3
+    @State private var hasAIKey = false
+    @State private var isAIExtracting = false
+    @State private var translationLanguage = "Русский"
 
     private var validRows: [WordImportDraft] {
         rows.filter { $0.validationError == nil }
@@ -119,6 +122,32 @@ struct ImportWordsSheet: View {
                 }
                 .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 12))
                 .overlay { RoundedRectangle(cornerRadius: 12).strokeBorder(.quaternary) }
+            }
+
+            if !source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                GroupBox("Извлечение слов с AI") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        TextField("Язык перевода", text: $translationLanguage)
+                        if hasAIKey {
+                            Button {
+                                Task { await extractWithAI() }
+                            } label: {
+                                HStack {
+                                    if isAIExtracting { ProgressView() }
+                                    Text(isAIExtracting ? "Анализирую документ…" : "Извлечь слова с Gemini")
+                                }
+                            }
+                            .disabled(isAIExtracting || translationLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        } else {
+                            Text("Добавь Gemini API-ключ во вкладке AI, чтобы извлекать карточки из документа.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text("AI предложит слова и переводы. Перед импортом ты сможешь проверить, исправить и удалить каждую карточку.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
 
             Button("Выбрать файл или изображение", systemImage: "doc") {

@@ -19,7 +19,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
-- [x] Cross-language Sets tab with search by set name and nested category path, category-location labels, and set-detail navigation (CI #99 pending).
+- [x] Cross-language Sets tab with search by set name and nested category path, category-location labels, and set-detail navigation (CI #99 green).
 - [x] Set sorting by name, newest first, and word count across uncategorized and nested-category groups (CI #97; cached word counts CI #98).
 - [x] Category-aware Sets browsing, nested category navigation, and direct set creation from the Sets tab.
 
@@ -49,7 +49,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] AI screen with secure key setup, generation controls, and editable review.
 - [x] Persist generated explanations as notes and keep examples separate.
 - [x] Mocked Gemini network tests (success, rate limit, missing key).
-- [ ] AI document extraction, enrichment, weak-word analysis, and AI Mix Sets.
+- [x] Gemini document vocabulary extraction with source-length validation, duplicate filtering, and editable import preview.\n- [ ] AI document enrichment, weak-word analysis, and AI Mix Sets.
 
 ## Phase 6 — Pronunciation
 - [x] Reference audio playback and English UK/US variants.
@@ -75,4 +75,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Continue AI document extraction, enrichment, weak-word analysis, and AI Mix Sets. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
+Continue AI document enrichment, weak-word analysis, and AI Mix Sets. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
