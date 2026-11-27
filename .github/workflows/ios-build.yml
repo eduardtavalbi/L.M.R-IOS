@@ -69,16 +69,16 @@ jobs:
 
       - name: Build device Release app (unsigned)
         run: |
-          xcodebuild \\
-            -project LMR.xcodeproj \\
-            -scheme LMR \\
-            -configuration Release \\
-            -sdk iphoneos \\
-            -destination 'generic/platform=iOS' \\
-            -derivedDataPath build/DerivedData \\
-            CODE_SIGNING_ALLOWED=NO \\
-            CODE_SIGNING_REQUIRED=NO \\
-            CODE_SIGN_IDENTITY='' \\
+          xcodebuild \
+            -project LMR.xcodeproj \
+            -scheme LMR \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY='' \
             build
 
       - name: Assemble and validate IPA
