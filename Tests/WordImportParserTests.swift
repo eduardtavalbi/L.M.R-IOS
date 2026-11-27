@@ -67,4 +67,20 @@ final class WordImportParserTests: XCTestCase {
         XCTAssertEqual(rows.first?.translation, "яблоко")
         XCTAssertEqual(rows.first?.transcription, "")
     }
+    func testParsesQuotedMultilineFieldsAndPreservesLineBreaks() throws {
+        let source = "word,translation,transcription,example\\r\\nhello,привет,,\"First line\\r\\nSecond line, with comma\"\\r\\n"
+        let rows = try WordImportParser.parse(source)
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows[0].example, "First line\\nSecond line, with comma")
+    }
+
+    func testRejectsUnclosedQuotedFieldInsteadOfSilentlyDroppingIt() {
+        XCTAssertThrowsError(try WordImportParser.parse("word,translation\\napple,яблоко\\nbook,\"книга"))
+    }
+
+    func testParsesQuotedDelimiterAndEscapedQuotesTogether() throws {
+        let rows = try WordImportParser.parse("word;translation;example\\nbook;книга;\"He said \"\"read; more\"\"\"")
+        XCTAssertEqual(rows.first?.example, "He said \"read; more\"")
+    }
+
 }

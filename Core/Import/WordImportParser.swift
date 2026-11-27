@@ -59,19 +59,18 @@ enum WordImportParser {
         case unsupportedFormat
     }
 
-    /// Parses tab-, comma-, or semicolon-delimited text. Columns:
-    /// word, translation, optional transcription, optional example.
+    /// Parses tab-, comma-, or semicolon-delimited text, including quoted fields
+    /// that contain delimiters, escaped quotes, and embedded line breaks.
     static func parse(_ source: String) throws -> [WordImportDraft] {
-        let lines = source
+        let normalized = source
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
-            .components(separatedBy: "\n")
-            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-        guard !lines.isEmpty else { throw ParseError.noRows }
+        guard !normalized.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ParseError.noRows
+        }
 
-        let delimiter = detectDelimiter(in: lines[0])
-        let fields = lines.compactMap { parseLine($0, delimiter: delimiter) }
-        guard !fields.isEmpty else { throw ParseError.noRows }
+        let delimiter = detectDelimiter(in: normalized.components(separatedBy: "\n").first ?? normalized)
+        let fields = try parseRecords(normalized, delimiter: delimiter)
         return try parse(rows: fields)
     }
 
@@ -109,8 +108,8 @@ enum WordImportParser {
     }
 
     private static func detectDelimiter(in line: String) -> Character {
-        let candidates: [Character] = ["\t", ";", ","]
-        return candidates.max { countUnquoted($0, in: line) < countUnquoted($1, in: line) } ?? "\t"
+        let candidates: [Character] = ["\\t", ";", ","]
+        return candidates.max { countUnquoted($0, in: line) < countUnquoted($1, in: line) } ?? "\\t"
     }
 
     private static func countUnquoted(_ delimiter: Character, in line: String) -> Int {
@@ -134,33 +133,76 @@ enum WordImportParser {
         return count
     }
 
-    private static func parseLine(_ line: String, delimiter: Character) -> [String]? {
+    private static func parseRecords(_ source: String, delimiter: Character) throws -> [[String]] {
+        var records: [[String]] = []
         var fields: [String] = []
         var field = ""
-        var quoted = false
-        let characters = Array(line)
+        var inQuotes = false
+        var afterClosingQuote = false
+        let characters = Array(source)
         var index = 0
+
+        func finishField() {
+            fields.append(field.trimmingCharacters(in: .whitespacesAndNewlines))
+            field = ""
+            afterClosingQuote = false
+        }
+
+        func finishRecord() {
+            finishField()
+            if fields.contains(where: { !$0.isEmpty }) {
+                records.append(fields)
+            }
+            fields = []
+        }
 
         while index < characters.count {
             let character = characters[index]
-            if character == "\"" {
-                if quoted && index + 1 < characters.count && characters[index + 1] == "\"" {
-                    field.append("\"")
-                    index += 1
+
+            if inQuotes {
+                if character == "\"" {
+                    if index + 1 < characters.count && characters[index + 1] == "\"" {
+                        field.append("\"")
+                        index += 1
+                    } else {
+                        inQuotes = false
+                        afterClosingQuote = true
+                    }
                 } else {
-                    quoted.toggle()
+                    field.append(character)
                 }
-            } else if character == delimiter && !quoted {
-                fields.append(field.trimmingCharacters(in: .whitespacesAndNewlines))
+            } else if afterClosingQuote {
+                if character == delimiter {
+                    finishField()
+                } else if character == "\n" {
+                    finishRecord()
+                } else if character.isWhitespace {
+                    // Ignore padding between a closing quote and the next separator.
+                } else {
+                    throw ParseError.unsupportedFormat
+                }
+            } else if character == delimiter {
+                finishField()
+            } else if character == "\n" {
+                finishRecord()
+            } else if character == "\"" {
+                guard field.trimmingCharacters(in: .whitespaces).isEmpty else {
+                    throw ParseError.unsupportedFormat
+                }
                 field = ""
+                inQuotes = true
             } else {
                 field.append(character)
             }
             index += 1
         }
-        guard !quoted else { return nil }
-        fields.append(field.trimmingCharacters(in: .whitespacesAndNewlines))
-        return fields
+
+        guard !inQuotes else { throw ParseError.unsupportedFormat }
+        if !field.isEmpty || !fields.isEmpty || afterClosingQuote {
+            finishRecord()
+        }
+        guard !records.isEmpty else { throw ParseError.noRows }
+        return records
     }
 
     private static func isHeader(_ fields: [String], columnIndices: [Int] = [0, 1]) -> Bool {
