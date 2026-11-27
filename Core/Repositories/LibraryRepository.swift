@@ -613,14 +613,34 @@ final class LibraryRepository {
                 WHERE text LIKE ? ESCAPE '\\' OR translation LIKE ? ESCAPE '\\'
                 ORDER BY text COLLATE NOCASE LIMIT 100
                 """, arguments: [pattern, pattern])
-            let matches = try words.map { word in
+            let wordIDs = words.map(\.id)
+            var setsByWordID: [String: [VocabularySet]] = [:]
+            if !wordIDs.isEmpty {
+                let placeholders = Array(repeating: "?", count: wordIDs.count).joined(separator: ", ")
                 let sets = try VocabularySet.fetchAll(db, sql: """
-                    SELECT vocabularySets.* FROM vocabularySets
+                    SELECT DISTINCT vocabularySets.* FROM vocabularySets
                     INNER JOIN set_words ON set_words.setID = vocabularySets.id
-                    WHERE set_words.wordID = ?
+                    WHERE set_words.wordID IN (\(placeholders))
                     ORDER BY vocabularySets.name COLLATE NOCASE
-                    """, arguments: [word.id])
-                return WordSearchMatch(word: word, sets: sets)
+                    """, arguments: StatementArguments(wordIDs))
+                let memberships = try Row.fetchAll(db, sql: """
+                    SELECT set_words.wordID AS wordID, set_words.setID AS setID
+                    FROM set_words
+                    INNER JOIN vocabularySets ON vocabularySets.id = set_words.setID
+                    WHERE set_words.wordID IN (\(placeholders))
+                    ORDER BY vocabularySets.name COLLATE NOCASE
+                    """, arguments: StatementArguments(wordIDs))
+                let setsByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
+                for membership in memberships {
+                    let wordID: String = membership["wordID"]
+                    let setID: String = membership["setID"]
+                    if let set = setsByID[setID] {
+                        setsByWordID[wordID, default: []].append(set)
+                    }
+                }
+            }
+            let matches = words.map { word in
+                WordSearchMatch(word: word, sets: setsByWordID[word.id] ?? [])
             }
             let sets = try VocabularySet.fetchAll(db, sql: """
                 SELECT * FROM vocabularySets WHERE name LIKE ? ESCAPE '\\'

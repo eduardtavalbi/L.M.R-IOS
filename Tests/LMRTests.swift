@@ -186,6 +186,15 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(Set(byOriginal.words[0].sets.map(\.id)), Set([foodSet.id, dailySet.id]))
         let byTranslation = try repository.searchLibrary("GREEN")
         XCTAssertEqual(byTranslation.words.map(\.word.id), [word.id])
+        
+        let standalone = try repository.createWord(
+            languageID: language.id,
+            text: "独立",
+            translation: "standalone entry"
+        )
+        let withoutSet = try repository.searchLibrary("standalone")
+        XCTAssertEqual(withoutSet.words.map(\.word.id), [standalone.id])
+        XCTAssertTrue(withoutSet.words[0].sets.isEmpty)
         let bySetName = try repository.searchLibrary("break")
         XCTAssertEqual(bySetName.sets.map(\.id), [foodSet.id])
         let byCategoryName = try repository.searchLibrary("drinks")
