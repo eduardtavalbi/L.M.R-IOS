@@ -196,9 +196,9 @@ struct AIGenerationView: View {
                         .disabled(isAnalyzingWeakWords || !hasSavedKey || targetLanguage == nil)
                         ForEach(weakWordInsights) { insight in
                             DisclosureGroup {
-                                Text("Почему сложно: \\(insight.difficultyReason)")
-                                Text("Что попробовать: \\(insight.recommendation)")
-                                Text("Мини-упражнение: \\(insight.practicePrompt)")
+                                Text("Почему сложно: \(insight.difficultyReason)")
+                                Text("Что попробовать: \(insight.recommendation)")
+                                Text("Мини-упражнение: \(insight.practicePrompt)")
                             } label: {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(insight.word).font(.headline)

@@ -110,7 +110,7 @@ struct AIWeakWordAnalysisRequest: Equatable {
                   $0.correctAnswers >= 0 && $0.incorrectAnswers > 0 &&
                   $0.streak >= 0 && $0.intervalDays >= 0
               }),
-              Set(cards.map(\\.id)).count == cards.count else {
+              Set(cards.map(\.id)).count == cards.count else {
             throw AIGenerationError.invalidRequest
         }
     }
