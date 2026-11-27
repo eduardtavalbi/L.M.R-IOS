@@ -453,8 +453,55 @@ final class LibraryRepository {
         try database.dbQueue.write { db in
             guard try Word.fetchOne(db, key: wordID) != nil else { throw LibraryRepositoryError.wordNotFound }
             let current = try LearningProgress.fetchOne(db, key: wordID) ?? LearningProgress(wordID: wordID)
-            var updated = SpacedRepetitionScheduler.applying(knewAnswer: knewAnswer, to: current, reviewedAt: reviewedAt)
+            let isFirstReview = current.lastReviewedAt == nil
+            let updated = SpacedRepetitionScheduler.applying(knewAnswer: knewAnswer, to: current, reviewedAt: reviewedAt)
             try updated.save(db)
+            let day = StudyActivity.dayKey(for: reviewedAt)
+            try db.execute(sql: """
+                INSERT INTO studyActivity (day, reviewCount, correctCount, incorrectCount, newWordsCount)
+                VALUES (?, 1, ?, ?, ?)
+                ON CONFLICT(day) DO UPDATE SET
+                    reviewCount = reviewCount + 1,
+                    correctCount = correctCount + excluded.correctCount,
+                    incorrectCount = incorrectCount + excluded.incorrectCount,
+                    newWordsCount = newWordsCount + excluded.newWordsCount
+                """, arguments: [day, knewAnswer ? 1 : 0, knewAnswer ? 0 : 1, isFirstReview ? 1 : 0])
+        }
+    }
+
+    func fetchLearningStatistics(for month: Date = .now, now: Date = .now) throws -> LearningStatistics {
+        try database.dbQueue.read { db in
+            let totalWords = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM words") ?? 0
+            let masteredWords = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM learningProgress WHERE intervalDays >= 7 AND streak >= 3") ?? 0
+            let totals = try Row.fetchOne(db, sql: """
+                SELECT COALESCE(SUM(reviewCount), 0) AS reviews,
+                       COALESCE(SUM(correctCount), 0) AS correct,
+                       COALESCE(SUM(incorrectCount), 0) AS incorrect,
+                       COUNT(*) AS studyDays
+                FROM studyActivity
+                """)
+            let allActivity = try StudyActivity.order(Column("day")).fetchAll(db)
+            let activeDays = Set(allActivity.filter { $0.reviewCount > 0 }.map(\.day))
+            let todayKey = StudyActivity.dayKey(for: now)
+            let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: now) ?? now
+            var cursor: Date? = activeDays.contains(todayKey) ? now : (activeDays.contains(StudyActivity.dayKey(for: yesterday)) ? yesterday : nil)
+            var streak = 0
+            while let date = cursor, activeDays.contains(StudyActivity.dayKey(for: date)) {
+                streak += 1
+                cursor = Calendar.current.date(byAdding: .day, value: -1, to: date)
+            }
+            let interval = Calendar.current.dateInterval(of: .month, for: month) ?? DateInterval(start: month, duration: 31 * 86400)
+            let firstDay = StudyActivity.dayKey(for: interval.start)
+            let lastDay = StudyActivity.dayKey(for: interval.end.addingTimeInterval(-1))
+            let monthActivity = allActivity.filter { $0.day >= firstDay && $0.day <= lastDay }
+            return LearningStatistics(
+                totalWords: totalWords, masteredWords: masteredWords,
+                totalReviews: totals?["reviews"] ?? 0,
+                correctAnswers: totals?["correct"] ?? 0,
+                incorrectAnswers: totals?["incorrect"] ?? 0,
+                studyDays: totals?["studyDays"] ?? 0,
+                currentStreak: streak, activity: monthActivity
+            )
         }
     }
 
