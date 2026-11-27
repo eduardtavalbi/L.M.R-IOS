@@ -50,16 +50,16 @@ struct LibraryBackup: Codable, Equatable {
 
     func validate() throws {
         guard formatVersion == Self.currentVersion else { throw LibraryBackupError.unsupportedVersion }
-        guard Self.hasUniqueIDs(languages.map(\\.id)),
-              Self.hasUniqueIDs(categories.map(\\.id)),
-              Self.hasUniqueIDs(sets.map(\\.id)),
-              Self.hasUniqueIDs(words.map(\\.id)),
-              Self.hasUniqueIDs(learningProgress.map(\\.wordID)),
-              Self.hasUniqueIDs(studyActivity.map(\\.day)) else {
+        guard Self.hasUniqueIDs(languages.map(\.id)),
+              Self.hasUniqueIDs(categories.map(\.id)),
+              Self.hasUniqueIDs(sets.map(\.id)),
+              Self.hasUniqueIDs(words.map(\.id)),
+              Self.hasUniqueIDs(learningProgress.map(\.wordID)),
+              Self.hasUniqueIDs(studyActivity.map(\.day)) else {
             throw LibraryBackupError.duplicateIdentifiers
         }
 
-        let languageIDs = Set(languages.map(\\.id))
+        let languageIDs = Set(languages.map(\.id))
         let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
         let setByID = Dictionary(uniqueKeysWithValues: sets.map { ($0.id, $0) })
         let wordByID = Dictionary(uniqueKeysWithValues: words.map { ($0.id, $0) })
