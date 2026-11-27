@@ -215,6 +215,7 @@ private struct LearningSessionView: View {
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).font(.title3).foregroundStyle(.secondary)
                 }
+                PronunciationControlsView(word: word, languageCode: store.language(id: set.languageID)?.code)
                 if activeMode == .flashcards && isRevealed {
                     Divider().padding(.horizontal, 30)
                     Text(word.translation)

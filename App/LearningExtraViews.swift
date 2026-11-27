@@ -181,6 +181,7 @@ private struct MultiSetLearningSessionView: View {
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).foregroundStyle(.secondary)
                 }
+                PronunciationControlsView(word: word, languageCode: store.language(id: sets.first?.languageID ?? "")?.code)
                 if activeMode == .flashcards && revealed {
                     Divider()
                     Text(word.translation).font(.title2.weight(.medium))

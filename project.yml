@@ -29,6 +29,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.eduardtavalbi.lmr
         INFOPLIST_KEY_CFBundleDisplayName: L.M.R.
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: L.M.R. uses the microphone so you can record and replay your pronunciation.
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "1"

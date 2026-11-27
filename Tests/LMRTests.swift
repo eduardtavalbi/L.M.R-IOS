@@ -7,6 +7,19 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(AppInfo.fullName, "Learn. Memorize. Repeat.")
     }
 
+    func testEnglishPronunciationVoiceOptions() {
+        XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "en"), ["en-US", "en-GB"])
+        XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "en-GB"), ["en-US", "en-GB"])
+        XCTAssertEqual(PronunciationVoiceOptions.defaultVoice(for: "en-GB"), "en-GB")
+        XCTAssertEqual(PronunciationVoiceOptions.defaultVoice(for: "zh-CN"), "zh-CN")
+    }
+
+    func testNonEnglishPronunciationUsesLanguageDefault() {
+        XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "zh-CN"), ["zh-CN"])
+        XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: nil), [])
+        XCTAssertEqual(PronunciationVoiceOptions.defaultVoice(for: nil), nil)
+    }
+
     func testLanguageCategoryAndNestedCategoryPersistence() throws {
         let database = try DatabaseManager.inMemory()
         let repository = LibraryRepository(database: database)
