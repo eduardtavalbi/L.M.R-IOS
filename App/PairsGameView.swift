@@ -110,7 +110,7 @@ struct PairsGameView: View {
     private var completionView: some View {
         VStack(spacing: 20) {
             Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 58))
+                .font(.largeTitle)
                 .foregroundStyle(.tint)
             Text("Все пары найдены!")
                 .font(.title2.weight(.semibold))
