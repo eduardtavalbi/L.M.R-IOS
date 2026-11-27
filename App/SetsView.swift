@@ -109,6 +109,7 @@ struct SetsView: View {
                         }
                     } label: {
                         Image(systemName: "arrow.up.arrow.down")
+                            .accessibilityLabel("Сортировка наборов")
                     }
                     .accessibilityLabel("Сортировка наборов")
                 }
