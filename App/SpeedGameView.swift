@@ -55,7 +55,7 @@ struct SpeedGameView: View {
             Spacer()
             VStack(spacing: 12) {
                 Text(word.text)
-                    .font(.system(size: 36, weight: .semibold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).weight(.semibold))
                     .multilineTextAlignment(.center).minimumScaleFactor(0.65)
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).font(.title3).foregroundStyle(.secondary)
@@ -92,7 +92,7 @@ struct SpeedGameView: View {
 
     private var resultView: some View {
         VStack(spacing: 18) {
-            Image(systemName: "bolt.circle.fill").font(.system(size: 58)).foregroundStyle(.tint)
+            Image(systemName: "bolt.circle.fill").font(.largeTitle).foregroundStyle(.tint)
             Text("Время!").font(.title2.weight(.semibold))
             Text("Очки: \(score)").font(.title.weight(.bold))
             Text("Правильных: \(correctCount) · Максимальная серия: \(bestStreak)")
