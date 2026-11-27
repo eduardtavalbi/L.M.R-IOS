@@ -8,6 +8,7 @@ struct PronunciationControlsView: View {
     @State private var synthesizer = AVSpeechSynthesizer()
     @State private var recorder: AVAudioRecorder?
     @State private var player: AVAudioPlayer?
+    @StateObject private var recognition = PronunciationRecognitionService()
     @State private var isRecording = false
     @State private var selectedVoiceCode = "en-US"
     @State private var message: String?
@@ -47,6 +48,23 @@ struct PronunciationControlsView: View {
                 .tint(isRecording ? .red : .accentColor)
             }
 
+            HStack(spacing: 12) {
+                Button {
+                    if recognition.isListening {
+                        recognition.stop()
+                    } else {
+                        recognition.start(expectedText: word.text, languageCode: languageCode)
+                    }
+                } label: {
+                    Label(
+                        recognition.isListening ? "Завершить проверку" : "Проверить произношение",
+                        systemImage: recognition.isListening ? "stop.fill" : "waveform"
+                    )
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(isRecording || languageCode == nil || languageCode?.isEmpty == true)
+            }
+
             if hasRecording {
                 Button(action: playRecording) {
                     Label("Моя запись", systemImage: "play.circle")
@@ -64,8 +82,28 @@ struct PronunciationControlsView: View {
                 .frame(maxWidth: 180)
             }
 
+            if recognition.isListening {
+                Label("Слушаю… произнеси слово", systemImage: "mic")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if let recognizedText = recognition.recognizedText {
+                VStack(spacing: 3) {
+                    Text("Распознано: \(recognizedText)")
+                        .font(.caption)
+                    if let feedback = recognition.feedback {
+                        Text(feedback)
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(PronunciationAssessment.matches(recognized: recognizedText, expected: word.text) ? .green : .secondary)
+                    }
+                }
+                .multilineTextAlignment(.center)
+            }
             if let message {
                 Text(message).font(.caption).foregroundStyle(.secondary)
+            }
+            if let recognitionError = recognition.errorMessage {
+                Text(recognitionError).font(.caption).foregroundStyle(.red).multilineTextAlignment(.center)
             }
         }
         .padding(.top, 4)
@@ -76,6 +114,7 @@ struct PronunciationControlsView: View {
             synthesizer.stopSpeaking(at: .immediate)
             if isRecording { recorder?.stop() }
             player?.stop()
+            recognition.stop()
         }
         .alert("Аудио", isPresented: Binding(
             get: { error != nil },

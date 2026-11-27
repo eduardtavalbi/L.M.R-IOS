@@ -14,14 +14,14 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #77 is green.
+- CI: GitHub Actions on macOS; latest verified run #91 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `eac0c6d` — validated local backup/restore and date-precision-safe backup round-trip tests.
-- Workflow run #86: successful iOS Simulator build and XCTest, including backup tests.
-- CSV export and per-set review/error statistics are implemented in commits `e1837de` and `2f92bf1`; verification is pending after correcting a BOM assertion in commit `2450102` (CI #89).
+- Commit: `3b7357c` — reference speech, personal voice recording/playback, and English US/UK voice selection.
+- Workflow run #91: successful iOS Simulator build and XCTest, including pronunciation voice-option tests.
+- CSV export and per-set review/error statistics are verified by CI #89.
 - Import coverage includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
 - OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
 - Gemini API tests cover a successful response, HTTP 429 mapping, and missing API-key handling.
@@ -39,6 +39,12 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date.
 - Flashcards, multiple-choice, typed-answer sessions, due-review queue, weak-word practice, and Mix Sets.
 - Pairs, Audio choice (system TTS), Speed typing, and Missing-word games.
+
+### Pronunciation
+- System text-to-speech reference playback, with US/UK English voice choice.
+- Per-word AAC voice recording and playback stored locally on the device.
+- Speech recognition compares the recognized text with the card's original word and shows transparent text-match feedback. It does not claim acoustic scoring or Chinese tone analysis.
+- Speech and microphone permission descriptions are configured in the generated Info.plist.
 
 ### Import
 - Paste text, CSV/TSV/TXT, XLSX with worksheet/column mapping, PDF text extraction, image OCR, and scanned-PDF OCR.
@@ -60,7 +66,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ### Profile and learning history
 - Seven milestone achievements with live progress and unlock states.
 - Daily local notification reminders with an in-app time picker and permission handling.
-- Set detail statistics include total answers and incorrect answers alongside accuracy and mastered-word progress (CI verification pending).
+- Set detail statistics include total answers and incorrect answers alongside accuracy and mastered-word progress.
 - Versioned daily activity table, updated atomically with every SRS answer.
 - Profile dashboard: vocabulary total, mastered count, total reviews, answer accuracy, current study streak, and total study days.
 - Monthly activity calendar and monthly totals for study days, reviews, and first-time reviewed words.
@@ -69,13 +75,14 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ### Backup and export
 - JSON backup includes languages, nested categories, sets, words, shared-word memberships, SRS progress, and study activity.
 - Restore validates the schema and references before replacing the library in a database transaction; the UI requires explicit destructive-action confirmation.
-- CSV export includes vocabulary, translations, transcription, notes, and examples, with UTF-8 BOM and quoting for delimiters, quotes, and multiline fields. Implementation is awaiting CI confirmation.
+- CSV export includes vocabulary, translations, transcription, notes, and examples, with UTF-8 BOM and quoting for delimiters, quotes, and multiline fields.
 
 ## Known gaps
 
 - Sets tab still needs category-aware search and sorting controls.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- First-run onboarding, pronunciation recording/recognition feedback, English UK/US voice selection, Chinese tone guidance, accessibility/Dynamic Type, and device installation workflow remain.
+- First-run onboarding, Chinese tone guidance, accessibility/Dynamic Type, and device installation workflow remain.
+- Speech recognition availability and quality depend on iOS language support, device settings, and network/on-device recognizer behavior.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 
 ## Verification policy
@@ -84,4 +91,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Next: finish CI verification for CSV export and per-set statistics, then implement pronunciation controls in focused stages (reference playback, voice recording/playback, speech recognition, and language-specific guidance). Device packaging remains a separate final milestone.
+Next: verify the speech-recognition feedback stage in CI, then implement language-specific Chinese pinyin/tone guidance. Device packaging remains a separate final milestone.

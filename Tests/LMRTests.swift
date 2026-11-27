@@ -14,6 +14,21 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(PronunciationVoiceOptions.defaultVoice(for: "zh-CN"), "zh-CN")
     }
 
+    func testPronunciationAssessmentNormalizesCaseDiacriticsAndPunctuation() {
+        XCTAssertTrue(PronunciationAssessment.matches(recognized: "HÉLLO!", expected: "hello"))
+        XCTAssertTrue(PronunciationAssessment.matches(recognized: " nǐ hǎo ", expected: "nihao"))
+        XCTAssertTrue(PronunciationAssessment.matches(recognized: "你好。", expected: "你好"))
+        XCTAssertFalse(PronunciationAssessment.matches(recognized: "你好", expected: "您好"))
+        XCTAssertFalse(PronunciationAssessment.matches(recognized: "   ", expected: "hello"))
+    }
+
+    func testSpeechRecognitionLocaleUsesLanguageSpecificDefaults() {
+        XCTAssertEqual(PronunciationVoiceOptions.recognitionLocale(for: "zh"), "zh-CN")
+        XCTAssertEqual(PronunciationVoiceOptions.recognitionLocale(for: "en-GB"), "en-GB")
+        XCTAssertEqual(PronunciationVoiceOptions.recognitionLocale(for: "ru"), "ru-RU")
+        XCTAssertNil(PronunciationVoiceOptions.recognitionLocale(for: nil))
+    }
+
     func testNonEnglishPronunciationUsesLanguageDefault() {
         XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: "zh-CN"), ["zh-CN"])
         XCTAssertEqual(PronunciationVoiceOptions.availableVoices(for: nil), [])
