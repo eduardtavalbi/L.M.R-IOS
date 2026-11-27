@@ -42,7 +42,7 @@ struct FirstRunOnboardingView: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: selectedCodes.contains(language.code) ? "checkmark.circle.fill" : "circle")
                                         .font(.title3)
-                                        .foregroundStyle(selectedCodes.contains(language.code) ? .tint : .secondary)
+                                        .foregroundStyle(selectedCodes.contains(language.code) ? Color.accentColor : Color.secondary)
                                     Text(language.name).foregroundStyle(.primary)
                                     Spacer()
                                 }
