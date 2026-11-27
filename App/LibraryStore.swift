@@ -88,6 +88,11 @@ final class LibraryStore: ObservableObject {
         var seen = Set<String>()
         return Set(setIDs).sorted().flatMap { words(setID: $0) }.filter { seen.insert($0.id).inserted }
     }
+    func learningStatistics(for month: Date = .now) -> LearningStatistics {
+        do { return try repository?.fetchLearningStatistics(for: month) ?? .empty }
+        catch { lastError = error.localizedDescription; return .empty }
+    }
+
     func recordLearningAnswer(wordID: String, knewAnswer: Bool) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.recordLearningAnswer(wordID: wordID, knewAnswer: knewAnswer)
