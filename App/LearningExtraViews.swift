@@ -53,6 +53,9 @@ struct LearningSetPickerView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(set.name)
+                    .accessibilityValue(selectedIDs.contains(set.id) ? "Выбран" : "Не выбран")
+                    .accessibilityAddTraits(selectedIDs.contains(set.id) ? .isSelected : [])
                 }
             } footer: {
                 Text(purpose.description)
@@ -115,6 +118,9 @@ struct AIMixSetPickerView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(set.name)
+                    .accessibilityValue(selectedIDs.contains(set.id) ? "Выбран" : "Не выбран")
+                    .accessibilityAddTraits(selectedIDs.contains(set.id) ? .isSelected : [])
                 }
             }
 
