@@ -110,7 +110,7 @@ struct AIMixSetPickerView: View {
                             }
                             Spacer()
                             Image(systemName: selectedIDs.contains(set.id) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(selectedIDs.contains(set.id) ? .tint : .tertiary)
+                                .foregroundStyle(selectedIDs.contains(set.id) ? Color.accentColor : Color.secondary)
                         }
                         .contentShape(Rectangle())
                     }
@@ -249,7 +249,7 @@ private struct ExtraLearningModeView: View {
             Section {
                 ForEach([StudyMode.flashcards, .multipleChoice, .typing], id: \.self) { mode in
                     NavigationLink {
-                        MultiSetLearningSessionView(store: store, sets: sets, purpose: purpose, mode: mode)
+                        MultiSetLearningSessionView(store: store, sets: sets, purpose: purpose, mode: mode, selectedWordIDs: nil)
                     } label: {
                         Label(mode.title, systemImage: mode.symbol)
                     }
@@ -269,7 +269,7 @@ private struct MultiSetLearningSessionView: View {
     let sets: [VocabularySet]
     let purpose: LearningExtraPurpose
     let mode: StudyMode
-    let selectedWordIDs: [String]? = nil
+    let selectedWordIDs: [String]?
 
     @State private var words: [Word] = []
     @State private var allWords: [Word] = []
