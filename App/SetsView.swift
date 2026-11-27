@@ -5,6 +5,7 @@ struct SetsView: View {
     @ObservedObject var store: LibraryStore
     @State private var searchText = ""
     @State private var showingCreateSet = false
+    @State private var sortOrder: SetCatalogueSort = .name
 
     private var query: String {
         searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -23,13 +24,14 @@ struct SetsView: View {
                     List {
                         ForEach(store.languages) { language in
                             let sets = store.allSets(languageID: language.id)
-                            let visibleSets = query.isEmpty
+                            let filteredSets = query.isEmpty
                                 ? sets
                                 : sets.filter { $0.name.localizedCaseInsensitiveContains(query) }
+                            let visibleSets = sortOrder.sorted(filteredSets, wordCount: { store.words(setID: $0.id).count })
 
                             Section {
                                 if query.isEmpty {
-                                    let uncategorized = sets.filter { $0.categoryID == nil }
+                                    let uncategorized = sortOrder.sorted(sets.filter { $0.categoryID == nil }, wordCount: { store.words(setID: $0.id).count })
                                     if !uncategorized.isEmpty {
                                         DisclosureGroup("Без категории · \(uncategorized.count)") {
                                             ForEach(uncategorized) { set in
@@ -37,12 +39,13 @@ struct SetsView: View {
                                             }
                                         }
                                     }
-                                    ForEach(store.categories(languageID: language.id).filter { $0.parentID == nil }) { category in
+                                    ForEach(store.categories(languageID: language.id).filter { $0.parentID == nil }.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }) { category in
                                         CategorySetGroup(
                                             store: store,
                                             language: language,
                                             category: category,
-                                            query: query
+                                            query: query,
+                                            sortOrder: sortOrder
                                         )
                                     }
                                     if sets.isEmpty && store.categories(languageID: language.id).isEmpty {
@@ -87,6 +90,18 @@ struct SetsView: View {
             .searchable(text: $searchText, prompt: "Поиск по названию набора")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Picker("Сортировка", selection: $sortOrder) {
+                            ForEach(SetCatalogueSort.allCases) { option in
+                                Text(option.title).tag(option)
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                    }
+                    .accessibilityLabel("Сортировка наборов")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { showingCreateSet = true } label: {
                         Image(systemName: "plus")
                     }
@@ -123,20 +138,57 @@ struct SetsView: View {
     }
 }
 
+private enum SetCatalogueSort: String, CaseIterable, Identifiable {
+    case name
+    case newest
+    case mostWords
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .name: return "По названию"
+        case .newest: return "Сначала новые"
+        case .mostWords: return "По количеству слов"
+        }
+    }
+
+    func sorted(_ sets: [VocabularySet], wordCount: (VocabularySet) -> Int) -> [VocabularySet] {
+        switch self {
+        case .name:
+            return sets.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        case .newest:
+            return sets.sorted {
+                if $0.createdAt != $1.createdAt { return $0.createdAt > $1.createdAt }
+                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            }
+        case .mostWords:
+            return sets.sorted {
+                let left = wordCount($0)
+                let right = wordCount($1)
+                if left != right { return left > right }
+                return $0.name.localizedStandardCompare($1.name) == .orderedAscending
+            }
+        }
+    }
+}
+
 private struct CategorySetGroup: View {
     @ObservedObject var store: LibraryStore
     let language: Language
     let category: Category
     let query: String
+    let sortOrder: SetCatalogueSort
 
     private var sets: [VocabularySet] {
         let all = store.sets(languageID: language.id, categoryID: category.id)
-        guard !query.isEmpty else { return all }
-        return all.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        let filtered = query.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        return sortOrder.sorted(filtered, wordCount: { store.words(setID: $0.id).count })
     }
 
     private var children: [Category] {
         store.categories(languageID: language.id, parentID: category.id)
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
     var body: some View {
@@ -154,7 +206,7 @@ private struct CategorySetGroup: View {
                 }
             }
             ForEach(children) { child in
-                CategorySetGroup(store: store, language: language, category: child, query: query)
+                CategorySetGroup(store: store, language: language, category: child, query: query, sortOrder: sortOrder)
             }
             if sets.isEmpty && children.isEmpty {
                 Text("Пустая категория")
