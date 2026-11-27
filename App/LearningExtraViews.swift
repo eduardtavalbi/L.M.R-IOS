@@ -346,6 +346,8 @@ private struct MultiSetLearningSessionView: View {
     private func card(_ word: Word) -> some View {
         VStack(spacing: 20) {
             ProgressView(value: Double(index), total: Double(max(words.count, 1)))
+                .accessibilityLabel("Прогресс тренировки")
+                .accessibilityValue("Карточка \(index + 1) из \(words.count)")
             Spacer(minLength: 4)
             VStack(spacing: 14) {
                 Text(word.text)
