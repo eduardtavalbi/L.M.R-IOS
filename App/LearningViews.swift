@@ -205,6 +205,8 @@ private struct LearningSessionView: View {
     private func sessionView(word: Word) -> some View {
         VStack(spacing: 20) {
             ProgressView(value: Double(currentIndex), total: Double(max(words.count, 1)))
+                .accessibilityLabel("Прогресс тренировки")
+                .accessibilityValue("Карточка \(currentIndex + 1) из \(words.count)")
                 .tint(.accentColor)
 
             if mode == .multipleChoice && activeMode == .flashcards {
