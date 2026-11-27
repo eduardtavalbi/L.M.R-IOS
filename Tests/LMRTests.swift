@@ -410,7 +410,8 @@ final class LMRTests: XCTestCase {
         ]
         let data = WordCSVExporter.data(for: words)
         let csv = try XCTUnwrap(String(data: data, encoding: .utf8))
-        XCTAssertTrue(csv.hasPrefix("\u{FEFF}Word,Translation,Transcription,Notes,Example"))
+        XCTAssertEqual(Array(data.prefix(3)), [0xEF, 0xBB, 0xBF])
+        XCTAssertTrue(csv.hasPrefix("Word,Translation,Transcription,Notes,Example"))
         XCTAssertTrue(csv.contains("\"你好, 世界\""))
         XCTAssertTrue(csv.contains("\"Фраза \"\"вежливая\"\"\""))
         XCTAssertTrue(csv.contains("\"你好\n朋友\""))
