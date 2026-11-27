@@ -46,3 +46,58 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPad (A16),OS=26.5' \
             CODE_SIGNING_ALLOWED=NO \
             test
+
+  package-sidestore:
+    name: Package unsigned IPA for SideStore
+    needs: build-and-test
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Build device Release app (unsigned)
+        run: |
+          xcodebuild \\
+            -project LMR.xcodeproj \\
+            -scheme LMR \\
+            -configuration Release \\
+            -sdk iphoneos \\
+            -destination 'generic/platform=iOS' \\
+            -derivedDataPath build/DerivedData \\
+            CODE_SIGNING_ALLOWED=NO \\
+            CODE_SIGNING_REQUIRED=NO \\
+            CODE_SIGN_IDENTITY='' \\
+            build
+
+      - name: Assemble and validate IPA
+        run: |
+          APP_PATH="build/DerivedData/Build/Products/Release-iphoneos/LMR.app"
+          test -d "$APP_PATH"
+          mkdir -p build/ipa/Payload
+          ditto "$APP_PATH" build/ipa/Payload/LMR.app
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' build/ipa/Payload/LMR.app/Info.plist | grep -Fx 'com.eduardtavalbi.lmr'
+          /usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' build/ipa/Payload/LMR.app/Info.plist
+          cd build/ipa
+          /usr/bin/zip -qry LMR-unsigned.ipa Payload
+          /usr/bin/unzip -t LMR-unsigned.ipa
+          /usr/bin/unzip -l LMR-unsigned.ipa | grep -F 'Payload/LMR.app/Info.plist'
+
+      - name: Upload SideStore IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LMR-SideStore-unsigned-IPA
+          path: build/ipa/LMR-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14

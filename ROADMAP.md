@@ -72,15 +72,18 @@ Check off work only after implementation and successful GitHub Actions verificat
 ## Phase 8 — Quality and delivery
 - [ ] Complete app-wide accessibility audit (core Dynamic Type and VoiceOver improvements are implemented and CI-verified in learning, games, onboarding, import, and library flows; remaining screens and Voice Control/contrast still need review).
 - [ ] Light/dark appearance polish and performance checks.
-- [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, and Gemini data-transfer disclosures implemented; speech-recognition data handling disclosure and local audio recording backup/retention policy remain; source-wide logging, retention, and network review remains).
-- [ ] Apple signing and SideStore-compatible packaging workflow.
+- [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, Gemini transfer disclosures, on-device-only speech recognition where supported, and exclusion of local voice recordings from backup are implemented; broader logging, network, temporary-file retention, and deletion review remains).
+- [ ] Validate the unsigned iOS-device Release IPA packaging job for SideStore (workflow implementation added; artifact and install still unverified).
 - [ ] Verify installation on the owner's iPhone.
 
 ## Current next task
 
-Continue the source-wide privacy review: add a clear speech-recognition data-processing disclosure and decide/implement local voice-recording backup and retention behavior. Continue accessibility and device packaging work in parallel. Device installation claims remain separate from Simulator CI verification.
+Validate the unsigned device-Release IPA artifact and SideStore installation on the owner's iPhone. Continue the broader privacy/network and accessibility audits. Device installation claims remain separate from Simulator CI verification.
 
 ## Latest verification
+
+- `dbed46e` — backup restore rejects duplicate memberships before transaction changes; GitHub Actions run #45994078206 passed (iOS Simulator build and XCTest).
+- `5305838` — on-device-only speech recognition where supported and local voice recordings excluded from backup; GitHub Actions run #45991975035 passed.
 
 - `8a586ab` — batched global-search word-to-set lookup; GitHub Actions run #45990196080 passed.
 - `ee5f703` — SQL-based set word and due-review counts; GitHub Actions run #45988166494 passed.

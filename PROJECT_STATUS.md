@@ -14,11 +14,13 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #45986246891 on commit `7c19156` is green (iOS Simulator build and XCTest).
+- CI: GitHub Actions on macOS; latest verified baseline run #45994078206 on commit `dbed46e` is green (iOS Simulator build and XCTest).
 - Development machine: Windows; Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
+- Commit: `dbed46e` — backup restore now rejects duplicate word-to-set memberships before modifying the database; iOS Simulator build and XCTest passed in workflow run #45994078206.
+- Commit: `5305838` — speech recognition is on-device-only when supported; recordings are stored under Application Support and excluded from backup. CI run #45991975035 passed.
 - Commit: `8a586ab` — batched global-search word-to-set lookup; iOS Simulator build and XCTest passed in workflow run #45990196080.
 - Commit: `ee5f703` — SQL-based set word and due-review counts; iOS Simulator build and XCTest passed in workflow run #45988166494.
 - Commit: `7c19156` — Gemini data-processing disclosures; iOS Simulator build and XCTest passed in workflow run #45986246891.
@@ -49,8 +51,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ### Pronunciation
 - System text-to-speech reference playback, with US/UK English voice choice.
-- Per-word AAC voice recording and playback stored locally on the device.
-- Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; no acoustic score or tone analysis is claimed. iOS Speech framework processing behavior can depend on locale/device and may involve Apple's service; a clear in-app disclosure and explicit on-device availability handling remain to be completed.
+- Per-word AAC voice recording and playback stored locally under Application Support; the recording directory is excluded from iOS backup.
+- Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; requests require on-device recognition. If the selected locale/device does not support it, recognition does not start and audio is not sent as a fallback. No acoustic score or tone analysis is claimed.
 - Chinese cards show pinyin tone hints for tone diacritics and numeric notation (1–5); these are reading aids, not microphone-based tone scoring.
 
 ### Import
@@ -86,9 +88,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ## Known gaps
 
 - Accessibility and Dynamic Type remain partial; finish remaining screens, Voice Control, and contrast review.
-- Privacy/network review remains partial. Speech-recognition data handling needs a user-facing disclosure; locally recorded pronunciation audio is currently stored under Documents and its backup/retention behavior needs an explicit decision.
+- Privacy/network review remains partial: speech recognition is local-only where supported and recordings are excluded from backup, but broader logging, network, temporary-file retention, and deletion behavior still need a source-wide audit.
 - Appearance polish, broader performance profiling, and device packaging remain.
-- Simulator CI success does not mean a signed/installable iPhone build has been produced.
+- Simulator CI success does not mean a signed/installable iPhone build has been produced. The workflow now has a separate unsigned device-Release IPA packaging job that is intended for SideStore to re-sign; it must pass its first real run and be tested on the owner's iPhone before delivery is considered verified.
 - Speech recognition quality depends on iOS language support and device settings; pinyin tone hints are not acoustic tone scoring.
 - AI Mix Sets currently limits a single recommendation request to 3–100 unique cards; larger libraries require narrowing the selected sets.
 
@@ -98,4 +100,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Complete the app-wide accessibility audit, then finish the privacy/network review and performance checks before implementing and validating SideStore-compatible delivery.
+Validate the new unsigned IPA packaging job, then test SideStore installation on the owner's iPhone. Continue the app-wide accessibility and privacy/network audits.
