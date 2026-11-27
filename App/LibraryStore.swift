@@ -93,7 +93,13 @@ final class LibraryStore: ObservableObject {
     }
 
     func dueWordCount(setID: String, dueAt: Date = .now) -> Int {
-        learningWords(setID: setID, dueAt: dueAt).count
+        do { return try repository?.fetchDueWordCount(inSet: setID, dueAt: dueAt) ?? 0 }
+        catch { lastError = error.localizedDescription; return 0 }
+    }
+
+    func wordCount(setID: String) -> Int {
+        do { return try repository?.fetchWordCount(inSet: setID) ?? 0 }
+        catch { lastError = error.localizedDescription; return 0 }
     }
 
     func learningWords(setIDs: [String], dueAt: Date = .now) -> [Word] {

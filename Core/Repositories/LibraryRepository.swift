@@ -453,6 +453,28 @@ final class LibraryRepository {
 
     /// Returns new words and reviews whose scheduled due date has arrived.
     /// Future-due cards stay out of the active queue until they are ready.
+    func fetchWordCount(inSet setID: String) throws -> Int {
+        try database.dbQueue.read { db in
+            try Int.fetchOne(
+                db,
+                sql: "SELECT COUNT(*) FROM set_words WHERE setID = ?",
+                arguments: [setID]
+            ) ?? 0
+        }
+    }
+
+    func fetchDueWordCount(inSet setID: String, dueAt: Date = .now) throws -> Int {
+        try database.dbQueue.read { db in
+            try Int.fetchOne(db, sql: """
+                SELECT COUNT(DISTINCT words.id) FROM words
+                INNER JOIN set_words ON set_words.wordID = words.id
+                LEFT JOIN learningProgress ON learningProgress.wordID = words.id
+                WHERE set_words.setID = ?
+                  AND (learningProgress.dueAt IS NULL OR learningProgress.dueAt <= ?)
+                """, arguments: [setID, dueAt]) ?? 0
+        }
+    }
+
     func fetchLearningQueue(inSet setID: String, dueAt: Date = .now) throws -> [Word] {
         try database.dbQueue.read { db in
             try Word.fetchAll(db, sql: """

@@ -310,7 +310,7 @@ struct SetRow: View {
             Image(systemName: "rectangle.stack").foregroundStyle(.tint).frame(width: 34)
             VStack(alignment: .leading, spacing: 3) {
                 Text(set.name).font(.body.weight(.medium))
-                Text("\(store.words(setID: set.id).count) слов").font(.caption).foregroundStyle(.secondary)
+                Text("\(store.wordCount(setID: set.id)) слов").font(.caption).foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 3)
