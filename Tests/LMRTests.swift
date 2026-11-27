@@ -336,7 +336,7 @@ final class LMRTests: XCTestCase {
 
     func testAchievementsUnlockAtTheirDefinedMilestones() {
         let empty = LearningStatistics.empty
-        XCTAssertFalse(StudyAchievement.all(for: empty).contains(where: \\.isUnlocked))
+        XCTAssertFalse(StudyAchievement.all(for: empty).contains(where: \.isUnlocked))
 
         var progress = empty
         progress.totalWords = 50
