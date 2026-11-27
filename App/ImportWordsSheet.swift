@@ -242,7 +242,7 @@ struct ImportWordsSheet: View {
     private func resultView(_ summary: WordImportSummary) -> some View {
         VStack(spacing: 18) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 54))
+                .font(.largeTitle)
                 .foregroundStyle(.green)
             Text("Импорт завершён")
                 .font(.title2.weight(.semibold))
