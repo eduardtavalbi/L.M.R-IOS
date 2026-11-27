@@ -45,6 +45,8 @@ struct MissingWordGameView: View {
             .foregroundStyle(.secondary)
 
             ProgressView(value: Double(index), total: Double(max(words.count, 1)))
+                .accessibilityLabel("Прогресс игры")
+                .accessibilityValue("Вопрос \(index + 1) из \(words.count)")
 
             Spacer(minLength: 12)
 
