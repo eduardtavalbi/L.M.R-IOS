@@ -220,6 +220,19 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
+    func updateWordDetails(_ word: Word, transcription: String?, notes: String?, example: String?) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        try repository.updateWord(
+            word.id,
+            text: word.text,
+            translation: word.translation,
+            transcription: transcription,
+            notes: notes,
+            example: example
+        )
+        objectWillChange.send()
+    }
+
     func deleteLanguage(_ id: String) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.deleteLanguage(id)

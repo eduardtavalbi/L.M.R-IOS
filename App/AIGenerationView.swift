@@ -1,5 +1,13 @@
 import SwiftUI
 
+private struct AIWordEnrichmentDraft: Identifiable {
+    let id: String
+    let original: Word
+    var transcription: String
+    var example: String
+    var explanation: String
+}
+
 private extension String {
     var nilIfEmpty: String? { isEmpty ? nil : self }
 }
@@ -18,7 +26,7 @@ struct AIGenerationView: View {
     @State private var drafts: [AIGeneratedWord] = []
     @State private var isGenerating = false
     @State private var errorMessage: String?
-    @State private var savedMessage: String?
+    @State private var savedMessage: String?\n    @State private var enrichmentDrafts: [AIWordEnrichmentDraft] = []\n    @State private var isEnriching = false
 
     private let secretStore: SecretStore = KeychainSecretStore()
     private var targetLanguage: Language? { store.language(id: targetLanguageID) }
@@ -125,7 +133,46 @@ struct AIGenerationView: View {
                     .disabled(isGenerating || topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || targetLanguage == nil || !hasSavedKey)
                 }
 
-                if !drafts.isEmpty {
+
+                if !selectedSetID.isEmpty {
+                    Section {
+                        Text("AI дополнит только пустые поля. Слова, переводы и уже заполненные данные останутся без изменений.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Button {
+                            Task { await enrichSelectedSet() }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if isEnriching { ProgressView().padding(.trailing, 8) }
+                                Text(isEnriching ? "Анализирую карточки…" : "Обогатить карточки выбранного набора")
+                                Spacer()
+                            }
+                        }
+                        .disabled(isEnriching || !hasSavedKey || targetLanguage == nil)
+                        ForEach($enrichmentDrafts) { $draft in
+                            DisclosureGroup {
+                                TextField("Транскрипция / пиньинь", text: $draft.transcription)
+                                TextField("Пример", text: $draft.example, axis: .vertical)
+                                TextField("Пояснение", text: $draft.explanation, axis: .vertical)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(draft.original.text).font(.headline)
+                                    Text(draft.original.translation).font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        if !enrichmentDrafts.isEmpty {
+                            Button("Сохранить обогащение для \(enrichmentDrafts.count) карточек") {
+                                saveEnrichment()
+                            }
+                            Button("Отменить обогащение", role: .destructive) { enrichmentDrafts = [] }
+                        }
+                    } header: {
+                        Text("AI-обогащение набора")
+                    }
+                }
+\n                if !drafts.isEmpty {
                     Section {
                         Text("\(drafts.count) карточек · проверь и отредактируй перед сохранением")
                             .font(.subheadline)
@@ -208,6 +255,70 @@ struct AIGenerationView: View {
                 count: count
             )
             drafts = try await GeminiVocabularyProvider(secretStore: secretStore).generateVocabulary(for: request)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+
+    @MainActor
+    private func enrichSelectedSet() async {
+        isEnriching = true
+        defer { isEnriching = false }
+        do {
+            let existing = store.words(setID: selectedSetID)
+            guard !existing.isEmpty else {
+                errorMessage = "В выбранном наборе пока нет карточек."
+                return
+            }
+            guard existing.count <= 100 else {
+                errorMessage = "За один запрос можно обработать не более 100 карточек. Раздели набор на несколько частей."
+                return
+            }
+            let request = AIEnrichmentRequest(
+                words: existing.map {
+                    AIGeneratedWord(
+                        text: $0.text,
+                        translation: $0.translation,
+                        transcription: $0.transcription,
+                        example: $0.example,
+                        explanation: $0.notes
+                    )
+                },
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage?.name ?? ""
+            )
+            let result = try await GeminiVocabularyProvider(secretStore: secretStore).enrichVocabulary(request)
+            guard result.count == existing.count else {
+                throw AIGenerationError.invalidResponse
+            }
+            enrichmentDrafts = zip(existing, result).map { word, enriched in
+                AIWordEnrichmentDraft(
+                    id: word.id,
+                    original: word,
+                    transcription: word.transcription ?? enriched.transcription ?? "",
+                    example: word.example ?? enriched.example ?? "",
+                    explanation: word.notes ?? enriched.explanation ?? ""
+                )
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func saveEnrichment() {
+        do {
+            for draft in enrichmentDrafts {
+                try store.updateWordDetails(
+                    draft.original,
+                    transcription: draft.original.transcription ?? draft.transcription.nilIfEmpty,
+                    notes: draft.original.notes ?? draft.explanation.nilIfEmpty,
+                    example: draft.original.example ?? draft.example.nilIfEmpty
+                )
+            }
+            let count = enrichmentDrafts.count
+            enrichmentDrafts = []
+            savedMessage = "Обновлено карточек: \(count). Существующие заполненные поля сохранены."
         } catch {
             errorMessage = error.localizedDescription
         }
