@@ -58,6 +58,9 @@ struct LibraryBackup: Codable, Equatable {
               Self.hasUniqueIDs(studyActivity.map(\.day)) else {
             throw LibraryBackupError.duplicateIdentifiers
         }
+        guard Self.hasUniqueMemberships(memberships) else {
+            throw LibraryBackupError.duplicateMemberships
+        }
 
         let languageIDs = Set(languages.map(\.id))
         let categoryByID = Dictionary(uniqueKeysWithValues: categories.map { ($0.id, $0) })
@@ -104,6 +107,13 @@ struct LibraryBackup: Codable, Equatable {
     private static func hasUniqueIDs(_ ids: [String]) -> Bool {
         Set(ids).count == ids.count
     }
+
+    private static func hasUniqueMemberships(_ memberships: [LibraryBackupMembership]) -> Bool {
+        var seen = Set<String>()
+        return memberships.allSatisfy { membership in
+            seen.insert("\(membership.setID)\u{0}\(membership.wordID)").inserted
+        }
+    }
 }
 
 struct LibraryBackupMembership: Codable, Equatable {
@@ -114,5 +124,6 @@ struct LibraryBackupMembership: Codable, Equatable {
 enum LibraryBackupError: Error, Equatable {
     case unsupportedVersion
     case duplicateIdentifiers
+    case duplicateMemberships
     case invalidRelationships
 }

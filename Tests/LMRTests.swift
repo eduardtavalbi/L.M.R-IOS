@@ -473,6 +473,30 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\.id), [set.id])
     }
 
+    func testBackupRejectsDuplicateMembershipsWithoutChangingExistingLibrary() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "English")
+        let set = try repository.createSet(languageID: language.id, name: "Existing")
+        let word = Word(languageID: language.id, text: "hello", translation: "привет")
+        let membership = LibraryBackupMembership(setID: set.id, wordID: word.id)
+        let invalid = LibraryBackup(
+            languages: [language],
+            categories: [],
+            sets: [set],
+            words: [word],
+            memberships: [membership, membership],
+            learningProgress: [],
+            studyActivity: []
+        )
+
+        XCTAssertThrowsError(try repository.restoreBackup(invalid)) { error in
+            XCTAssertEqual(error as? LibraryBackupError, .duplicateMemberships)
+        }
+        XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\.id), [set.id])
+        XCTAssertTrue(try repository.fetchWords(inSet: set.id).isEmpty)
+    }
+
+
     
     func testCSVExportEscapesFieldsAndIncludesOptionalData() throws {
         let words = [
