@@ -26,7 +26,7 @@ struct ContentView: View {
                 .tabItem { Label("Наборы", systemImage: "square.grid.2x2") }
                 .tag(AppTab.sets)
 
-            PlaceholderView(title: "AI", symbol: "sparkles")
+            AIGenerationView(store: store)
                 .tabItem { Label("AI", systemImage: "sparkles") }
                 .tag(AppTab.ai)
 

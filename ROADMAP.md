@@ -3,28 +3,24 @@
 Check off work only after implementation and successful GitHub Actions verification.
 
 ## Phase 0 — Repository foundation
-
 - [x] SwiftUI/XcodeGen project skeleton and five-tab navigation.
 - [x] GitHub Actions iOS Simulator build and XCTest.
 
 ## Phase 1 — Domain model and local persistence
-
 - [x] GRDB-backed SQLite database, migrations, foreign keys, and indexes.
 - [x] Language, nested category, vocabulary set, word, membership, and learning progress models.
 - [x] Repository CRUD, relationships, shared words, and duplicate policies.
 - [x] Isolated persistence and repository tests.
 
 ## Phase 2 — Library experience
-
 - [ ] App bootstrap and dependency container.
 - [ ] First-run onboarding.
 - [x] Library navigation, nested categories, uncategorized sets, set movement.
-- [x] Word creation/editing and global search across words, translations, sets, and categories.
+- [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
 
 ## Phase 3 — Learning engine
-
 - [x] Flashcards and card details.
 - [x] Word-level SRS shared across sets.
 - [x] Due-review queue and future-review deferral.
@@ -32,7 +28,6 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Weak-word practice and Mix Sets.
 
 ## Phase 4 — Games
-
 - [x] Pairs matching game.
 - [x] Audio choice with system text-to-speech.
 - [x] Speed 60-second typing challenge.
@@ -40,27 +35,25 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Games do not modify SRS history.
 
 ## Phase 5 — Import and AI
-
 - [x] Paste text pairs with editable preview and validation.
 - [x] CSV/TSV/TXT file import.
 - [x] XLSX import with worksheet and column mapping.
 - [x] PDF text-layer extraction into editable review.
 - [x] On-device image OCR and scanned-PDF OCR via Apple Vision.
 - [x] Quoted CSV fields, embedded delimiters/newlines, CRLF, and escaped quote handling.
-- [ ] AI provider abstraction and Keychain-backed API-key storage.
-- [ ] Gemini vocabulary generation with topic, level, and count controls.
-- [ ] Editable AI result review before saving.
+- [x] AI provider abstraction and Keychain-backed API-key storage.
+- [x] Gemini vocabulary generation client with JSON parsing and request validation.
+- [ ] AI screen with secure key setup, generation controls, and editable review.
+- [ ] Persist generated explanations as notes and add mocked network tests.
 - [ ] AI document extraction, enrichment, weak-word analysis, and AI Mix Sets.
 
 ## Phase 6 — Pronunciation
-
 - [ ] Reference audio playback and English UK/US variants.
 - [ ] Voice recording and playback.
 - [ ] Speech recognition and transparent pronunciation feedback.
 - [ ] Chinese pinyin and tone support.
 
 ## Phase 7 — Progress, profile, and backup
-
 - [ ] Statistics and per-word/per-set performance.
 - [ ] Activity calendar, streaks, and history.
 - [ ] Restrained achievements and celebrations.
@@ -68,7 +61,6 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [ ] Full local backup/restore and CSV export.
 
 ## Phase 8 — Quality and delivery
-
 - [ ] App accessibility and Dynamic Type.
 - [ ] Light/dark appearance polish and performance checks.
 - [ ] Privacy review and secret-handling audit.
@@ -77,4 +69,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Build the AI foundation without embedding credentials: provider protocol, Keychain secret store, Gemini client, response validation, and a reviewable generation workflow. Keep all generated content in draft state until the user explicitly saves it.
+Verify the AI generation screen in GitHub Actions. Then add network-mocked provider tests and preserve AI explanations in the word notes field. Keep generated content in draft state until the user explicitly saves it.
