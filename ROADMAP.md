@@ -52,7 +52,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Gemini document vocabulary extraction with source-length validation and editable import preview.
 - [x] AI enrichment of existing sets with editable review and explicit save (CI #45974032162).
 - [x] AI weak-word analysis with recommendation and mini-exercise preview (CI #45976200195).
-- [ ] AI Mix Sets based on existing library words, with review before starting.
+- [x] AI Mix Sets from selected existing sets, with review before starting and existing word IDs only (CI #45978494297).
 
 ## Phase 6 — Pronunciation
 - [x] Reference audio playback and English UK/US variants.
@@ -78,4 +78,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Implement AI Mix Sets. Recommendations must refer only to vocabulary already in the user's library, preserve word-level SRS history, and be reviewable before starting. Device installation claims remain separate from Simulator CI verification.
+Audit and improve accessibility and Dynamic Type across the main library and learning flows. Device installation claims remain separate from Simulator CI verification.

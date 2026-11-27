@@ -14,11 +14,12 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #45976200195 is green.
+- CI: GitHub Actions on macOS; latest verified run #45978494297 is green (build and XCTest).
 - Development machine: Windows; Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
+- Commit: `8d94f00` — AI Mix Sets implementation and compile fixes; build and XCTest passed in workflow run #45978494297.
 - Commit: `23b321f` — AI weak-word analysis; build and XCTest passed in workflow run #45976200195.
 - Commit: `62cb5a7` — reviewable AI vocabulary enrichment workflow; build and XCTest passed in workflow run #45974032162.
 - Commit: `4f7b223` — Gemini document vocabulary extraction; CI run #45969493513 passed.
@@ -37,6 +38,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - SRS progress persists correct/incorrect answers, streak, interval, ease factor, and next due date.
 - Flashcards, multiple-choice, typed-answer sessions, due-review queue, weak-word practice, and Mix Sets.
 - Pairs, Audio choice (system TTS), Speed typing, and Missing-word games.
+- AI Mix Sets selects and orders existing cards from user-selected sets using topic, level, and learning statistics. The user reviews the proposed cards and rationale before choosing flashcards, multiple-choice, or typing practice. Only existing word IDs are accepted; no vocabulary is created, and the shared word-level SRS history is retained.
 
 ### Pronunciation
 - System text-to-speech reference playback, with US/UK English voice choice.
@@ -54,6 +56,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - AI enrichment proposes missing transcription, examples, and explanations for an existing set; edits are reviewed before explicit save, and existing word/translation values are preserved.
 - AI weak-word analysis considers answer errors, correct/incorrect counts, streak, and review interval. It returns explanations, training recommendations, and a mini exercise for review.
 - AI analysis and enrichment do not silently rewrite cards or SRS progress. Gemini API keys are stored in iOS Keychain.
+- AI Mix Sets recommendations are constrained to supplied candidate IDs; unknown or duplicate IDs and invalid response sizes are rejected.
 - Mocked provider tests cover validation and representative successful/error responses.
 
 ### Sets tab
@@ -74,11 +77,11 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Known gaps
 
-- AI Mix Sets: intelligent selection and ordering of existing library words for mixed practice is still pending.
-- Accessibility/Dynamic Type, appearance polish, and performance checks remain.
+- Accessibility and Dynamic Type, appearance polish, and performance checks remain.
 - Privacy/secret-handling audit and device packaging remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 - Speech recognition quality depends on iOS language support and device settings; pinyin tone hints are not acoustic tone scoring.
+- AI Mix Sets currently limits a single recommendation request to 3–100 unique cards; larger libraries require narrowing the selected sets.
 
 ## Verification policy
 
@@ -86,4 +89,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Implement AI Mix Sets with a reviewable selection based only on the user's existing vocabulary, then continue accessibility, privacy, performance, and SideStore delivery work.
+Audit accessibility and Dynamic Type across the main learning and library flows, then continue appearance polish, privacy/secret handling, performance, and SideStore delivery work.
