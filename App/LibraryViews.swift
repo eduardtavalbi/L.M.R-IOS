@@ -353,6 +353,8 @@ struct VocabularySetView: View {
                     LabeledContent("Новые", value: String(newCount))
                     LabeledContent("Изучаются", value: String(learningCount))
                     LabeledContent("Освоены", value: String(masteredCount))
+                    LabeledContent("Повторений", value: String(totalAnswers))
+                    LabeledContent("Ошибок", value: String(incorrect))
                     LabeledContent("Точность ответов", value: "\(accuracy)%")
                     ProgressView(value: Double(masteredCount), total: Double(max(words.count, 1)))
                 }
