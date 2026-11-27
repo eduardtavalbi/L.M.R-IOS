@@ -454,7 +454,7 @@ final class LibraryRepository {
             guard try Word.fetchOne(db, key: wordID) != nil else { throw LibraryRepositoryError.wordNotFound }
             let current = try LearningProgress.fetchOne(db, key: wordID) ?? LearningProgress(wordID: wordID)
             let isFirstReview = current.lastReviewedAt == nil
-            let updated = SpacedRepetitionScheduler.applying(knewAnswer: knewAnswer, to: current, reviewedAt: reviewedAt)
+            var updated = SpacedRepetitionScheduler.applying(knewAnswer: knewAnswer, to: current, reviewedAt: reviewedAt)
             try updated.save(db)
             let day = StudyActivity.dayKey(for: reviewedAt)
             try db.execute(sql: """
