@@ -116,7 +116,7 @@ struct ProfileView: View {
             HStack {
                 Text("Достижения").font(.headline)
                 Spacer()
-                Text("\(StudyAchievement.all(for: stats).filter(\\.isUnlocked).count)/7")
+                Text("\(StudyAchievement.all(for: stats).filter(\.isUnlocked).count)/7")
                     .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
             ForEach(StudyAchievement.all(for: stats)) { achievement in
