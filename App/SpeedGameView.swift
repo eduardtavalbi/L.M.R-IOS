@@ -48,6 +48,8 @@ struct SpeedGameView: View {
             }
             ProgressView(value: Double(timeRemaining), total: 60)
                 .tint(timeRemaining <= 10 ? .red : .accentColor)
+                .accessibilityLabel("Оставшееся время")
+                .accessibilityValue("\(timeRemaining) секунд из 60")
 
             Text("Серия: \(streak) · Рекорд: \(bestStreak)")
                 .font(.caption).foregroundStyle(.secondary)
