@@ -317,4 +317,20 @@ final class LMRTests: XCTestCase {
     }
 
 
+
+    func testLearningProgressStatusMovesFromNewToLearningToMastered() {
+        let start = Date(timeIntervalSince1970: 1_800_000_000)
+        let initial = LearningProgress(wordID: "status-word")
+        XCTAssertEqual(initial.status, .new)
+        let first = SpacedRepetitionScheduler.applying(knewAnswer: true, to: initial, reviewedAt: start)
+        XCTAssertEqual(first.status, .learning)
+        let second = SpacedRepetitionScheduler.applying(knewAnswer: true, to: first, reviewedAt: start)
+        XCTAssertEqual(second.status, .learning)
+        let third = SpacedRepetitionScheduler.applying(knewAnswer: true, to: second, reviewedAt: start)
+        XCTAssertEqual(third.status, .mastered)
+        let forgotten = SpacedRepetitionScheduler.applying(knewAnswer: false, to: third, reviewedAt: start)
+        XCTAssertEqual(forgotten.status, .learning)
+    }
+
+
 }
