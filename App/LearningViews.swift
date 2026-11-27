@@ -215,7 +215,7 @@ private struct LearningSessionView: View {
             Spacer(minLength: 8)
             VStack(spacing: 16) {
                 Text(word.text)
-                    .font(.system(size: 36, weight: .semibold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).weight(.semibold))
                     .multilineTextAlignment(.center).minimumScaleFactor(0.65).lineLimit(4)
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).font(.title3).foregroundStyle(.secondary)
@@ -225,7 +225,7 @@ private struct LearningSessionView: View {
                 if activeMode == .flashcards && isRevealed {
                     Divider().padding(.horizontal, 30)
                     Text(word.translation)
-                        .font(.system(size: 27, weight: .medium, design: .rounded))
+                        .font(.system(.title, design: .rounded).weight(.medium))
                         .multilineTextAlignment(.center)
                     if let example = word.example, !example.isEmpty {
                         Text(example).font(.body).foregroundStyle(.secondary).multilineTextAlignment(.center)
@@ -319,7 +319,7 @@ private struct LearningSessionView: View {
 
     private var completionView: some View {
         VStack(spacing: 20) {
-            Image(systemName: "checkmark.seal.fill").font(.system(size: 54)).foregroundStyle(.tint)
+            Image(systemName: "checkmark.seal.fill").font(.largeTitle).foregroundStyle(.tint)
             Text("Сессия завершена").font(.title2.weight(.semibold))
             Text("Карточек просмотрено: \(words.count)").foregroundStyle(.secondary)
             HStack(spacing: 24) {
