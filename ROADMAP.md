@@ -57,8 +57,9 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [ ] Chinese pinyin and tone support.
 
 ## Phase 7 — Progress, profile, and backup
-- [ ] Statistics and per-word/per-set performance.
-- [ ] Activity calendar, streaks, and history.
+- [x] Basic profile statistics: vocabulary totals, mastered count, review count, and answer accuracy.
+- [ ] Per-word/per-set performance.
+- [x] Persisted daily activity, monthly calendar, study-day count, and current streak.
 - [ ] Restrained achievements and celebrations.
 - [ ] Local daily reminders.
 - [ ] Full local backup/restore and CSV export.
@@ -72,4 +73,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Add category-aware search and sorting to Sets, then build the Profile experience on top of persisted learning history. Keep device installation claims separate from Simulator CI verification.
+Continue with per-word/per-set performance, achievements, reminders, and backup/restore. Keep device installation claims separate from Simulator CI verification.
