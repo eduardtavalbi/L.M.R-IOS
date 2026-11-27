@@ -14,7 +14,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Phase 2 — Library experience
 - [ ] App bootstrap and dependency container.
-- [ ] First-run onboarding.
+- [ ] First-run onboarding (implemented; awaiting CI verification).
 - [x] Library navigation, nested categories, uncategorized sets, set movement.
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
@@ -54,7 +54,7 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Reference audio playback and English UK/US variants.
 - [x] Voice recording and playback.
 - [x] Speech recognition and transparent text-match feedback (CI #92).
-- [ ] Chinese pinyin and tone support.
+- [x] Chinese pinyin tone hints from diacritics and numeric notation (CI #94).
 
 ## Phase 7 — Progress, profile, and backup
 - [x] Basic profile statistics: vocabulary totals, mastered count, review count, and answer accuracy.
@@ -74,4 +74,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Add and verify pinyin tone hints sourced from card transcription. Keep these distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
+Verify the first-run onboarding implementation. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.

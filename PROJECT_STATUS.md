@@ -14,12 +14,13 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified run #92 is green.
+- CI: GitHub Actions on macOS; latest verified run #94 is green.
 - Development machine: Windows 11; all Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
-- Commit: `ad6078a` — speech recognition with transparent text-match feedback.
+- Commit: `84d7d30` — pinyin tone hints and Unicode-compatible numeric tone parsing.
+- Workflow run #94: successful iOS Simulator build and XCTest, including tone-mark and numbered-pinyin tests.
 - Workflow run #92: successful iOS Simulator build and XCTest, including pronunciation normalization and language-locale tests.
 - Reference speech, personal voice recording/playback, and English US/UK voice selection are verified by CI #91.
 - CSV export and per-set review/error statistics are verified by CI #89.
@@ -45,6 +46,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - System text-to-speech reference playback, with US/UK English voice choice.
 - Per-word AAC voice recording and playback stored locally on the device.
 - Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; no acoustic score or tone analysis is claimed.
+- Chinese cards show pinyin tone hints for tone diacritics and numeric notation (1–5); these are reading aids, not microphone-based tone scoring.
 - Speech and microphone permission descriptions are configured in the generated Info.plist.
 
 ### Import
@@ -82,7 +84,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 - Sets tab still needs category-aware search and sorting controls.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- First-run onboarding, Chinese tone guidance, accessibility/Dynamic Type, and device installation workflow remain.
+- First-run onboarding is implemented but awaiting CI verification.
+- Accessibility/Dynamic Type and device installation workflow remain.
 - Speech recognition availability and quality depend on iOS language support, device settings, and network/on-device recognizer behavior.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 
@@ -92,4 +95,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Next: verify the Chinese pinyin tone guidance stage, then continue onboarding and library quality improvements. Device packaging remains a separate final milestone.
+Next: verify first-run onboarding, then continue library quality improvements. Device packaging remains a separate final milestone. Device packaging remains a separate final milestone.

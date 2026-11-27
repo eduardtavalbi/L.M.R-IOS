@@ -13,6 +13,13 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(PinyinToneGuide.tones(in: "ni3 hao3 ma5").map(\.number), [3, 3, 5])
     }
 
+    func testOnboardingLanguageSuggestionsIncludeChineseAndEnglish() {
+        let codes = Set(OnboardingLanguage.suggested.map(\.code))
+        XCTAssertTrue(codes.contains("zh"))
+        XCTAssertTrue(codes.contains("en"))
+        XCTAssertEqual(codes.count, OnboardingLanguage.suggested.count)
+    }
+
     func testPinyinToneGuideOnlyAppearsForChineseLanguages() {
         XCTAssertTrue(PinyinToneGuide.isChineseLanguage("zh"))
         XCTAssertTrue(PinyinToneGuide.isChineseLanguage("zh-CN"))

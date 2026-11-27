@@ -11,6 +11,8 @@ enum AppTab: Hashable {
 struct ContentView: View {
     @ObservedObject var store: LibraryStore
     @State private var selectedTab: AppTab = .library
+    @State private var showingOnboarding = false
+    @AppStorage("lmr.onboarding.completed") private var onboardingCompleted = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -33,6 +35,18 @@ struct ContentView: View {
             ProfileView(store: store)
                 .tabItem { Label("Профиль", systemImage: "person.crop.circle") }
                 .tag(AppTab.profile)
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            FirstRunOnboardingView(store: store) {
+                onboardingCompleted = true
+                showingOnboarding = false
+            }
+        }
+        .onAppear {
+            if !store.languages.isEmpty {
+                onboardingCompleted = true
+            }
+            showingOnboarding = !onboardingCompleted
         }
     }
 }
