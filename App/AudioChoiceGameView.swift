@@ -65,7 +65,7 @@ struct AudioChoiceGameView: View {
 
             VStack(spacing: 18) {
                 Image(systemName: "headphones")
-                    .font(.system(size: 48))
+                    .font(.largeTitle)
                     .foregroundStyle(.tint)
                 Text("Какое слово ты слышишь?")
                     .font(.title3.weight(.semibold))
@@ -141,7 +141,7 @@ struct AudioChoiceGameView: View {
     private var completionView: some View {
         VStack(spacing: 20) {
             Image(systemName: "ear")
-                .font(.system(size: 56))
+                .font(.largeTitle)
                 .foregroundStyle(.tint)
             Text("Игра завершена")
                 .font(.title2.weight(.semibold))
