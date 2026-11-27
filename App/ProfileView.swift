@@ -77,6 +77,7 @@ struct ProfileView: View {
                     calendar
                     achievements
                     reminderSettings
+                    BackupSettingsView(store: store)
                     VStack(alignment: .leading, spacing: 10) {
                         Text("За месяц").font(.headline)
                         HStack {

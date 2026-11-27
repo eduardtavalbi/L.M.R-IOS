@@ -21,6 +21,19 @@ final class LibraryStore: ObservableObject {
         }
     }
 
+    func makeBackupData() throws -> Data {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        return try repository.exportBackup().encoded()
+    }
+
+    func restoreBackup(data: Data) throws {
+        guard let repository else { throw StoreError.databaseUnavailable }
+        let backup = try LibraryBackup.decode(data)
+        try repository.restoreBackup(backup)
+        refreshLanguages()
+        objectWillChange.send()
+    }
+
     func refreshLanguages() {
         do {
             languages = try repository?.fetchLanguages() ?? []
