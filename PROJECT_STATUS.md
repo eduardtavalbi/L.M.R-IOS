@@ -19,6 +19,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Latest verified baseline
 
+- Commit: `8a586ab` — batched global-search word-to-set lookup; iOS Simulator build and XCTest passed in workflow run #45990196080.
+- Commit: `ee5f703` — SQL-based set word and due-review counts; iOS Simulator build and XCTest passed in workflow run #45988166494.
 - Commit: `7c19156` — Gemini data-processing disclosures; iOS Simulator build and XCTest passed in workflow run #45986246891.
 - Commit: `a736602` — VoiceOver labels and values for core library, learning progress, game timers, set selection, and catalogue actions; latest relevant accessibility CI run #45983308627 passed.
 - Dynamic Type updates replaced fixed large text sizes in core learning screens, games, onboarding, and import review; the accessibility-related workflow runs passed.
@@ -34,6 +36,8 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - GRDB.swift 7 with SQLite storage under Application Support/LMR/library.sqlite and an in-memory initializer for isolated tests.
 - Versioned migrations for languages, nested categories, vocabulary sets, words, set membership, and word-level learning progress.
 - Repository operations for language/category/set/word CRUD, set movement, membership, duplicate resolution, and global search.
+- Global search fetches matching word memberships in batches instead of one database query per result word.
+- Set word totals and due-review counts are calculated in SQLite without materializing the full word list.
 - Shared words retain a single word-level learning history across sets.
 - Library screens support nested categories, uncategorized sets, set detail, word CRUD, import, and moving sets.
 
@@ -46,7 +50,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ### Pronunciation
 - System text-to-speech reference playback, with US/UK English voice choice.
 - Per-word AAC voice recording and playback stored locally on the device.
-- Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; no acoustic score or tone analysis is claimed.
+- Speech recognition compares recognized text with the card's original word and shows transparent text-match feedback; no acoustic score or tone analysis is claimed. iOS Speech framework processing behavior can depend on locale/device and may involve Apple's service; a clear in-app disclosure and explicit on-device availability handling remain to be completed.
 - Chinese cards show pinyin tone hints for tone diacritics and numeric notation (1–5); these are reading aids, not microphone-based tone scoring.
 
 ### Import
@@ -81,8 +85,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Known gaps
 
-- Accessibility and Dynamic Type, appearance polish, and performance checks remain.
-- Privacy/secret-handling audit and device packaging remain.
+- Accessibility and Dynamic Type remain partial; finish remaining screens, Voice Control, and contrast review.
+- Privacy/network review remains partial. Speech-recognition data handling needs a user-facing disclosure; locally recorded pronunciation audio is currently stored under Documents and its backup/retention behavior needs an explicit decision.
+- Appearance polish, broader performance profiling, and device packaging remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 - Speech recognition quality depends on iOS language support and device settings; pinyin tone hints are not acoustic tone scoring.
 - AI Mix Sets currently limits a single recommendation request to 3–100 unique cards; larger libraries require narrowing the selected sets.

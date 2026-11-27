@@ -72,16 +72,18 @@ Check off work only after implementation and successful GitHub Actions verificat
 ## Phase 8 — Quality and delivery
 - [ ] Complete app-wide accessibility audit (core Dynamic Type and VoiceOver improvements are implemented and CI-verified in learning, games, onboarding, import, and library flows; remaining screens and Voice Control/contrast still need review).
 - [ ] Light/dark appearance polish and performance checks.
-- [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, and Gemini data-transfer disclosures implemented; source-wide logging, retention, and network review remains).
+- [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, and Gemini data-transfer disclosures implemented; speech-recognition data handling disclosure and local audio recording backup/retention policy remain; source-wide logging, retention, and network review remains).
 - [ ] Apple signing and SideStore-compatible packaging workflow.
 - [ ] Verify installation on the owner's iPhone.
 
 ## Current next task
 
-Finish the app-wide accessibility audit, then perform a source-wide privacy/network and performance review. Device installation claims remain separate from Simulator CI verification.
+Continue the source-wide privacy review: add a clear speech-recognition data-processing disclosure and decide/implement local voice-recording backup and retention behavior. Continue accessibility and device packaging work in parallel. Device installation claims remain separate from Simulator CI verification.
 
 ## Latest verification
 
+- `8a586ab` — batched global-search word-to-set lookup; GitHub Actions run #45990196080 passed.
+- `ee5f703` — SQL-based set word and due-review counts; GitHub Actions run #45988166494 passed.
 - `7c19156` — Gemini data-processing disclosures; GitHub Actions run #45986246891 passed (iOS Simulator build and XCTest).
 - `a736602` — core VoiceOver labels and values; GitHub Actions run #45983308627 passed.
 - Dynamic Type changes across core learning, game, onboarding, and import screens passed the associated GitHub Actions runs.
