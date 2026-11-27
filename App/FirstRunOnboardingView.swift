@@ -17,7 +17,7 @@ struct FirstRunOnboardingView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 10) {
                         Image(systemName: "character.book.closed.fill")
-                            .font(.system(size: 42))
+                            .font(.largeTitle)
                             .foregroundStyle(.tint)
                         Text("Добро пожаловать в L.M.R.")
                             .font(.largeTitle.bold())
