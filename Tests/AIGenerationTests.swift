@@ -31,3 +31,96 @@ final class AIGenerationTests: XCTestCase {
   XCTAssertEqual(decoded.transcription,word.transcription)
  }
 }
+
+
+private final class AITestSecretStore: SecretStore {
+    var value: String?
+    func readSecret(for key: String) throws -> String? { value }
+    func saveSecret(_ secret: String, for key: String) throws { value = secret }
+    func deleteSecret(for key: String) throws { value = nil }
+}
+
+private final class AITestURLProtocol: URLProtocol {
+    static var handler: ((URLRequest) throws -> (HTTPURLResponse, Data))?
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        do {
+            guard let handler = Self.handler else { throw AIGenerationError.invalidResponse }
+            let (response, data) = try handler(request)
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
+}
+
+extension AIGenerationTests {
+    func testGeminiProviderParsesSuccessfulResponseAndUsesKeychainKey() async throws {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-goog-api-key"), "test-api-key")
+            XCTAssertEqual(request.httpMethod, "POST")
+            let generated = #"{"words":[{"text":"你好","translation":"привет","transcription":"nǐ hǎo","example":"你好！","explanation":"Приветствие"}]}"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let request = AIGenerationRequest(topic: "Greetings", sourceLanguage: "Chinese", targetLanguage: "Russian", level: "A1", count: 1)
+        let words = try await provider.generateVocabulary(for: request)
+
+        XCTAssertEqual(words.count, 1)
+        XCTAssertEqual(words.first?.text, "你好")
+        XCTAssertEqual(words.first?.explanation, "Приветствие")
+    }
+
+    func testGeminiProviderMapsRateLimitToServiceUnavailable() async {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            (HTTPURLResponse(url: request.url!, statusCode: 429, httpVersion: nil, headerFields: nil)!, Data())
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let request = AIGenerationRequest(topic: "Travel", sourceLanguage: "English", targetLanguage: "Russian", level: "A2", count: 5)
+        do {
+            _ = try await provider.generateVocabulary(for: request)
+            XCTFail("Expected rate-limit error")
+        } catch {
+            XCTAssertEqual(error as? AIGenerationError, .serviceUnavailable)
+        }
+    }
+
+    func testGeminiProviderRejectsMissingAPIKeyBeforeNetworkRequest() async {
+        let secretStore = AITestSecretStore()
+        let provider = GeminiVocabularyProvider(secretStore: secretStore)
+        let request = AIGenerationRequest(topic: "Food", sourceLanguage: "English", targetLanguage: "Russian", level: "A1", count: 5)
+
+        do {
+            _ = try await provider.generateVocabulary(for: request)
+            XCTFail("Expected missing-key error")
+        } catch {
+            XCTAssertEqual(error as? AIGenerationError, .missingAPIKey)
+        }
+    }
+}
