@@ -375,7 +375,7 @@ final class LMRTests: XCTestCase {
 
         XCTAssertEqual(try destination.fetchLanguages(), [language])
         XCTAssertEqual(try destination.fetchCategories(languageID: language.id), [parent, child])
-        XCTAssertEqual(Set(try destination.fetchSets(containing: word.id).map(\\.id)), Set([firstSet.id, secondSet.id]))
+        XCTAssertEqual(Set(try destination.fetchSets(containing: word.id).map(\.id)), Set([firstSet.id, secondSet.id]))
         XCTAssertEqual(try destination.fetchProgress(for: word.id), try source.fetchProgress(for: word.id))
         XCTAssertEqual(try destination.fetchLearningStatistics(for: reviewedAt, now: reviewedAt).totalReviews, 1)
         XCTAssertEqual(try destination.fetchWords(inSet: firstSet.id).first?.example, "我吃苹果")
@@ -395,7 +395,7 @@ final class LMRTests: XCTestCase {
             studyActivity: []
         )
         XCTAssertThrowsError(try repository.restoreBackup(invalid))
-        XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\\.id), [set.id])
+        XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\.id), [set.id])
     }
 
 }
