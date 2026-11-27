@@ -187,3 +187,69 @@ extension AIGenerationTests {
         XCTAssertEqual(words.map(\.translation), ["яблоко", "книга"])
     }
 }
+
+
+extension AIGenerationTests {
+    func testAIEnrichmentRequestRejectsInvalidCardsAndAcceptsValidCards() throws {
+        let valid = AIEnrichmentRequest(
+            words: [AIGeneratedWord(text: "你好", translation: "привет")],
+            sourceLanguage: "Chinese",
+            targetLanguage: "Russian"
+        )
+        XCTAssertNoThrow(try valid.validate())
+
+        let empty = AIEnrichmentRequest(words: [], sourceLanguage: "Chinese", targetLanguage: "Russian")
+        XCTAssertThrowsError(try empty.validate())
+
+        let invalidCard = AIEnrichmentRequest(
+            words: [AIGeneratedWord(text: " ", translation: "привет")],
+            sourceLanguage: "Chinese",
+            targetLanguage: "Russian"
+        )
+        XCTAssertThrowsError(try invalidCard.validate())
+    }
+
+    func testEnrichmentPromptProtectsExistingCardTextAndOnlyRequestsMissingFields() {
+        let request = AIEnrichmentRequest(
+            words: [AIGeneratedWord(text: "你好", translation: "привет", transcription: "nǐ hǎo")],
+            sourceLanguage: "Chinese",
+            targetLanguage: "Russian"
+        )
+        let prompt = GeminiVocabularyProvider.enrichmentPrompt(for: request)
+        XCTAssertTrue(prompt.contains("你好"))
+        XCTAssertTrue(prompt.contains("привет"))
+        XCTAssertTrue(prompt.contains("nǐ hǎo"))
+        XCTAssertTrue(prompt.contains("NEVER correct, translate, rewrite, or replace them"))
+        XCTAssertTrue(prompt.contains("Only fill missing or null transcription, example, and explanation"))
+    }
+
+    func testGeminiEnrichmentReturnsStructuredCardData() async throws {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-goog-api-key"), "test-api-key")
+            let generated = #"{"words":[{"text":"你好","translation":"привет","transcription":"nǐ hǎo","example":"你好！","explanation":"Приветствие"}]}"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let request = AIEnrichmentRequest(
+            words: [AIGeneratedWord(text: "你好", translation: "привет")],
+            sourceLanguage: "Chinese",
+            targetLanguage: "Russian"
+        )
+        let result = try await provider.enrichVocabulary(request)
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].transcription, "nǐ hǎo")
+        XCTAssertEqual(result[0].example, "你好！")
+        XCTAssertEqual(result[0].explanation, "Приветствие")
+    }
+}

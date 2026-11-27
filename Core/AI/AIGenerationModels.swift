@@ -35,6 +35,24 @@ struct AIImportRequest: Equatable {
     }
 }
 
+struct AIEnrichmentRequest: Equatable {
+    let words: [AIGeneratedWord]
+    let sourceLanguage: String
+    let targetLanguage: String
+
+    func validate() throws {
+        guard !words.isEmpty, words.count <= 100,
+              !sourceLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !targetLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              words.allSatisfy({
+                  !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  !$0.translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+              }) else {
+            throw AIGenerationError.invalidRequest
+        }
+    }
+}
+
 struct AIGeneratedWord: Codable, Equatable, Identifiable {
     var id: UUID = UUID()
     var text: String
