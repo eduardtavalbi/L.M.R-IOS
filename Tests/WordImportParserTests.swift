@@ -79,7 +79,7 @@ final class WordImportParserTests: XCTestCase {
     }
 
     func testParsesQuotedDelimiterAndEscapedQuotesTogether() throws {
-        let rows = try WordImportParser.parse("word;translation;example\nbook;книга;\"He said \"\"read; more\"\"\"")
+        let rows = try WordImportParser.parse("word;translation;transcription;example\nbook;книга;;\"He said \"\"read; more\"\"\"")
         XCTAssertEqual(rows.first?.example, "He said \"read; more\"")
     }
 
