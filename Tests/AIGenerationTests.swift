@@ -253,3 +253,51 @@ extension AIGenerationTests {
         XCTAssertEqual(result[0].explanation, "Приветствие")
     }
 }
+
+
+extension AIGenerationTests {
+    func testWeakWordAnalysisRequestValidatesReviewData() throws {
+        let card = AIWeakWordAnalysisCard(
+            id: "word-1", text: "苹果", translation: "яблоко", transcription: "píngguǒ",
+            correctAnswers: 2, incorrectAnswers: 3, streak: 0, intervalDays: 0
+        )
+        XCTAssertNoThrow(try AIWeakWordAnalysisRequest(cards: [card], sourceLanguage: "Chinese", targetLanguage: "Russian").validate())
+        XCTAssertThrowsError(try AIWeakWordAnalysisRequest(cards: [], sourceLanguage: "Chinese", targetLanguage: "Russian").validate())
+        let noErrors = AIWeakWordAnalysisCard(
+            id: "word-2", text: "书", translation: "книга", transcription: nil,
+            correctAnswers: 3, incorrectAnswers: 0, streak: 3, intervalDays: 7
+        )
+        XCTAssertThrowsError(try AIWeakWordAnalysisRequest(cards: [noErrors], sourceLanguage: "Chinese", targetLanguage: "Russian").validate())
+    }
+
+    func testGeminiAnalyzesWeakWordsAndPreservesOriginalCardText() async throws {
+        let secretStore = AITestSecretStore()
+        secretStore.value = "test-api-key"
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [AITestURLProtocol.self]
+        let session = URLSession(configuration: configuration)
+        defer { AITestURLProtocol.handler = nil }
+
+        AITestURLProtocol.handler = { request in
+            XCTAssertEqual(request.value(forHTTPHeaderField: "x-goog-api-key"), "test-api-key")
+            let generated = #"{ "insights":[{"id":"word-1","word":"苹果","translation":"яблоко","difficultyReason":"Было несколько ошибок","recommendation":"Повтори слово через карточку и произнеси вслух","practicePrompt":"Как будет яблоко по-китайски?"}] }"#
+            let responseBody = try JSONSerialization.data(withJSONObject: [
+                "candidates": [["content": ["parts": [["text": generated]]]]]
+            ])
+            return (HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!, responseBody)
+        }
+
+        let provider = GeminiVocabularyProvider(secretStore: secretStore, session: session)
+        let card = AIWeakWordAnalysisCard(
+            id: "word-1", text: "苹果", translation: "яблоко", transcription: "píngguǒ",
+            correctAnswers: 1, incorrectAnswers: 4, streak: 0, intervalDays: 0
+        )
+        let result = try await provider.analyzeWeakWords(
+            AIWeakWordAnalysisRequest(cards: [card], sourceLanguage: "Chinese", targetLanguage: "Russian")
+        )
+        XCTAssertEqual(result.count, 1)
+        XCTAssertEqual(result[0].word, "苹果")
+        XCTAssertEqual(result[0].translation, "яблоко")
+        XCTAssertTrue(result[0].recommendation.contains("Повтори"))
+    }
+}

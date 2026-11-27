@@ -29,6 +29,8 @@ struct AIGenerationView: View {
     @State private var savedMessage: String?
     @State private var enrichmentDrafts: [AIWordEnrichmentDraft] = []
     @State private var isEnriching = false
+    @State private var weakWordInsights: [AIWeakWordInsight] = []
+    @State private var isAnalyzingWeakWords = false
 
     private let secretStore: SecretStore = KeychainSecretStore()
     private var targetLanguage: Language? { store.language(id: targetLanguageID) }
@@ -175,6 +177,43 @@ struct AIGenerationView: View {
                     }
                 }
 
+
+                if !selectedSetID.isEmpty {
+                    Section {
+                        Text("AI использует только карточки, в которых уже были ошибки, и историю повторений. Результат — рекомендации, он не меняет карточки или расписание SRS.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        Button {
+                            Task { await analyzeWeakWords() }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if isAnalyzingWeakWords { ProgressView().padding(.trailing, 8) }
+                                Text(isAnalyzingWeakWords ? "Анализирую сложные слова…" : "Разобрать сложные слова с AI")
+                                Spacer()
+                            }
+                        }
+                        .disabled(isAnalyzingWeakWords || !hasSavedKey || targetLanguage == nil)
+                        ForEach(weakWordInsights) { insight in
+                            DisclosureGroup {
+                                Text("Почему сложно: \\(insight.difficultyReason)")
+                                Text("Что попробовать: \\(insight.recommendation)")
+                                Text("Мини-упражнение: \\(insight.practicePrompt)")
+                            } label: {
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(insight.word).font(.headline)
+                                    Text(insight.translation).font(.subheadline).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                        if !weakWordInsights.isEmpty {
+                            Button("Очистить рекомендации", role: .destructive) { weakWordInsights = [] }
+                        }
+                    } header: {
+                        Text("AI-анализ сложных слов")
+                    }
+                }
+
                 if !drafts.isEmpty {
                     Section {
                         Text("\(drafts.count) карточек · проверь и отредактируй перед сохранением")
@@ -308,6 +347,51 @@ struct AIGenerationView: View {
             errorMessage = error.localizedDescription
         }
     }
+
+
+    @MainActor
+    private func analyzeWeakWords() async {
+        isAnalyzingWeakWords = true
+        defer { isAnalyzingWeakWords = false }
+        do {
+            let weakWords = store.weakWords(setIDs: [selectedSetID])
+            guard !weakWords.isEmpty else {
+                errorMessage = "В этом наборе пока нет карточек с ошибками. Сначала пройди несколько тренировок."
+                return
+            }
+            guard weakWords.count <= 50 else {
+                errorMessage = "Для AI-анализа выбери набор не более чем с 50 сложными словами."
+                return
+            }
+            let cards = weakWords.compactMap { word -> AIWeakWordAnalysisCard? in
+                guard let progress = store.learningProgress(wordID: word.id),
+                      progress.incorrectAnswers > 0 else { return nil }
+                return AIWeakWordAnalysisCard(
+                    id: word.id,
+                    text: word.text,
+                    translation: word.translation,
+                    transcription: word.transcription,
+                    correctAnswers: progress.correctAnswers,
+                    incorrectAnswers: progress.incorrectAnswers,
+                    streak: progress.streak,
+                    intervalDays: progress.intervalDays
+                )
+            }
+            guard !cards.isEmpty else {
+                errorMessage = "Не удалось получить статистику сложных карточек."
+                return
+            }
+            let request = AIWeakWordAnalysisRequest(
+                cards: cards,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage?.name ?? ""
+            )
+            weakWordInsights = try await GeminiVocabularyProvider(secretStore: secretStore).analyzeWeakWords(request)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
 
     private func saveEnrichment() {
         do {

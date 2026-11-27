@@ -82,6 +82,49 @@ struct AIGeneratedWord: Codable, Equatable, Identifiable {
     }
 }
 
+
+struct AIWeakWordAnalysisCard: Codable, Equatable {
+    let id: String
+    let text: String
+    let translation: String
+    let transcription: String?
+    let correctAnswers: Int
+    let incorrectAnswers: Int
+    let streak: Int
+    let intervalDays: Int
+}
+
+struct AIWeakWordAnalysisRequest: Equatable {
+    let cards: [AIWeakWordAnalysisCard]
+    let sourceLanguage: String
+    let targetLanguage: String
+
+    func validate() throws {
+        guard !cards.isEmpty, cards.count <= 50,
+              !sourceLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !targetLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              cards.allSatisfy({
+                  !$0.id.isEmpty &&
+                  !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  !$0.translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+                  $0.correctAnswers >= 0 && $0.incorrectAnswers > 0 &&
+                  $0.streak >= 0 && $0.intervalDays >= 0
+              }),
+              Set(cards.map(\\.id)).count == cards.count else {
+            throw AIGenerationError.invalidRequest
+        }
+    }
+}
+
+struct AIWeakWordInsight: Codable, Equatable, Identifiable {
+    let id: String
+    let word: String
+    let translation: String
+    let difficultyReason: String
+    let recommendation: String
+    let practicePrompt: String
+}
+
 enum AIGenerationError: LocalizedError, Equatable {
     case invalidRequest
     case missingAPIKey
