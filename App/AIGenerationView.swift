@@ -26,7 +26,9 @@ struct AIGenerationView: View {
     @State private var drafts: [AIGeneratedWord] = []
     @State private var isGenerating = false
     @State private var errorMessage: String?
-    @State private var savedMessage: String?\n    @State private var enrichmentDrafts: [AIWordEnrichmentDraft] = []\n    @State private var isEnriching = false
+    @State private var savedMessage: String?
+    @State private var enrichmentDrafts: [AIWordEnrichmentDraft] = []
+    @State private var isEnriching = false
 
     private let secretStore: SecretStore = KeychainSecretStore()
     private var targetLanguage: Language? { store.language(id: targetLanguageID) }
@@ -172,7 +174,8 @@ struct AIGenerationView: View {
                         Text("AI-обогащение набора")
                     }
                 }
-\n                if !drafts.isEmpty {
+
+                if !drafts.isEmpty {
                     Section {
                         Text("\(drafts.count) карточек · проверь и отредактируй перед сохранением")
                             .font(.subheadline)
@@ -348,7 +351,7 @@ struct AIGenerationView: View {
                 imported += 1
             }
             drafts = []
-            savedMessage = "Добавлено: \\(imported). Пропущено как дубликаты: \\(skipped). Пояснения и примеры сохранены отдельно."
+            savedMessage = "Добавлено: \(imported). Пропущено как дубликаты: \(skipped). Пояснения и примеры сохранены отдельно."
         } catch {
             errorMessage = error.localizedDescription
         }
