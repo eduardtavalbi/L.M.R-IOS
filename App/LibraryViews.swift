@@ -326,9 +326,36 @@ struct VocabularySetView: View {
     @State private var editingWord: Word?
     @State private var deletingWord: Word?
 
+    private func statusTitle(_ status: WordLearningStatus) -> String {
+        switch status {
+        case .new: return "Новое"
+        case .learning: return "Изучается"
+        case .mastered: return "Освоено"
+        }
+    }
+
     var body: some View {
         List {
             let words = store.words(setID: set.id)
+            let wordProgress = words.compactMap { store.learningProgress(wordID: $0.id) }
+            let newCount = words.count - wordProgress.filter { $0.status != .new }.count
+            let learningCount = wordProgress.filter { $0.status == .learning }.count
+            let masteredCount = wordProgress.filter { $0.status == .mastered }.count
+            let correct = wordProgress.reduce(0) { $0 + $1.correctAnswers }
+            let incorrect = wordProgress.reduce(0) { $0 + $1.incorrectAnswers }
+            let totalAnswers = correct + incorrect
+            let accuracy = totalAnswers == 0 ? 0 : Int((Double(correct) / Double(totalAnswers) * 100).rounded())
+
+            if !words.isEmpty {
+                Section("Прогресс набора") {
+                    LabeledContent("Новые", value: String(newCount))
+                    LabeledContent("Изучаются", value: String(learningCount))
+                    LabeledContent("Освоены", value: String(masteredCount))
+                    LabeledContent("Точность ответов", value: "\(accuracy)%")
+                    ProgressView(value: Double(masteredCount), total: Double(max(words.count, 1)))
+                }
+            }
+
             if words.isEmpty {
                 ContentUnavailableView("Пока нет слов", systemImage: "character.book.closed", description: Text("Добавь первое слово в этот набор."))
             } else {
@@ -342,6 +369,8 @@ struct VocabularySetView: View {
                             }
                         }
                         .font(.subheadline)
+                        Text(statusTitle(store.learningProgress(wordID: word.id)?.status ?? .new))
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                     .contextMenu {
