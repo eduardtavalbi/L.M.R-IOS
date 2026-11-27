@@ -83,9 +83,13 @@ struct ProfileView: View {
     }
 
     private func metric(_ title: String, value: Int, icon: String) -> some View {
+        metric(title, value: String(value), icon: icon)
+    }
+
+    private func metric(_ title: String, value: String, icon: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Image(systemName: icon).font(.title3).foregroundStyle(.tint)
-            Text(String(value)).font(.title2.bold()).contentTransition(.numericText())
+            Text(value).font(.title2.bold()).contentTransition(.numericText())
             Text(title).font(.caption).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
