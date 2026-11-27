@@ -60,6 +60,8 @@ struct AudioChoiceGameView: View {
             .foregroundStyle(.secondary)
 
             ProgressView(value: Double(currentIndex), total: Double(max(words.count, 1)))
+                .accessibilityLabel("Прогресс игры")
+                .accessibilityValue("Вопрос \(currentIndex + 1) из \(words.count)")
 
             Spacer(minLength: 8)
 
