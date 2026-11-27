@@ -14,11 +14,12 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Repository: https://github.com/eduardtavalbi/L.M.R-IOS
 - Working branch: main
 - Project generation: XcodeGen (`project.yml`)
-- CI: GitHub Actions on macOS; latest verified baseline run #45994078206 on commit `dbed46e` is green (iOS Simulator build and XCTest).
+- CI: GitHub Actions on macOS; latest verified workflow run #45995703782 on commit `bfae965` passed both iOS Simulator build/XCTest and unsigned iOS-device Release IPA packaging.
 - Development machine: Windows; Xcode builds and XCTest run in GitHub Actions.
 
 ## Latest verified baseline
 
+- Commit: `bfae965` — corrected shell continuations in the SideStore packaging workflow; workflow run #45995703782 passed simulator build, XCTest, device Release build, IPA assembly/validation, and artifact upload. Artifact `LMR-SideStore-unsigned-IPA` (3,126,718 bytes; SHA-256 `dea5b2b2da15cd782b1c9a81c22b71188eea5142ad2259e01f1e48ea70956778`) is available until 2026-12-11.
 - Commit: `dbed46e` — backup restore now rejects duplicate word-to-set memberships before modifying the database; iOS Simulator build and XCTest passed in workflow run #45994078206.
 - Commit: `5305838` — speech recognition is on-device-only when supported; recordings are stored under Application Support and excluded from backup. CI run #45991975035 passed.
 - Commit: `8a586ab` — batched global-search word-to-set lookup; iOS Simulator build and XCTest passed in workflow run #45990196080.
@@ -90,7 +91,7 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 - Accessibility and Dynamic Type remain partial; finish remaining screens, Voice Control, and contrast review.
 - Privacy/network review remains partial: speech recognition is local-only where supported and recordings are excluded from backup, but broader logging, network, temporary-file retention, and deletion behavior still need a source-wide audit.
 - Appearance polish, broader performance profiling, and device packaging remain.
-- Simulator CI success does not mean a signed/installable iPhone build has been produced. The workflow now has a separate unsigned device-Release IPA packaging job that is intended for SideStore to re-sign; it must pass its first real run and be tested on the owner's iPhone before delivery is considered verified.
+- The unsigned device-Release IPA has been built, structurally validated, and uploaded successfully. It is not signed for direct installation; SideStore must re-sign it. Installation and launch on the owner's iPhone remain unverified.
 - Speech recognition quality depends on iOS language support and device settings; pinyin tone hints are not acoustic tone scoring.
 - AI Mix Sets currently limits a single recommendation request to 3–100 unique cards; larger libraries require narrowing the selected sets.
 
@@ -100,4 +101,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Validate the new unsigned IPA packaging job, then test SideStore installation on the owner's iPhone. Continue the app-wide accessibility and privacy/network audits.
+Download the verified `LMR-SideStore-unsigned-IPA` artifact from workflow run #45995703782, import it into SideStore, and verify installation and launch on the owner's iPhone. Continue the app-wide accessibility and privacy/network audits.

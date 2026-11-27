@@ -73,15 +73,16 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [ ] Complete app-wide accessibility audit (core Dynamic Type and VoiceOver improvements are implemented and CI-verified in learning, games, onboarding, import, and library flows; remaining screens and Voice Control/contrast still need review).
 - [ ] Light/dark appearance polish and performance checks.
 - [ ] Complete privacy review (Keychain storage with `WhenUnlockedThisDeviceOnly`, exclusion of API keys from JSON backups, Gemini transfer disclosures, on-device-only speech recognition where supported, and exclusion of local voice recordings from backup are implemented; broader logging, network, temporary-file retention, and deletion review remains).
-- [ ] Validate the unsigned iOS-device Release IPA packaging job for SideStore (workflow implementation added; artifact and install still unverified).
+- [x] Build, validate, and upload unsigned iOS-device Release IPA for SideStore (workflow run #45995703782; artifact `LMR-SideStore-unsigned-IPA`).
 - [ ] Verify installation on the owner's iPhone.
 
 ## Current next task
 
-Validate the unsigned device-Release IPA artifact and SideStore installation on the owner's iPhone. Continue the broader privacy/network and accessibility audits. Device installation claims remain separate from Simulator CI verification.
+Import the verified unsigned IPA artifact from workflow run #45995703782 into SideStore and verify installation and launch on the owner's iPhone. Continue the broader privacy/network and accessibility audits. Device installation claims remain separate from Simulator CI verification.
 
 ## Latest verification
 
+- `bfae965` — corrected SideStore IPA workflow shell continuations; workflow run #45995703782 passed simulator build, XCTest, unsigned device Release build, IPA validation, and artifact upload. Artifact SHA-256: `dea5b2b2da15cd782b1c9a81c22b71188eea5142ad2259e01f1e48ea70956778`.
 - `dbed46e` — backup restore rejects duplicate memberships before transaction changes; GitHub Actions run #45994078206 passed (iOS Simulator build and XCTest).
 - `5305838` — on-device-only speech recognition where supported and local voice recordings excluded from backup; GitHub Actions run #45991975035 passed.
 
