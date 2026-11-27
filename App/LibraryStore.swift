@@ -64,6 +64,15 @@ final class LibraryStore: ObservableObject {
         }
     }
 
+    func allCategories(languageID: String) -> [Category] {
+        do {
+            return try repository?.fetchCategories(languageID: languageID) ?? []
+        } catch {
+            lastError = error.localizedDescription
+            return []
+        }
+    }
+
     func sets(languageID: String, categoryID: String? = nil) -> [VocabularySet] {
         do {
             return try repository?.fetchSets(languageID: languageID, categoryID: categoryID) ?? []

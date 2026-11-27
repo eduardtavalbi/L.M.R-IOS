@@ -24,9 +24,17 @@ struct SetsView: View {
                     List {
                         ForEach(store.languages) { language in
                             let sets = store.allSets(languageID: language.id)
+                            let categories = store.allCategories(languageID: language.id)
+                            let categoriesByID = Dictionary(categories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
                             let filteredSets = query.isEmpty
                                 ? sets
-                                : sets.filter { $0.name.localizedCaseInsensitiveContains(query) }
+                                : sets.filter { set in
+                                    if set.name.localizedCaseInsensitiveContains(query) { return true }
+                                    guard let categoryID = set.categoryID,
+                                          let category = categoriesByID[categoryID] else { return false }
+                                    return CategoryHierarchy.path(for: category, in: categories)
+                                        .localizedCaseInsensitiveContains(query)
+                                }
                             let wordCounts = sortOrder == .mostWords
                                 ? Dictionary(uniqueKeysWithValues: sets.map { ($0.id, store.words(setID: $0.id).count) })
                                 : [:]
@@ -90,7 +98,7 @@ struct SetsView: View {
                 }
             }
             .navigationTitle("Наборы")
-            .searchable(text: $searchText, prompt: "Поиск по названию набора")
+            .searchable(text: $searchText, prompt: "Поиск по наборам и категориям")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -131,6 +139,11 @@ struct SetsView: View {
                     Text(set.name).font(.body.weight(.medium))
                     if let details = set.details, !details.isEmpty {
                         Text(details).font(.caption).foregroundStyle(.secondary).lineLimit(2)
+                    }
+                    if let categoryID = set.categoryID,
+                       let category = store.allCategories(languageID: language.id).first(where: { $0.id == categoryID }) {
+                        Text(CategoryHierarchy.path(for: category, in: store.allCategories(languageID: language.id)))
+                            .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                     }
                     Text("\(store.words(setID: set.id).count) слов")
                         .font(.caption).foregroundStyle(.secondary)

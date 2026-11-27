@@ -69,6 +69,19 @@ final class LMRTests: XCTestCase {
         XCTAssertTrue(fetched.allSatisfy { $0.languageID == language.id })
     }
 
+    func testCategoryHierarchyBuildsNestedPathForCatalogueSearch() throws {
+        let repository = LibraryRepository(database: try DatabaseManager.inMemory())
+        let language = try repository.createLanguage(name: "Chinese")
+        let travel = try repository.createCategory(languageID: language.id, name: "Travel")
+        let airport = try repository.createCategory(languageID: language.id, name: "Airport", parentID: travel.id)
+        let phrases = try repository.createCategory(languageID: language.id, name: "Phrases", parentID: airport.id)
+        let categories = try repository.fetchCategories(languageID: language.id)
+
+        XCTAssertEqual(CategoryHierarchy.path(for: travel, in: categories), "Travel")
+        XCTAssertEqual(CategoryHierarchy.path(for: airport, in: categories), "Travel / Airport")
+        XCTAssertEqual(CategoryHierarchy.path(for: phrases, in: categories), "Travel / Airport / Phrases")
+    }
+
     func testSetCreationPersistsOptionalDetailsAndCategory() throws {
         let repository = LibraryRepository(database: try DatabaseManager.inMemory())
         let language = try repository.createLanguage(name: "Chinese")

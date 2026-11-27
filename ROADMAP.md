@@ -19,8 +19,8 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
-- [x] Cross-language Sets tab with search and set-detail navigation.
-- [x] Set sorting by name, newest first, and word count across uncategorized and nested-category groups (CI #97).
+- [x] Cross-language Sets tab with search by set name and nested category path, category-location labels, and set-detail navigation (CI #99 pending).
+- [x] Set sorting by name, newest first, and word count across uncategorized and nested-category groups (CI #97; cached word counts CI #98).
 - [x] Category-aware Sets browsing, nested category navigation, and direct set creation from the Sets tab.
 
 ## Phase 3 — Learning engine
@@ -75,4 +75,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Improve category-aware catalogue search and navigation. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
+Continue AI document extraction, enrichment, weak-word analysis, and AI Mix Sets. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.

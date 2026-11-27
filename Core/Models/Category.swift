@@ -24,3 +24,20 @@ struct Category: Codable, FetchableRecord, MutablePersistableRecord, Identifiabl
         self.createdAt = createdAt
     }
 }
+
+enum CategoryHierarchy {
+    /// Returns a readable category path from the root to the supplied category.
+    static func path(for category: Category, in categories: [Category]) -> String {
+        let categoriesByID = Dictionary(categories.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var names = [category.name]
+        var visited: Set<String> = [category.id]
+        var parentID = category.parentID
+
+        while let id = parentID, visited.insert(id).inserted, let parent = categoriesByID[id] {
+            names.append(parent.name)
+            parentID = parent.parentID
+        }
+
+        return names.reversed().joined(separator: " / ")
+    }
+}
