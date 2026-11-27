@@ -108,8 +108,8 @@ enum WordImportParser {
     }
 
     private static func detectDelimiter(in line: String) -> Character {
-        let candidates: [Character] = ["\\t", ";", ","]
-        return candidates.max { countUnquoted($0, in: line) < countUnquoted($1, in: line) } ?? "\\t"
+        let candidates: [Character] = ["\t", ";", ","]
+        return candidates.max { countUnquoted($0, in: line) < countUnquoted($1, in: line) } ?? "\t"
     }
 
     private static func countUnquoted(_ delimiter: Character, in line: String) -> Int {
