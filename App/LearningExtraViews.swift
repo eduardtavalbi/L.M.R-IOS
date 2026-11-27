@@ -343,7 +343,7 @@ private struct MultiSetLearningSessionView: View {
             Spacer(minLength: 4)
             VStack(spacing: 14) {
                 Text(word.text)
-                    .font(.system(size: 36, weight: .semibold, design: .rounded))
+                    .font(.system(.largeTitle, design: .rounded).weight(.semibold))
                     .multilineTextAlignment(.center)
                 if let transcription = word.transcription, !transcription.isEmpty {
                     Text(transcription).foregroundStyle(.secondary)
@@ -413,7 +413,7 @@ private struct MultiSetLearningSessionView: View {
 
     private var completion: some View {
         VStack(spacing: 18) {
-            Image(systemName: "checkmark.seal.fill").font(.system(size: 52)).foregroundStyle(.tint)
+            Image(systemName: "checkmark.seal.fill").font(.largeTitle).foregroundStyle(.tint)
             Text("Сессия завершена").font(.title2.weight(.semibold))
             Text("Карточек: \(words.count)").foregroundStyle(.secondary)
             HStack(spacing: 22) {
