@@ -203,6 +203,7 @@ struct ProfileView: View {
                 Spacer()
                 Button { changeMonth(-1) } label: { Image(systemName: "chevron.left") }.accessibilityLabel("Предыдущий месяц")
                 Button { changeMonth(1) } label: { Image(systemName: "chevron.right") }
+                    .accessibilityLabel("Следующий месяц")
                     .disabled(Calendar.current.isDate(displayedMonth, equalTo: .now, toGranularity: .month))
                     .accessibilityLabel("Следующий месяц")
             }
