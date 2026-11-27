@@ -14,14 +14,14 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Phase 2 — Library experience
 - [ ] App bootstrap and dependency container.
-- [x] First-run onboarding with suggested language selection and skip option (CI #96).
+- [x] First-run onboarding with suggested language selection and skip option.
 - [x] Library navigation, nested categories, uncategorized sets, set movement.
 - [x] Word creation/editing and global search.
 - [x] Search results show all sets containing each word.
 - [x] Edit/delete operations and duplicate skip/keep-both/merge flow.
-- [x] Cross-language Sets tab with search by set name and nested category path, category-location labels, and set-detail navigation (CI #99 green).
-- [x] Set sorting by name, newest first, and word count across uncategorized and nested-category groups (CI #97; cached word counts CI #98).
-- [x] Category-aware Sets browsing, nested category navigation, and direct set creation from the Sets tab.
+- [x] Cross-language Sets tab with search by set name and nested category path.
+- [x] Set sorting by name, newest first, and word count.
+- [x] Category-aware Sets browsing, nested category navigation, and direct set creation.
 
 ## Phase 3 — Learning engine
 - [x] Flashcards and card details.
@@ -49,22 +49,25 @@ Check off work only after implementation and successful GitHub Actions verificat
 - [x] AI screen with secure key setup, generation controls, and editable review.
 - [x] Persist generated explanations as notes and keep examples separate.
 - [x] Mocked Gemini network tests (success, rate limit, missing key).
-- [x] Gemini document vocabulary extraction with source-length validation, duplicate filtering, and editable import preview.\n- [ ] AI document enrichment, weak-word analysis, and AI Mix Sets.
+- [x] Gemini document vocabulary extraction with source-length validation and editable import preview.
+- [x] AI enrichment of existing sets with editable review and explicit save (CI #45974032162).
+- [x] AI weak-word analysis with recommendation and mini-exercise preview (CI #45976200195).
+- [ ] AI Mix Sets based on existing library words, with review before starting.
 
 ## Phase 6 — Pronunciation
 - [x] Reference audio playback and English UK/US variants.
 - [x] Voice recording and playback.
-- [x] Speech recognition and transparent text-match feedback (CI #92).
-- [x] Chinese pinyin tone hints from diacritics and numeric notation (CI #94).
+- [x] Speech recognition and transparent text-match feedback.
+- [x] Chinese pinyin tone hints from diacritics and numeric notation.
 
 ## Phase 7 — Progress, profile, and backup
 - [x] Basic profile statistics: vocabulary totals, mastered count, review count, and answer accuracy.
-- [x] Per-word/per-set performance (review/error counters and accuracy).
+- [x] Per-word/per-set performance.
 - [x] Persisted daily activity, monthly calendar, study-day count, and current streak.
 - [x] Seven milestone achievements with live progress and unlock states.
 - [x] Local daily reminders with configurable time and notification permission handling.
-- [x] Full local JSON backup/restore with validation and transactional replacement (CI #86 green).
-- [x] CSV export of vocabulary fields (CI #89 green).
+- [x] Full local JSON backup/restore with validation and transactional replacement.
+- [x] CSV export of vocabulary fields.
 
 ## Phase 8 — Quality and delivery
 - [ ] App accessibility and Dynamic Type.
@@ -75,4 +78,4 @@ Check off work only after implementation and successful GitHub Actions verificat
 
 ## Current next task
 
-Continue AI document enrichment, weak-word analysis, and AI Mix Sets. Keep pinyin tone hints distinct from speech-recognition scoring; do not claim acoustic tone assessment. Device installation claims remain separate from Simulator CI verification.
+Implement AI Mix Sets. Recommendations must refer only to vocabulary already in the user's library, preserve word-level SRS history, and be reviewable before starting. Device installation claims remain separate from Simulator CI verification.
