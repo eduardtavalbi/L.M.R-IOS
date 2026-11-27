@@ -19,8 +19,9 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 
 ## Latest verified baseline
 
-- Commit: `ba92314` — Profile dashboard, persisted learning activity, and learning status transitions.
-- Workflow run #77: successful iOS Simulator build and XCTest.
+- Commit: `eac0c6d` — validated local backup/restore and date-precision-safe backup round-trip tests.
+- Workflow run #86: successful iOS Simulator build and XCTest, including backup tests.
+- CSV export and per-set review/error statistics are implemented in commits `e1837de` and `2f92bf1`; verification is pending after correcting a BOM assertion in commit `2450102` (CI #89).
 - Import coverage includes text pairs, CSV/TSV/TXT, XLSX, PDF text extraction, image OCR, scanned-PDF OCR, multiline quoted CSV fields, escaped quotes, and malformed quoted-field rejection.
 - OCR uses Apple Vision on-device; scanned PDF pages are rasterized and passed through the same recognition pipeline.
 - Gemini API tests cover a successful response, HTTP 429 mapping, and missing API-key handling.
@@ -59,16 +60,22 @@ A personal, non-commercial, offline-first iOS language-learning app. Native Swif
 ### Profile and learning history
 - Seven milestone achievements with live progress and unlock states.
 - Daily local notification reminders with an in-app time picker and permission handling.
+- Set detail statistics include total answers and incorrect answers alongside accuracy and mastered-word progress (CI verification pending).
 - Versioned daily activity table, updated atomically with every SRS answer.
 - Profile dashboard: vocabulary total, mastered count, total reviews, answer accuracy, current study streak, and total study days.
 - Monthly activity calendar and monthly totals for study days, reviews, and first-time reviewed words.
 - Activity aggregation and streak behavior covered by repository tests.
 
+### Backup and export
+- JSON backup includes languages, nested categories, sets, words, shared-word memberships, SRS progress, and study activity.
+- Restore validates the schema and references before replacing the library in a database transaction; the UI requires explicit destructive-action confirmation.
+- CSV export includes vocabulary, translations, transcription, notes, and examples, with UTF-8 BOM and quoting for delimiters, quotes, and multiline fields. Implementation is awaiting CI confirmation.
+
 ## Known gaps
 
 - Sets tab still needs category-aware search and sorting controls.
 - AI document extraction, enrichment, weak-word analysis, and AI Mix Sets remain.
-- Basic profile statistics and activity calendar are implemented; onboarding, pronunciation recording/feedback, backup/restore, export, and device installation workflow remain.
+- First-run onboarding, pronunciation recording/recognition feedback, English UK/US voice selection, Chinese tone guidance, accessibility/Dynamic Type, and device installation workflow remain.
 - Simulator CI success does not mean a signed/installable iPhone build has been produced.
 
 ## Verification policy
@@ -77,4 +84,4 @@ GitHub Actions on macos-latest is authoritative because development is performed
 
 ## Next
 
-Continue with richer per-word/per-set performance and backup/restore. Device packaging remains a separate final milestone.
+Next: finish CI verification for CSV export and per-set statistics, then implement pronunciation controls in focused stages (reference playback, voice recording/playback, speech recognition, and language-specific guidance). Device packaging remains a separate final milestone.
