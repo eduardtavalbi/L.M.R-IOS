@@ -403,4 +403,18 @@ final class LMRTests: XCTestCase {
         XCTAssertEqual(try repository.fetchSets(languageID: language.id).map(\.id), [set.id])
     }
 
+    
+    func testCSVExportEscapesFieldsAndIncludesOptionalData() throws {
+        let words = [
+            Word(languageID: "zh", text: "你好, 世界", translation: "Привет", transcription: "nǐ hǎo", notes: "Фраза \"вежливая\"", example: "你好\n朋友")
+        ]
+        let data = WordCSVExporter.data(for: words)
+        let csv = try XCTUnwrap(String(data: data, encoding: .utf8))
+        XCTAssertTrue(csv.hasPrefix("\u{FEFF}Word,Translation,Transcription,Notes,Example"))
+        XCTAssertTrue(csv.contains("\"你好, 世界\""))
+        XCTAssertTrue(csv.contains("\"Фраза \"\"вежливая\"\"\""))
+        XCTAssertTrue(csv.contains("\"你好\n朋友\""))
+    }
+
+
 }

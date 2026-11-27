@@ -320,6 +320,8 @@ struct VocabularySetView: View {
     let set: VocabularySet
     @State private var showingWord = false
     @State private var showingImport = false
+    @State private var showingCSVExport = false
+    @State private var csvDocument = WordCSVDocument(data: Data())
     @State private var showingMoveSet = false
     @State private var showingEditSet = false
     @State private var confirmingDeleteSet = false
@@ -386,6 +388,10 @@ struct VocabularySetView: View {
                 Menu {
                     Button("Добавить слово", systemImage: "plus") { showingWord = true }
                     Button("Импортировать слова", systemImage: "square.and.arrow.down") { showingImport = true }
+                    Button("Экспортировать CSV", systemImage: "square.and.arrow.up") {
+                        csvDocument = WordCSVDocument(data: WordCSVExporter.data(for: store.words(setID: set.id)))
+                        showingCSVExport = true
+                    }
                     Button("Переместить набор", systemImage: "folder") { showingMoveSet = true }
                     Button("Изменить набор", systemImage: "pencil") { showingEditSet = true }
                     Button("Удалить набор", systemImage: "trash", role: .destructive) { confirmingDeleteSet = true }
@@ -394,6 +400,9 @@ struct VocabularySetView: View {
         }
         .sheet(isPresented: $showingWord) { CreateWordSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingImport) { ImportWordsSheet(store: store, language: language, set: set) }
+        .fileExporter(isPresented: $showingCSVExport, document: csvDocument, contentType: .commaSeparatedText, defaultFilename: "\(set.name)-words", onCompletion: { result in
+            if case .failure(let error) = result { store.lastError = error.localizedDescription }
+        })
         .sheet(isPresented: $showingMoveSet) { MoveSetSheet(store: store, language: language, set: set) }
         .sheet(isPresented: $showingEditSet) { EditSetSheet(store: store, set: set) }
         .sheet(item: $editingWord) { word in EditWordSheet(store: store, word: word) }
