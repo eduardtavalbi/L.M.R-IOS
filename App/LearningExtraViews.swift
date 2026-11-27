@@ -269,6 +269,7 @@ private struct MultiSetLearningSessionView: View {
     let sets: [VocabularySet]
     let purpose: LearningExtraPurpose
     let mode: StudyMode
+    let selectedWordIDs: [String]? = nil
 
     @State private var words: [Word] = []
     @State private var allWords: [Word] = []
