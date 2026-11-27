@@ -1,5 +1,9 @@
 import SwiftUI
 
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
+}
+
 struct AIGenerationView: View {
     @ObservedObject var store: LibraryStore
     @State private var apiKey = ""
@@ -211,23 +215,30 @@ struct AIGenerationView: View {
 
     private func saveDrafts() {
         do {
-            let rows = drafts.map { word in
-                WordImportDraft(
-                    text: word.text,
-                    translation: word.translation,
-                    transcription: word.transcription ?? "",
-                    example: [word.example, word.explanation.map { "Пояснение: " + $0 }]
-                        .compactMap { $0 }
-                        .filter { !$0.isEmpty }
-                        .joined(separator: "\n\n"),
-                    duplicateResolution: .skip
+            var imported = 0
+            var skipped = 0
+            guard let targetLanguageID = targetLanguageID.nilIfEmpty else { return }
+            for word in drafts {
+                let text = word.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                let translation = word.translation.trimmingCharacters(in: .whitespacesAndNewlines)
+                if store.duplicateWord(languageID: targetLanguageID, text: text, translation: translation) != nil {
+                    skipped += 1
+                    continue
+                }
+                try store.createWord(
+                    languageID: targetLanguageID,
+                    setID: selectedSetID,
+                    text: text,
+                    translation: translation,
+                    transcription: word.transcription,
+                    notes: word.explanation,
+                    example: word.example
                 )
+                imported += 1
             }
-            let result = try store.importWords(rows, intoSet: selectedSetID)
             drafts = []
-            savedMessage = "Добавлено: \(result.imported). Пропущено как дубликаты: \(result.skipped)."
+            savedMessage = "Добавлено: \\(imported). Пропущено как дубликаты: \\(skipped). Пояснения и примеры сохранены отдельно."
         } catch {
             errorMessage = error.localizedDescription
         }
-    }
-}
+    }}

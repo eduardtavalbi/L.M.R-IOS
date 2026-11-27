@@ -149,13 +149,15 @@ final class LibraryStore: ObservableObject {
         objectWillChange.send()
     }
 
-    func createWord(languageID: String, setID: String, text: String, translation: String, transcription: String?) throws {
+    func createWord(languageID: String, setID: String, text: String, translation: String, transcription: String?, notes: String? = nil, example: String? = nil) throws {
         guard let repository else { throw StoreError.databaseUnavailable }
         try repository.createWord(
             languageID: languageID,
             text: text,
             translation: translation,
             transcription: transcription,
+            notes: notes,
+            example: example,
             inSet: setID
         )
         objectWillChange.send()
